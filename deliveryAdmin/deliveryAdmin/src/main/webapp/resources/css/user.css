@@ -1,0 +1,177 @@
+/* User Management Styles */
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #6c757d;
+    --success-color: #1cc88a;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+    --info-color: #36b9cc;
+    --light-bg: #f8f9fc;
+}
+
+.main-content {
+    background-color: #f8f9fc;
+    min-height: calc(100vh - 70px);
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    border-bottom: 1px solid #e3e6f0;
+    background-color: #fff;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: #5a5c69;
+    padding: 1rem 0.75rem;
+}
+
+.table td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+}
+
+.avatar {
+    position: relative;
+}
+
+.avatar img {
+    object-fit: cover;
+}
+
+.avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background-color: var(--success-color);
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.btn {
+    border-radius: 0.35rem;
+    font-weight: 500;
+}
+
+.form-control, .form-select {
+    border-radius: 0.35rem;
+    padding: 0.5rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.input-group-text {
+    background-color: #fff;
+}
+
+.pagination .page-item .page-link {
+    border-radius: 0.25rem;
+    margin: 0 0.15rem;
+}
+
+/* Stats cards styles */
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+/* Filter section styles */
+.filter-section {
+    background-color: var(--light-bg);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+/* Hover effects */
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+.btn-group-sm > .btn, .btn-sm {
+    border-radius: 0.25rem;
+}
+
+/* Custom checkbox alignment */
+.form-check {
+    margin-bottom: 0;
+    padding-left: 0;
+}
+
+.form-check-input {
+    margin-top: 0.25rem;
+}
+
+/* Loading indicator */
+#loadingIndicator {
+    display: none;
+}
+
+/* Error message styling */
+.alert-error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+/* Toast notification positioning */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+
+    .avatar img {
+        width: 32px;
+        height: 32px;
+    }
+}

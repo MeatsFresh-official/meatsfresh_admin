@@ -1,0 +1,142 @@
+/* --- General Animation --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-on-load {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+
+/* --- Skeleton Loader --- */
+.skeleton {
+    background: #e9ecef;
+    background: linear-gradient(110deg, #e9ecef 8%, #f8f9fa 18%, #e9ecef 33%);
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+    border-radius: .25rem;
+}
+
+@keyframes shine {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+
+/* --- Stylish Table --- */
+.table-stylish {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-stylish thead th {
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e3e6f0;
+    white-space: nowrap;
+}
+
+.table-stylish tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.table-stylish tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+.table-stylish td {
+    vertical-align: middle;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.table-stylish tbody tr:not(:last-child) td {
+    border-bottom: 1px solid #e3e6f0;
+}
+
+/* --- Column Specific Styling (FIX) --- */
+.status-column {
+    width: 120px; /* Sets a consistent width for the status column */
+}
+
+/* This new rule fixes the badge positioning issue */
+.status-column .badge {
+    position: static;
+}
+
+
+/* --- Vendor Info Cell --- */
+.vendor-info {
+    display: flex;
+    align-items: center;
+}
+
+.vendor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #fff;
+    margin-right: 12px;
+    font-size: 1rem;
+}
+
+.vendor-name {
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.vendor-id {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+
+/* --- Status Badges --- */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.4em 0.7em;
+    border-radius: 0.35rem;
+}
+
+.bg-success-light {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.bg-warning-light {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #b98700;
+}
+
+.bg-danger-light {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.bg-secondary-light {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+/* --- Earnings Amount --- */
+.earnings-amount {
+    font-weight: 600;
+}

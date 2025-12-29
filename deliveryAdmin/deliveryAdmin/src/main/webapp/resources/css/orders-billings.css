@@ -1,0 +1,54 @@
+/* Order Status Styles */
+.order-status {
+    padding: 0.3em 0.8em;
+    border-radius: 1em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    color: #fff;
+    text-transform: capitalize;
+    display: inline-block;
+}
+
+.order-status.status-accepted { background-color: #198754; }
+.order-status.status-packing { background-color: #0dcaf0; }
+.order-status.status-shipping { background-color: #6c757d; }
+.order-status.status-delivered { background-color: #0d6efd; }
+.order-status.status-cancelled { background-color: #dc3545; }
+.order-status.status-refunded { background-color: #212529; }
+.order-status.status-pending { background-color: #ffc107; color: #000; }
+
+/* Table Styling */
+.table-hover tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Skeleton Loading Effect */
+@keyframes pulse-bg {
+    0% { background-color: #eee; }
+    50% { background-color: #e0e0e0; }
+    100% { background-color: #eee; }
+}
+
+.skeleton {
+    animation: pulse-bg 1.5s infinite;
+    border-radius: 0.25rem;
+}
+
+.skeleton-text {
+    height: 1em;
+    margin-bottom: 0.5em;
+    width: 80%;
+}
+.skeleton-text:last-child {
+    width: 60%;
+}
+
+/* Modal styling */
+#productsTable tfoot td {
+    border-top: 2px solid #dee2e6;
+}

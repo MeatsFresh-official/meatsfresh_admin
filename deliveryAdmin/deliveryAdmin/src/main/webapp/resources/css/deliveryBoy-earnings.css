@@ -1,0 +1,87 @@
+/* --- Skeleton Loader --- */
+.skeleton {
+    background: #e9ecef;
+    background: linear-gradient(110deg, #e9ecef 8%, #f8f9fa 18%, #e9ecef 33%);
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+    border-radius: .25rem;
+}
+
+@keyframes shine {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+/* --- Table Specific Styles --- */
+.rider-info {
+    display: flex;
+    align-items: center;
+}
+
+.rider-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #fff;
+    margin-right: 12px;
+    font-size: 1rem;
+}
+
+.rider-name {
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.rider-id {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.earnings-amount {
+    font-weight: 600;
+}
+
+.pending-amount {
+    color: #dc3545; /* Bootstrap danger color for emphasis */
+}
+
+/* --- Payout Status Column & Badge Fix --- */
+
+/* 1. Define a consistent width for the column */
+.payout-status-column {
+    width: 130px;
+}
+
+/* 2. CRUCIAL FIX: Reset badge position to override conflicting global styles */
+.payout-status-column .badge {
+    position: static;
+}
+
+/* --- Status Badge Styling --- */
+.payout-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    letter-spacing: 0.5px;
+}
+
+.payout-status.status-paid {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.payout-status.status-pending {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #b98700;
+}
+
+.payout-status.status-failed {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}

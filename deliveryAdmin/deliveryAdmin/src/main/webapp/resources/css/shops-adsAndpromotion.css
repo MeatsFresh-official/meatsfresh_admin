@@ -1,0 +1,62 @@
+/* General Styling */
+.table-hover tbody tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.card-header h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Loading Spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 150px;
+}
+
+/* Empty Data Message */
+.empty-data-message {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+/* Active Promotion Card Styling */
+.promotion-card .progress {
+    height: 6px;
+}
+
+.promotion-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Status Badges */
+.badge-status {
+    padding: 0.5em 0.75em;
+    font-size: 0.8em;
+    border-radius: 0.25rem;
+    color: #fff;
+    text-transform: capitalize;
+}
+.badge-status.approved { background-color: #198754; }
+.badge-status.pending { background-color: #ffc107; color: #000; }
+.badge-status.rejected { background-color: #dc3545; }
+
+/* Position Badges */
+.badge-position {
+    padding: 0.5em 0.75em;
+    font-size: 0.8em;
+    border-radius: 0.25rem;
+    color: #fff;
+}
+.badge-position.top { background-color: #0d6efd; }
+.badge-position.featured { background-color: #0dcaf0; }
+
+/* Action Buttons */
+.btn-group-sm .btn {
+    padding: 0.2rem 0.5rem;
+}

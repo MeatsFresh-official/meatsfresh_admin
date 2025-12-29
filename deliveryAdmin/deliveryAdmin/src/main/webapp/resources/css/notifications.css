@@ -1,0 +1,20 @@
+/* notifications.css */
+
+#notificationTemplatesList .list-group-item {
+    cursor: pointer;
+}
+
+#templateEditor {
+    border: 1px solid #dee2e6;
+    padding: 1.5rem;
+    border-radius: 0.25rem;
+}
+
+#campaignsTable .progress {
+    height: 8px;
+    margin-bottom: 2px;
+}
+
+#scheduleDateContainer {
+    transition: all 0.3s ease-in-out;
+}

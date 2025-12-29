@@ -1,0 +1,118 @@
+/* Vendor Dashboard Styles */
+.vendor-profile-card {
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+}
+
+.vendor-profile-card:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transform: translateY(-2px);
+}
+
+.vendor-avatar img {
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.vendor-rating .badge {
+    font-size: 0.9rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Stats Cards */
+.card.bg-light-primary { background-color: rgba(78, 115, 223, 0.1); }
+.card.bg-light-success { background-color: rgba(40, 167, 69, 0.1); }
+.card.bg-light-warning { background-color: rgba(255, 193, 7, 0.1); }
+.card.bg-light-danger { background-color: rgba(220, 53, 69, 0.1); }
+.card.bg-light-info { background-color: rgba(23, 162, 184, 0.1); }
+.card.bg-light-secondary { background-color: rgba(108, 117, 125, 0.1); }
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+}
+
+/* Document Badges */
+.document-badges .badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+}
+
+/* Document Preview Modal */
+.document-card {
+    background: #f8f9fa;
+    border-radius: 0.35rem;
+    padding: 1rem;
+    border: 1px solid #e3e6f0;
+}
+
+.document-card h6 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #4e73df;
+}
+
+.document-preview {
+    min-height: 200px;
+    background: white;
+    border: 1px dashed #d1d3e2;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.document-preview img {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 0.25rem;
+}
+
+/* Tabbed Modal */
+.nav-tabs .nav-link {
+    color: #6e707e;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: #4e73df;
+    border-bottom: 3px solid #4e73df;
+}
+
+/* Table Enhancements */
+#shopsTable td {
+    vertical-align: middle;
+}
+
+#shopsTable .badge-div {
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    min-width: 80px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .vendor-profile-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .document-card {
+        margin-bottom: 1rem;
+    }
+}

@@ -1,0 +1,140 @@
+.main-content {
+    padding-top: 80px;
+    padding-bottom: 80px; /* Ensure footer doesn't overlap content */
+}
+
+/* Stats Cards */
+.stats-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stats-info h5 {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.stats-info h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.main-content {
+    padding-top: 80px;
+}
+
+.stats-change {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.stats-change.success {
+    color: #28a745;
+}
+
+.stats-change.danger {
+    color: #dc3545;
+}
+
+.stats-icon i {
+    font-size: 30px;
+    color: #5e72e4;
+}
+
+/* page header */
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* Charts */
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+}
+
+/* Content List */
+.content-list {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.content-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+.content-item:last-child {
+    border-bottom: none;
+}
+
+.content-item:hover {
+    background-color: #f8f9fa;
+}
+
+.content-text h6 {
+    margin-bottom: 3px;
+    font-size: 15px;
+}
+
+.content-text small {
+    color: #6c757d;
+    font-size: 12px;
+}
+
+.content-actions .btn {
+    margin-left: 8px;
+    font-size: 13px;
+    padding: 5px 10px;
+}
+
+/* Tables */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stats-icon {
+        margin-top: 10px;
+    }
+
+    .content-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content-actions {
+        margin-top: 10px;
+        align-self: flex-end;
+    }
+}

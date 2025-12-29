@@ -1,0 +1,139 @@
+/* Help & Support General Styles */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.25rem;
+}
+
+li.nav-item {
+  display: block; /* Makes each item take full width and stack vertically */
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge-div {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+
+/* --- Live Chat Styles --- */
+
+/* Conversation List */
+.chat-list {
+    max-height: 400px; /* Increased height for better scrolling */
+    overflow-y: auto;
+}
+
+.chat-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-left: 4px solid transparent;
+}
+
+.chat-item:hover {
+    background-color: #f8f9fa;
+}
+
+.chat-item.active {
+    background-color: #e7f1ff;
+    border-left-color: #0d6efd;
+    font-weight: 500;
+}
+
+.unread-chat {
+    font-weight: bold;
+    background-color: #f0f8ff;
+}
+
+#conversation-list-header a[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+#conversation-list-header a .fa-chevron-down {
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Chat Window */
+.chat-body {
+    height: 500px; /* Increased height for the main chat window */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* Messages stack from top to bottom */
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 1rem;
+    max-width: 80%;
+}
+
+.message-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    word-wrap: break-word;
+}
+
+.message.outgoing {
+    align-self: flex-end;
+}
+
+.message.outgoing .message-bubble {
+    background-color: #0d6efd;
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.message.incoming {
+    align-self: flex-start;
+}
+
+.message.incoming .message-bubble {
+    background-color: #e9ecef;
+    color: #212529;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    margin-top: 4px;
+    text-align: right;
+}
+
+/* Test Rig Styles */
+.test-chat-messages {
+    height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+/* FAQ Accordion */
+.accordion-button:not(.collapsed) {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}

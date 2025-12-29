@@ -1,0 +1,7 @@
+/* sms-integration.css */
+
+#mainContent,
+.form-text.d-none,
+.alert.d-none {
+    transition: opacity 0.3s ease-in-out;
+}

@@ -1,0 +1,49 @@
+/* payments.css */
+
+.card-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    font-size: 2.5rem;
+}
+
+.badge-div {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: .85em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    text-transform: capitalize;
+}
+
+/* Custom background colors for badges if not in bootstrap */
+.bg-purple {
+    background-color: #6f42c1;
+}
+.bg-razorpay { background-color: #02042b; }
+.bg-stripe { background-color: #635bff; }
+.bg-phonepe { background-color: #5f259f; }
+.bg-cash { background-color: #198754; }
+.bg-pending { background-color: #ffc107; color: #000 !important; }
+.bg-failed { background-color: #dc3545; }
+.bg-completed { background-color: #198754; }
+
+
+#timeFilterButtons .btn.active {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+#timeFilterButtons #customDateBtn.active {
+     color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}

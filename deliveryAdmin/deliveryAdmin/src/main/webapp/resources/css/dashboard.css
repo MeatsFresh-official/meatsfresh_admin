@@ -1,0 +1,477 @@
+/* Dashboard Layout */
+.dashboard-body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    margin-left: 250px; /* Must match sidebar width */
+    padding: 20px;
+    width: calc(100% - 250px);
+    min-height: 100vh;
+    transition: all 0.3s;
+}
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.breadcrumb {
+    padding: 0;
+    margin-bottom: 0;
+}
+
+/* Stats Cards */
+.stats-row {
+    margin-bottom: 30px;
+}
+
+.stats-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stats-info h5 {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.stats-info h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.stats-change {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.stats-change i {
+    margin-right: 5px;
+    font-size: 10px;
+}
+
+.stats-change.success {
+    color: #28a745;
+}
+
+.stats-change.danger {
+    color: #dc3545;
+}
+
+.stats-icon {
+    font-size: 30px;
+    color: #5e72e4;
+    display: flex;
+    align-items: center;
+}
+
+/* Charts */
+.charts-row {
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.chart-card .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #eee;
+    padding: 15px 20px;
+}
+
+.chart-card .card-header h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.chart-card .card-header p {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.chart-card .card-body {
+    padding: 20px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Recent Orders */
+.recent-order {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.recent-order:last-child {
+    border-bottom: none;
+}
+
+.order-info h5 {
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.order-info p {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.order-status {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.order-status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.order-status.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.order-status.processing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+/* Projects */
+.project-item {
+    margin-bottom: 15px;
+}
+
+.project-item:last-child {
+    margin-bottom: 0;
+}
+
+.project-item h5 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.project-progress {
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    margin-bottom: 5px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #5e72e4;
+    border-radius: 3px;
+}
+
+.project-budget {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #fff;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.sidebar-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 0;
+    color: #5e72e4;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.nav-item {
+    margin-bottom: 5px;
+}
+
+.nav-link {
+    color: #333;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #5e72e4;
+    background-color: #f8f9fe;
+    border-left: 3px solid #5e72e4;
+}
+
+.nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin-left: 10px;
+}
+
+.dropdown-item {
+    padding: 8px 20px;
+    font-size: 13px;
+}
+
+.sidebar-footer {
+    padding: 20px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.upgrade-card {
+    background-color: #f8f9fe;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.upgrade-card h5 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #5e72e4;
+}
+
+.upgrade-card p {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.btn-upgrade {
+    background-color: #5e72e4;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    font-size: 12px;
+    border-radius: 20px;
+}
+
+
+/* Add these to your existing dashboard.css */
+
+/* Stats Cards */
+.stats-change.neutral {
+    color: #6c757d;
+}
+
+/* Dropdown in cards */
+.card-header .dropdown .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Table styles */
+.table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+/* Review items */
+.review-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.review-user {
+    font-weight: 600;
+}
+
+.review-rating {
+    color: #ffc107;
+}
+
+.review-text {
+    font-size: 0.875rem;
+    margin-bottom: 5px;
+}
+
+.review-date {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+/* Footer Styles */
+.footer {
+    background-color: #fff;
+    padding: 20px 0;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-copyright {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-align: right;
+}
+
+.footer-copyright a {
+    color: #5e72e4;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.footer-copyright i {
+    color: #dc3545;
+    margin: 0 3px;
+}
+
+.footer-links {
+    text-align: right;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.footer-links a {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #5e72e4;
+}
+
+/* Adjust main content to accommodate footer */
+.main-content {
+    padding-top: 80px;
+    padding-bottom: 80px; /* Ensure footer doesn't overlap content */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .footer-copyright,
+    .footer-links {
+        text-align: center;
+    }
+
+    .footer-links li {
+        margin: 0 10px;
+    }
+
+    .footer-links ul {
+        margin-top: 10px;
+    }
+}
+
+
+
+/* Responsive */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+}

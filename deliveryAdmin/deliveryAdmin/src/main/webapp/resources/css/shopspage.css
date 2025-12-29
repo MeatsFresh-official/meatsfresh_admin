@@ -1,0 +1,253 @@
+:root {
+    --primary-color: #0d6efd;
+    --primary-glow: rgba(13, 110, 253, 0.4);
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --body-bg: #f8f9fc;
+    --card-bg: #ffffff;
+    --text-color: #5a6a85;
+    --heading-color: #343d50;
+    --border-color: #e9ecef;
+    --shadow-sm: 0 2px 8px rgba(31, 45, 61, .07);
+    --shadow-md: 0 8px 25px rgba(31, 45, 61, .09);
+    --card-radius: 0.75rem;
+    --transition-speed: 0.3s;
+}
+
+body {
+    background-color: var(--body-bg);
+    color: var(--text-color);
+}
+
+h1, h5 {
+    color: var(--heading-color);
+    font-weight: 600;
+}
+
+/* ===================================================================
+   2. KEYFRAME ANIMATIONS
+   =================================================================== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-on-load {
+    animation: fadeInUp 0.6s var(--transition-speed) ease-out forwards;
+    opacity: 0; /* Start hidden */
+}
+
+/* ===================================================================
+   3. ENHANCED CARD & LAYOUT STYLES
+   =================================================================== */
+.card {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    margin-bottom: 2rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+}
+
+/* ===================================================================
+   4. NEW AGGREGATED DASHBOARD UI
+   =================================================================== */
+
+/* Hero Stat Card (for Total Earnings) */
+.hero-stat-card {
+    background: linear-gradient(45deg, #0d6efd, #3c8aff);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero-stat-card .hero-icon {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    font-size: 8rem;
+    opacity: 0.15;
+    transform: rotate(-15deg);
+}
+
+.hero-stat-card h6 {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.hero-stat-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+/* Mini Stat Cards (for Order Breakdowns) */
+.mini-stat-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 1rem;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+}
+
+.mini-stat-card:hover {
+    border-color: var(--primary-color);
+    background-color: #f8f9fc;
+}
+
+.mini-stat-card .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.mini-stat-card h4 {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: var(--heading-color);
+    font-size: 1.5rem;
+}
+
+.mini-stat-card p {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+/* Icon Color Variants */
+.bg-primary-light { background-color: rgba(13, 110, 253, 0.1); color: var(--primary-color); }
+.bg-success-light { background-color: rgba(25, 135, 84, 0.1); color: var(--success-color); }
+.bg-warning-light { background-color: rgba(255, 193, 7, 0.1); color: var(--warning-color); }
+.bg-danger-light { background-color: rgba(220, 53, 69, 0.1); color: var(--danger-color); }
+
+/* ===================================================================
+   5. STYLISH TABLE & BADGES
+   =================================================================== */
+.table-stylish thead th {
+    background-color: #f8f9fc;
+    border-bottom: 2px solid var(--border-color);
+    color: #8898aa;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.5rem;
+}
+.table-stylish tbody td { vertical-align: middle; padding: 1rem 1.5rem; }
+.table-stylish .vendor-info img { width: 45px; height: 45px; object-fit: cover; border-radius: 50%; }
+.table-stylish .vendor-info h6 { font-weight: 600; color: var(--heading-color); }
+
+.badge-status, .badge-avail { padding: 0.45em 0.9em; border-radius: 50px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border: 1px solid transparent; }
+.badge-status.accepted { background-color: #e1f9ee; color: #17a560; border-color: #c0f2de; }
+.badge-status.pending { background-color: #fff8e1; color: #ffb400; border-color: #ffecb3; }
+.badge-avail.available { background-color: #e7f5ff; color: #0d6efd; border-color: #d0e7ff; }
+.badge-avail.unavailable { background-color: #f1f3f5; color: #868e96; border-color: #dee2e6; }
+
+/* ===================================================================
+   6. SKELETON LOADER
+   =================================================================== */
+.skeleton {
+    opacity: .7;
+    animation: skeleton-loading 1.2s linear infinite alternate;
+    border-radius: var(--card-radius);
+}
+@keyframes skeleton-loading {
+    0% { background-color: hsl(210, 20%, 90%); }
+    100% { background-color: hsl(210, 20%, 98%); }
+}
+
+/* ===================================================================
+   7. OVERALL STAT CARDS (WITH COLORS)
+   =================================================================== */
+
+.stat-card-enhanced {
+    position: relative;
+    padding-left: 10px; /* Space for the border */
+    border-left: 5px solid var(--border-color); /* Default border color */
+}
+
+.stat-card-enhanced .card-body {
+    padding: 1.5rem;
+    position: relative;
+}
+
+.stat-card-enhanced .stat-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2.5rem;
+    opacity: 0.15;
+}
+
+.stat-card-enhanced h6 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.stat-card-enhanced h3 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    margin-top: 0.5rem;
+}
+
+/* Color Variant: Total Shops (Blue) */
+.stat-card-enhanced.stat-total {
+    border-left-color: #0d6efd;
+}
+.stat-card-enhanced.stat-total .stat-icon {
+    color: #0d6efd;
+}
+
+/* Color Variant: Accepted (Green) */
+.stat-card-enhanced.stat-accepted {
+    border-left-color: #198754;
+}
+.stat-card-enhanced.stat-accepted .stat-icon {
+    color: #198754;
+}
+
+/* Color Variant: Pending (Orange) */
+.stat-card-enhanced.stat-pending {
+    border-left-color: #ff9800;
+}
+.stat-card-enhanced.stat-pending .stat-icon {
+    color: #ff9800;
+}
+
+/* Color Variant: Active (Purple) */
+.stat-card-enhanced.stat-active {
+    border-left-color: #6f42c1;
+}
+.stat-card-enhanced.stat-active .stat-icon {
+    color: #6f42c1;
+}
+
