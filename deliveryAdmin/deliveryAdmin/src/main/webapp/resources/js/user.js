@@ -274,56 +274,6 @@ async function fetchUsers(filters = {}) {
         showLoading(false);
     }
 }
-async function fetchUsers(filters = {}) {
-    try {
-        showLoading(true);
-        currentFilters = filters; // Update the global state with the latest filters.
-        const username = "user";
-        const password = "user";
-        const basicAuth = btoa(`${username}:${password}`);
-        const requestBody = {
-                    activityStatus: (filters.activity || "ALL").toUpperCase(),
-                    spendingLevel: (filters.spending || "ALL").toUpperCase(),
-                    startDate: filters.startDate || null,
-                    endDate: filters.endDate || null,
-                    page: filters.page ?? 0,
-                    size: filters.size ?? 1000
-        };
-
-        // Fetch stats and users concurrently for better performance.
-        await Promise.all([
-            fetchStats(filters),
-            (async () => {
-                const queryParams = buildQueryString(filters);
-                const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.users}`,
-                                               {
-                                                 method: 'POST',
-                                                 headers: {
-                                                              'Content-Type': 'application/json',
-                                                               'Authorization': `Basic ${basicAuth}`
-                                                           },
-                                                  body: JSON.stringify(requestBody)
-                                               }
-                                             );
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const result = await response.json();
-                const users = result.data || result.content || [];
-                renderUsers(users); // Render the table with the fetched user data.
-                updateUserCount(users.length); // Update the user count display.
-            })()
-        ]);
-
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        showError('Failed to load users. Please try again.');
-    } finally {
-        // The 'finally' block ensures the loading indicator is hidden,
-        // regardless of whether the fetch succeeded or failed.
-        showLoading(false);
-    }
-}
 async function globalFilterUser() {
     try {
         showLoading(true);
