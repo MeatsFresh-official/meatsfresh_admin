@@ -15,9 +15,11 @@
  */
 const API_CONFIG = {
     baseUrl: 'http://localhost:8080',
+    baseUrl2: 'http://meatsfresh.org.in:8082',
     endpoints: {
-        users: '/api/users',
-        stats: '/api/users/stats',
+        users: '/api/dashboard/table',
+        stats: '/deliveryAdmin/api/dashboard/users-card',
+        globalSearch:'/api/dashboard/users/search',
         deleteUser: '/api/users/', // Note: User ID will be appended to this
         exportBasic: '/api/export/basic',
         exportAdvanced: '/api/export/advanced',
@@ -85,9 +87,9 @@ function showSuccess(message) {
  */
 function formatCurrency(amount) {
     if (amount >= 100000) {
-        return '₹' + (amount / 100000).toFixed(1) + 'L';
+        return '₹' + (amount / 100000).toFixed(2) + 'L';
     } else if (amount >= 1000) {
-        return '₹' + (amount / 1000).toFixed(1) + 'k';
+        return '₹' + (amount / 1000).toFixed(2) + 'k';
     } else {
         return '₹' + amount;
     }
@@ -126,9 +128,9 @@ function formatTime(dateString) {
  * @param {number} count - The number of users currently displayed in the table.
  */
 function updateUserCount(count) {
-    document.getElementById('showingCount').textContent = count;
+    //document.getElementById('showingCount').textContent = count;
     // The total count is now updated from the stats object, so we can use that.
-    document.getElementById('totalCount').textContent = userStats.totalUsers || 0;
+    //document.getElementById('totalCount').textContent = userStats.totalUsers || 0;
 }
 
 /**
@@ -136,7 +138,7 @@ function updateUserCount(count) {
  */
 function updateStatsDisplay() {
     document.getElementById('totalUsers').textContent = userStats.totalUsers || 0;
-    document.getElementById('activeUsers').textContent = userStats.activeUsers || 0;
+    document.getElementById('activeUsers').textContent = userStats.activeUsersLast30Days || 0;
     document.getElementById('totalRevenue').textContent = formatCurrency(userStats.totalRevenue || 0);
     document.getElementById('avgOrderValue').textContent = formatCurrency(userStats.avgOrderValue || 0);
 }
@@ -226,19 +228,135 @@ async function fetchUsers(filters = {}) {
     try {
         showLoading(true);
         currentFilters = filters; // Update the global state with the latest filters.
+        const username = "user";
+        const password = "user";
+        const basicAuth = btoa(`${username}:${password}`);
+        const requestBody = {
+                    activityStatus: (filters.activity || "ALL").toUpperCase(),
+                    spendingLevel: (filters.spending || "ALL").toUpperCase(),
+                    startDate: filters.startDate || null,
+                    endDate: filters.endDate || null,
+                    page: filters.page ?? 0,
+                    size: filters.size ?? 1000
+        };
 
         // Fetch stats and users concurrently for better performance.
         await Promise.all([
             fetchStats(filters),
             (async () => {
                 const queryParams = buildQueryString(filters);
-                const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.users}?${queryParams}`);
+                const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.users}`,
+                                               {
+                                                 method: 'POST',
+                                                 headers: {
+                                                              'Content-Type': 'application/json',
+                                                               'Authorization': `Basic ${basicAuth}`
+                                                           },
+                                                  body: JSON.stringify(requestBody)
+                                               }
+                                             );
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const users = await response.json();
+                const result = await response.json();
+                const users = result.data || result.content || [];
                 renderUsers(users); // Render the table with the fetched user data.
                 updateUserCount(users.length); // Update the user count display.
+            })()
+        ]);
+
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        showError('Failed to load users. Please try again.');
+    } finally {
+        // The 'finally' block ensures the loading indicator is hidden,
+        // regardless of whether the fetch succeeded or failed.
+        showLoading(false);
+    }
+}
+async function fetchUsers(filters = {}) {
+    try {
+        showLoading(true);
+        currentFilters = filters; // Update the global state with the latest filters.
+        const username = "user";
+        const password = "user";
+        const basicAuth = btoa(`${username}:${password}`);
+        const requestBody = {
+                    activityStatus: (filters.activity || "ALL").toUpperCase(),
+                    spendingLevel: (filters.spending || "ALL").toUpperCase(),
+                    startDate: filters.startDate || null,
+                    endDate: filters.endDate || null,
+                    page: filters.page ?? 0,
+                    size: filters.size ?? 1000
+        };
+
+        // Fetch stats and users concurrently for better performance.
+        await Promise.all([
+            fetchStats(filters),
+            (async () => {
+                const queryParams = buildQueryString(filters);
+                const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.users}`,
+                                               {
+                                                 method: 'POST',
+                                                 headers: {
+                                                              'Content-Type': 'application/json',
+                                                               'Authorization': `Basic ${basicAuth}`
+                                                           },
+                                                  body: JSON.stringify(requestBody)
+                                               }
+                                             );
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                const users = result.data || result.content || [];
+                renderUsers(users); // Render the table with the fetched user data.
+                updateUserCount(users.length); // Update the user count display.
+            })()
+        ]);
+
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        showError('Failed to load users. Please try again.');
+    } finally {
+        // The 'finally' block ensures the loading indicator is hidden,
+        // regardless of whether the fetch succeeded or failed.
+        showLoading(false);
+    }
+}
+async function globalFilterUser() {
+    try {
+        showLoading(true);
+        let filters = {};
+        const username = "user";
+        const password = "user";
+        const basicAuth = btoa(`${username}:${password}`);
+        const requestBody = {
+                    search: document.getElementById('userSearch').value,
+                    page: 0,
+                    size: 1000
+        };
+
+        // Fetch stats and users concurrently for better performance.
+        await Promise.all([
+            fetchStats(filters),
+            (async () => {
+                const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.globalSearch}`,
+                                               {
+                                                 method: 'POST',
+                                                 headers: {
+                                                              'Content-Type': 'application/json',
+                                                               'Authorization': `Basic ${basicAuth}`
+                                                           },
+                                                  body: JSON.stringify(requestBody)
+                                               }
+                                             );
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                const users = result.data || result.content || [];
+                renderUsers(users); // Render the table with the fetched user data.
             })()
         ]);
 
@@ -294,20 +412,17 @@ function renderUsers(users) {
                     </div>
                     <div>
                         <h6 class="mb-0">${user.name}</h6>
-                        <small class="text-muted">ID: ${user.id}</small>
                     </div>
                 </div>
             </td>
             <td>
                 <div class="fw-medium">${user.phone}</div>
-                <small class="text-muted">${user.email}</small>
             </td>
             <td>
-                <div>${user.city}, ${user.country}</div>
-                <small class="text-muted">${user.address}</small>
+                <small class="fw-medium">${user.address}</small>
             </td>
             <td>
-                <span class="badge bg-primary rounded-pill">${user.totalOrders}</span>
+                <div class="fw-medium">${user.orders}</div>
             </td>
             <td class="fw-bold text-success">${formatCurrency(user.totalSpent)}</td>
             <td>
@@ -351,7 +466,7 @@ function applyFilters() {
     const filters = {
         activity: document.getElementById('activityFilter').value,
         spending: document.getElementById('spendingFilter').value,
-        type: document.getElementById('typeFilter').value,
+        //type: document.getElementById('typeFilter').value,
         search: document.getElementById('userSearch').value
     };
 
@@ -478,8 +593,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Filter controls
     document.getElementById('activityFilter').addEventListener('change', applyFilters);
     document.getElementById('spendingFilter').addEventListener('change', applyFilters);
-    document.getElementById('typeFilter').addEventListener('change', applyFilters);
-    document.getElementById('searchBtn').addEventListener('click', applyFilters);
+    //document.getElementById('typeFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchBtn').addEventListener('click', globalFilterUser);
     document.getElementById('userSearch').addEventListener('keyup', (event) => {
         if (event.key === 'Enter') applyFilters();
     });
@@ -488,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('resetFiltersBtn').addEventListener('click', () => {
         document.getElementById('activityFilter').value = 'all';
         document.getElementById('spendingFilter').value = 'all';
-        document.getElementById('typeFilter').value = 'all';
+        //document.getElementById('typeFilter').value = 'all';
         document.getElementById('userSearch').value = '';
         fetchUsers(); // Fetch with no filters.
     });
@@ -522,5 +637,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Final confirmation button in the delete modal
-    document.getElementById('confirmDeleteBtn').addEventListener('click', deleteUser);
+    //document.getElementById('confirmDeleteBtn').addEventListener('click', deleteUser);
 });

@@ -51,6 +51,11 @@ public class PageController {
         return "users-reviewAndratings";
     }
 
+    @GetMapping("/pie-chart")
+    public String getPieChart() {
+        return "pie-chart";
+    }
+
     @GetMapping("/view-cartpage")
     public String getViewCartPage() {
         return "view-cartpage";
@@ -171,6 +176,10 @@ public class PageController {
     @GetMapping("/reports")
     public String getReports() {
         return "reports";
+    }
+    @GetMapping("/profit")
+    public String getProfit() {
+        return "profit";
     }
 
 

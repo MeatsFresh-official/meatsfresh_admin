@@ -54,6 +54,26 @@
         <div class="card mb-4 animate-on-load" style="animation-delay: 0.2s;">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
                 <h5 class="mb-0"><i class="fas fa-store me-2"></i>All Shops</h5>
+                <!-- Global Search with Button -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input
+                                type="text"
+                                id="globalShopSearch"
+                                class="form-control"
+                                placeholder="Search by shop name, owner, mobile, email..."
+                            >
+                            <button class="btn btn-primary" id="searchShopBtn">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-flex align-items-center mt-2 mt-md-0">
                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addShopModal">
                         <i class="fas fa-plus me-1"></i> Add Vendor

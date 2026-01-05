@@ -51,6 +51,9 @@
                        class="nav-link ${pageContext.request.requestURI.endsWith('/view-cartpage') ? 'active' : ''}">
                   <i class="fas fa-shopping-cart"></i> Carts</a></li>
               </c:if>
+              <li><a href="${pageContext.request.contextPath}/pie-chart"
+                                     class="nav-link ${pageContext.request.requestURI.endsWith('/users-reviewAndratings') ? 'active' : ''}">
+                                <i class="fas fa-star"></i> Pie Chart</a></li>
             </ul>
           </div>
         </li>
@@ -200,6 +203,14 @@
           </a>
         </li>
       </c:if>
+      <li class="nav-item">
+                <a class="nav-link ${pageContext.request.requestURI.contains('/reports') ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/profit"
+                   aria-current="${pageContext.request.requestURI.endsWith('/reports') ? 'active' : ''}">
+                  <i class="fas fa-chart-bar"></i>
+                  <span>Profit</span>
+                </a>
+       </li>
 
     </ul>
   </div>

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================================
     // API ENDPOINTS & CONFIG
     // ===================================================================
-    const API_BASE = 'http://113.11.231.115:1275/api/vendor';
+    const API_BASE = 'http://meatsfresh.org.in:8080/api/vendor';
     const ADMIN_API = `${API_BASE}/admin`;
     const IMAGE_BASE_URL = 'http://113.11.231.115:8080/';
 
