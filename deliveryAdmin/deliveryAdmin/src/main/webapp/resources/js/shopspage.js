@@ -2,10 +2,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===================================================================
     // API ENDPOINTS
     // ===================================================================
-    const API_BASE = 'http://113.11.231.115:1275/api';
+    const API_BASE = 'http://localhost:8080';
     const VENDORS_API = API_BASE + '/vendor';
     const VENDOR_REGISTER_API = VENDORS_API + '/register';
-    const ADMIN_VENDORS_API = VENDORS_API + '/allVendors';
+    const ADMIN_VENDORS_API = API_BASE + '/deliveryAdmin/api/dashboard/all-shops';
+    const ADMIN_VENDORS_GLOBAL_SEARCH = API_BASE + '/deliveryAdmin/api/dashboard/search';
     const DELETE_VENDOR_API = (id) => `${VENDORS_API}/${id}`;
     const VENDOR_STATUS_API = (id) => `${VENDORS_API}/admin/${id}/status`;
     const VENDOR_DASHBOARD_API = (id) => `${VENDORS_API}/dashboard?vendor_id=${id}`;
@@ -122,6 +123,57 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+const fetchGlobalSearchShops = async (search = '') => {
+    showTableLoading();
+    try {
+        const url = search
+            ? `${ADMIN_VENDORS_GLOBAL_SEARCH}?search=${encodeURIComponent(search)}`
+            : ADMIN_VENDORS_API;
+
+        const vendors = await fetchAPI(url);
+
+        if (!vendors || !Array.isArray(vendors)) {
+            shopsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center p-4">
+                        No shops found.
+                    </td>
+                </tr>`;
+            allVendors = [];
+            applyFiltersAndRender();
+            calculateAndRenderOverallStats([]);
+            calculateAndRenderAggregatedDashboard([]);
+            return;
+        }
+
+        const statusPromises = vendors.map(vendor =>
+            fetchAPI(VENDOR_STATUS_API(vendor.vendorId)).catch(() => null)
+        );
+
+        const statusResults = await Promise.all(statusPromises);
+
+        allVendors = vendors.map((vendor, index) => {
+            const statusInfo = statusResults[index];
+            return (statusInfo && statusInfo.vendorId === vendor.vendorId)
+                ? { ...vendor, isApproved: statusInfo.isApproved }
+                : vendor;
+        });
+
+        applyFiltersAndRender();
+        calculateAndRenderOverallStats(allVendors);
+        calculateAndRenderAggregatedDashboard(allVendors);
+
+    } catch (error) {
+        showToastMessage(`Error loading vendors: ${error.message}`, 'danger');
+        shopsTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center p-4 text-danger">
+                    Could not load shop data.
+                </td>
+            </tr>`;
+    }
+};
+
     // ===================================================================
     // FILTERING LOGIC
     // ===================================================================
@@ -165,14 +217,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div class="d-flex align-items-center vendor-info">
                             <img src="${imageUrl}" class="rounded-circle me-3" alt="${shop.vendorName || 'N/A'}" onerror="this.onerror=null;this.src='/resources/images/default-store.jpg';">
                             <div>
-                                <h6>${shop.vendorName || 'Unnamed Vendor'}</h6>
+                                <h6>${shop.vendorInfo || 'Unnamed Vendor'}</h6>
                                 <small class="text-muted">ID: ${shop.vendorId}</small>
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>${shop.email || '-'}</div>
-                        <small class="text-muted">${shop.phoneNumber || '-'}</small>
+                        <small class="text-muted">${shop.contactDetails || '-'}</small>
                     </td>
                     <td><span class="badge-status ${statusClass}">${status}</span></td>
                     <td><span class="badge-avail ${availabilityClass}">${availabilityText}</span></td>
@@ -280,6 +332,11 @@ document.addEventListener('DOMContentLoaded', function () {
             deleteModal.show();
         }
     });
+    document.getElementById('searchShopBtn').addEventListener('click', () => {
+        const searchValue = document.getElementById('globalShopSearch').value.trim();
+        fetchGlobalSearchShops(searchValue);
+    });
+
 
     document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
         const shopId = this.dataset.shopId;

@@ -173,7 +173,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="d-flex justify-content-between align-items-center mt-4">
+                <!-- <div class="d-flex justify-content-between align-items-center mt-4">
                     <div class="text-muted">
                         Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> users
                     </div>
@@ -190,7 +190,7 @@
                             </li>
                         </ul>
                     </nav>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
