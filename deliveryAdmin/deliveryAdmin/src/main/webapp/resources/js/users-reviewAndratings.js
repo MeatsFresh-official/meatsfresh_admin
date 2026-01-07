@@ -15,14 +15,17 @@
  * @description The base URL for all API requests. Centralizing this makes it easy to switch
  *              between development, staging, and production environments.
  */
-const API_BASE_URL = 'https://localhost:8082/api';
-
+const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL2 = 'http://meatsfresh.org.in:8082';
 /**
  * @const {object} API_ENDPOINTS
  * @description A map of all API endpoints used in this module. Using placeholders like ':id'
  *              allows for dynamic endpoint generation.
  */
 const API_ENDPOINTS = {
+    DASHBOARD_CARDS: '/deliveryAdmin/api/dashboard/dashboard-card',
+    SEARCH: '/api/reviews/dashboard',
+    GLOBAL_SEARCH: '/api/reviews/global-search',
     REVIEWS: '/reviews',
     REVIEW_DETAIL: '/reviews/:id',
     REVIEW_REPLY: '/reviews/:id/reply',
@@ -83,7 +86,7 @@ const apiService = {
      * @returns {Promise<object>} The API response containing the reviews.
      */
     async getReviews(filters = {}) {
-        const queryParams = new URLSearchParams();
+        /*const queryParams = new URLSearchParams();
         // Dynamically build the query string from the filters object.
         Object.keys(filters).forEach(key => {
             if (filters[key] && filters[key] !== 'all') {
@@ -91,7 +94,20 @@ const apiService = {
             }
         });
         const endpoint = `${API_ENDPOINTS.REVIEWS}?${queryParams.toString()}`;
-        return this.request(endpoint);
+        return this.request(endpoint);*/
+        const response = await fetch(`${API_BASE_URL2}${API_ENDPOINTS.SEARCH}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                reviewType: filters.type.toUpperCase(),
+                rating: filters.rating == "all" ? null : Number(filters.rating),
+                status: filters.status.toUpperCase()
+            })
+        });
+        const data = await response.json();
+        return data;
     },
 
     /**
@@ -206,7 +222,19 @@ const apiService = {
         }
     }
 };
+async function loadDashboardCards() {
+    try {
+        const data = await apiService.request(API_ENDPOINTS.DASHBOARD_CARDS);
 
+        document.getElementById("avgVendorRating").innerText = data.avgVendorRating.toFixed(1);
+        document.getElementById("avgDeliveryRating").innerText = data.avgDeliveryRating.toFixed(1);
+        document.getElementById("totalReviews").innerText = data.totalReviews;
+        document.getElementById("pendingModeration").innerText = data.pendingModeration;
+
+    } catch (e) {
+        console.error("Failed to load dashboard cards", e);
+    }
+}
 // ===================================================================================
 // APPLICATION STATE MANAGEMENT
 // ===================================================================================
@@ -244,9 +272,10 @@ async function initializeApp() {
     try {
         // Use Promise.all to fetch initial data concurrently for faster load times.
         await Promise.all([
+            loadDashboardCards(),
             loadReviews(),
-            loadVendorPerformance(),
-            loadDeliveryPerformance()
+            //loadVendorPerformance(),
+            //loadDeliveryPerformance()
         ]);
 
         // Once data is loaded, set up the interactive parts of the UI.
@@ -269,7 +298,7 @@ function setupEventListeners() {
     document.getElementById('ratingFilter').addEventListener('change', filterReviews);
     document.getElementById('statusFilter').addEventListener('change', filterReviews);
     document.getElementById('reviewSearch').addEventListener('keyup', debounce(filterReviews, 300));
-    document.getElementById('searchReviewBtn').addEventListener('click', filterReviews);
+    document.getElementById('searchReviewBtn').addEventListener('click', loadGlobalSearch);
     document.getElementById('exportBtn').addEventListener('click', exportReviews);
     document.getElementById('replyForm').addEventListener('submit', handleReplySubmit);
 }
@@ -285,12 +314,39 @@ function setupEventListeners() {
 async function loadReviews() {
     try {
         const response = await apiService.getReviews(appState.currentFilters);
-        appState.reviews = response.data || response; // Handle different API response structures
+        appState.reviews = response.customerReviews; // Handle different API response structures
         renderReviewsTable(); // Re-render the table with new data
+        appState.vendorPerformance = response.vendorPerformance;
+        renderVendorPerformance();
+        appState.deliveryPerformance = response.deliveryPerformance;
+        renderDeliveryPerformance();
     } catch (error) {
         // The error is logged by the apiService, so we just show a user-facing message here.
         showAlert('Failed to load reviews. Please try again.', 'error');
     }
+}
+async function loadGlobalSearch() {
+    try {
+            const response = await fetch(`${API_BASE_URL2}${API_ENDPOINTS.GLOBAL_SEARCH}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            search: document.getElementById('reviewSearch').value
+                        })
+            });
+            const data = await response.json();
+            appState.reviews = data.customerReviews; // Handle different API response structures
+            renderReviewsTable(); // Re-render the table with new data
+            appState.vendorPerformance = data.vendorPerformance;
+            renderVendorPerformance();
+            appState.deliveryPerformance = data.deliveryPerformance;
+            renderDeliveryPerformance();
+        } catch (error) {
+            // The error is logged by the apiService, so we just show a user-facing message here.
+            showAlert('Failed to load reviews. Please try again.', 'error');
+        }
 }
 
 /**
@@ -433,15 +489,14 @@ function renderReviewsTable() {
         <tr>
             <td>
                 <div class="d-flex align-items-center">
-                    <img src="${review.user.profilePic || '/resources/images/default-avatar.jpg'}"
-                         class="rounded-circle me-3" width="40" height="40" alt="${review.user.name}">
+                    <img src="${review.reviewerName || '/resources/images/default-avatar.jpg'}"
+                         class="rounded-circle me-3" width="40" height="40" alt="${review.reviewerName}">
                     <div>
-                        <h6 class="mb-0">${review.user.name}</h6>
-                        <small class="text-muted">Order #${review.orderId}</small>
+                        <h6 class="mb-0">${review.reviewerName}</h6>
                     </div>
                 </div>
             </td>
-            <td><span class="badge bg-${review.type === 'VENDOR' ? 'primary' : 'success'}">${review.type}</span></td>
+            <td><p>${review.type}</p></td>
             <td><div class="rating-stars">${generateStars(review.rating)}<span class="ms-1 small">(${review.rating})</span></div></td>
             <td>
                 <p class="mb-1 review-comment">${review.comment}</p>
@@ -451,7 +506,7 @@ function renderReviewsTable() {
                 </div>` : ''}
             </td>
             <td>${formatDate(review.date)}</td>
-            <td><span class="badge bg-${review.status === 'APPROVED' ? 'success' : review.status === 'PENDING' ? 'warning' : 'danger'}">${review.status}</span></td>
+            <td><p>${review.status}</p></td>
             <td>
                 <div class="btn-group btn-group-sm" role="group">
                     ${review.status === 'PENDING' ? `
@@ -463,6 +518,8 @@ function renderReviewsTable() {
             </td>
         </tr>
     `).join('');
+
+
 }
 
 /**
@@ -478,8 +535,8 @@ function renderVendorPerformance() {
         <tr>
             <td>
                 <div class="d-flex align-items-center">
-                    <img src="${vendor.profilePic || '/resources/images/default-vendor.jpg'}" class="rounded-circle me-3" width="40" height="40" alt="${vendor.name}">
-                    <div><h6 class="mb-0">${vendor.name}</h6><small class="text-muted">${vendor.category}</small></div>
+                    <img src="${vendor.profilePic || '/resources/images/default-vendor.jpg'}" class="rounded-circle me-3" width="40" height="40" alt="${vendor.vendorName}">
+                    <div><h6 class="mb-0">${vendor.vendorName}</h6></div>
                 </div>
             </td>
             <td><div class="d-flex align-items-center"><strong class="me-2">${vendor.rating.toFixed(1)}</strong><div class="rating-stars small">${generateStars(vendor.rating)}</div></div></td>
@@ -507,8 +564,8 @@ function renderDeliveryPerformance() {
         <tr>
             <td>
                 <div class="d-flex align-items-center">
-                    <img src="${delivery.profilePic || '/resources/images/default-delivery.jpg'}" class="rounded-circle me-3" width="40" height="40" alt="${delivery.name}">
-                    <div><h6 class="mb-0">${delivery.name}</h6><small class="text-muted">${delivery.vehicleType}</small></div>
+                    <img src="${delivery.profilePic || '/resources/images/default-delivery.jpg'}" class="rounded-circle me-3" width="40" height="40" alt="${delivery.deliveryPerson}">
+                    <div><h6 class="mb-0">${delivery.deliveryPerson}</h6></div>
                 </div>
             </td>
             <td><div class="d-flex align-items-center"><strong class="me-2">${delivery.rating.toFixed(1)}</strong><div class="rating-stars small">${generateStars(delivery.rating)}</div></div></td>

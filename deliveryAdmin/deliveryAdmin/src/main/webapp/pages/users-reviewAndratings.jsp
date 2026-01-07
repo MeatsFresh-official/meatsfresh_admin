@@ -16,7 +16,7 @@
                             <div>
                                 <h6 class="mb-0">Avg. Vendor Rating</h6>
                                 <div class="d-flex align-items-center">
-                                    <h3 class="mb-0 me-2"><fmt:formatNumber value="${avgVendorRating}" maxFractionDigits="1"/></h3>
+                                    <h3 class="mb-0 me-2" id="avgVendorRating">--</h3>
                                     <div class="rating-stars">
                                         <c:forEach begin="1" end="5" var="i">
                                             <i class="fas fa-star${i <= avgVendorRating ? '' : '-empty'}"></i>
@@ -39,7 +39,7 @@
                             <div>
                                 <h6 class="mb-0">Avg. Delivery Rating</h6>
                                 <div class="d-flex align-items-center">
-                                    <h3 class="mb-0 me-2"><fmt:formatNumber value="${avgDeliveryRating}" maxFractionDigits="1"/></h3>
+                                    <h3 class="mb-0 me-2" id="avgDeliveryRating">--</h3>
                                     <div class="rating-stars">
                                         <c:forEach begin="1" end="5" var="i">
                                             <i class="fas fa-star${i <= avgDeliveryRating ? '' : '-empty'}"></i>
@@ -61,7 +61,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-0">Total Reviews</h6>
-                                <h3 class="mb-0">${totalReviews}</h3>
+                                <h3 class="mb-0" id="totalReviews">--</h3>
                             </div>
                             <i class="fas fa-comment-alt fa-2x"></i>
                         </div>
@@ -77,7 +77,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-0">Pending Moderation</h6>
-                                <h3 class="mb-0">${pendingReviews}</h3>
+                                <h3 class="mb-0" id="pendingModeration">--</h3>
                             </div>
                             <i class="fas fa-clock fa-2x"></i>
                         </div>
