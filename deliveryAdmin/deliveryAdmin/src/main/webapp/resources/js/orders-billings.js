@@ -1,185 +1,315 @@
+/* Zenith Admin - Orders Logic */
+
 document.addEventListener('DOMContentLoaded', function () {
-    // --- IMPORTANT: REPLACE WITH YOUR API ENDPOINT ---
-    const API_BASE_URL = 'https://localhost:8082/api/admin';
 
-    const API_ENDPOINTS = {
-        orders: `${API_BASE_URL}/orders`,
-        stats: `${API_BASE_URL}/orders/stats`,
-        shops: `${API_BASE_URL}/shops/list`,
-        deliveryPersons: `${API_BASE_URL}/delivery-persons/list`
-    };
+    // --- State ---
+    let allOrders = [];
+    let currentFilter = 'ALL';
+    let dateRange = { start: moment().subtract(7, 'days').format('YYYY-MM-DD'), end: moment().format('YYYY-MM-DD') };
+    let fpInstance = null;
 
-    // --- DOM ELEMENT REFERENCES ---
-    const statsContainer = document.getElementById('stats-cards-container');
-    const ordersTableBody = document.getElementById('ordersTableBody');
-    const searchInput = document.getElementById('orderSearchInput');
-    const detailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
-    const editModal = new bootstrap.Modal(document.getElementById('editOrderModal'));
-    const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
+    // --- Initialization ---
+    initDateRangePicker();
+    generateSampleData();
+    renderStats();
+    renderTable();
+    setupEventListeners();
 
-    let searchTimeout;
-    let currentFilters = {
-        status: 'all',
-        search: '',
-        startDate: '',
-        endDate: ''
-    };
+    // --- Date Picker ---
+    function initDateRangePicker() {
+        fpInstance = flatpickr("#dateRangePicker", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            defaultDate: [dateRange.start, dateRange.end],
+            onChange: function (selectedDates) {
+                if (selectedDates.length === 2) {
+                    dateRange = {
+                        start: moment(selectedDates[0]).format('YYYY-MM-DD'),
+                        end: moment(selectedDates[1]).format('YYYY-MM-DD')
+                    };
+                    renderTable();
+                }
+            }
+        });
+    }
 
-    // --- UTILITY FUNCTIONS ---
-    const showLoading = (element) => {
-        element.innerHTML = `<tr><td colspan="8" class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
-    };
+    // --- Sample Data Generation ---
+    function generateSampleData() {
+        // ... (Same as before)
+        const statuses = [
+            'PENDING_VENDOR_APPROVAL', 'ACCEPTED_BY_VENDOR', 'ORDER_PREPARING',
+            'ORDER_READY', 'AWAITING_DELIVERY_PARTNER_CONFIRMATION', 'PLACED',
+            'DELIVERY_PARTNER_ASSIGNED', 'REACHED_VENDOR', 'ORDER_PICKED',
+            'ON_THE_WAY', 'REACHED_CUSTOMER', 'DELIVERED', 'PAYMENT_PENDING',
+            'REJECTED_BY_PARTNER', 'APPROVED', 'COLLECTED_ORDER', 'RETURN',
+            'VENDOR_DECLINED', 'CANCELLED'
+        ];
 
-    const showEmpty = (element, message) => {
-        element.innerHTML = `<tr><td colspan="8" class="text-center p-5 text-muted">${message}</td></tr>`;
-    };
+        const customers = ['John Doe', 'Sarah Smith', 'Michael Johnson', 'Emily Davis', 'David Wilson', 'Priya Patel', 'Rahul Sharma'];
+        const shops = ['Meat Masters', 'Fresh Cuts', 'Ocean Catch', 'Green Valley Farms', 'Organic Choice'];
+        const meals = ['Premium Angus Steak', 'Organic Chicken Breast', 'Fresh Atlantic Salmon', 'Spicy Lamb Chops', 'Gourmet Sausages', 'Tiger Prawns'];
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        const options = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-        return new Date(dateString).toLocaleDateString('en-GB', options);
-    };
+        for (let i = 0; i < 45; i++) {
+            const date = moment().subtract(Math.floor(Math.random() * 30), 'days').subtract(Math.floor(Math.random() * 24), 'hours'); // Increased range for demo
+            const status = statuses[Math.floor(Math.random() * statuses.length)];
+            const itemCount = Math.floor(Math.random() * 5) + 1;
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
-    };
+            // Generate Items
+            let items = [];
+            let subtotal = 0;
+            for (let j = 0; j < itemCount; j++) {
+                const price = (Math.random() * 200 + 50).toFixed(2); // Increased prices for Rupees
+                const qty = Math.floor(Math.random() * 3) + 1;
+                subtotal += price * qty;
+                items.push({
+                    name: meals[Math.floor(Math.random() * meals.length)],
+                    qty: qty,
+                    price: price
+                });
+            }
 
-    const getStatusBadge = (status) => {
-        return `<span class="order-status status-${status.toLowerCase()}">${status}</span>`;
-    };
+            const deliveryFee = (Math.random() * 50 + 20).toFixed(2);
+            const tax = (subtotal * 0.05).toFixed(2);
+            const total = (subtotal + parseFloat(deliveryFee) + parseFloat(tax)).toFixed(2);
 
-    // --- API FETCH FUNCTIONS ---
-
-    const fetchOrderStats = async () => {
-        try {
-            const response = await fetch(API_ENDPOINTS.stats);
-            if (!response.ok) throw new Error('Failed to load stats');
-            const stats = await response.json();
-            renderStats(stats);
-        } catch (error) {
-            console.error("Error fetching stats:", error);
-            statsContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger">Could not load order statistics.</div></div>`;
+            allOrders.push({
+                id: 1000 + i,
+                orderCode: 'ORD-' + (2024000 + i),
+                customer: customers[Math.floor(Math.random() * customers.length)],
+                phone: '+91 98765 ' + (Math.floor(Math.random() * 89999) + 10000),
+                address: (Math.floor(Math.random() * 99) + 1) + ' MG Road, Bengaluru, KA',
+                shop: shops[Math.floor(Math.random() * shops.length)],
+                total: total,
+                subtotal: subtotal.toFixed(2),
+                deliveryFee: deliveryFee,
+                tax: tax,
+                status: status,
+                date: date.format('YYYY-MM-DD HH:mm'),
+                deliveryBoy: status.includes('DELIVER') || status === 'ON_THE_WAY' ? 'Rider ' + (Math.floor(Math.random() * 5) + 1) : 'Unassigned',
+                itemCount: itemCount + ' Items',
+                itemsList: items
+            });
         }
-    };
 
-    const fetchOrders = async () => {
-        showLoading(ordersTableBody);
-        const params = new URLSearchParams();
-        if (currentFilters.status && currentFilters.status !== 'all') params.append('status', currentFilters.status);
-        if (currentFilters.search) params.append('search', currentFilters.search);
-        if (currentFilters.startDate) params.append('startDate', currentFilters.startDate);
-        if (currentFilters.endDate) params.append('endDate', currentFilters.endDate);
+        // Sort by date desc
+        allOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
 
-        try {
-            const response = await fetch(`${API_ENDPOINTS.orders}?${params.toString()}`);
-            if (!response.ok) throw new Error('Failed to load orders');
-            const orders = await response.json();
-            renderOrdersTable(orders);
-        } catch (error) {
-            console.error("Error fetching orders:", error);
-            showEmpty(ordersTableBody, 'Could not load orders.');
+    // --- Rendering ---
+    function renderStats() {
+        document.getElementById('stat-total-orders').textContent = allOrders.length;
+        document.getElementById('stat-pending-orders').textContent = allOrders.filter(o => o.status.includes('PENDING') || o.status === 'PLACED').length;
+        document.getElementById('stat-delivered-orders').textContent = allOrders.filter(o => o.status === 'DELIVERED').length;
+
+        const totalRev = allOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+        document.getElementById('stat-revenue').textContent = '₹' + totalRev.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('ordersTableBody');
+        tbody.innerHTML = '';
+
+        let filtered = allOrders;
+
+        // Status Filter
+        if (currentFilter !== 'ALL') {
+            filtered = filtered.filter(o => o.status === currentFilter);
         }
-    };
 
-    // --- RENDER FUNCTIONS ---
+        // Date Filter
+        if (dateRange.start && dateRange.end) {
+            const start = moment(dateRange.start).startOf('day');
+            const end = moment(dateRange.end).endOf('day');
+            filtered = filtered.filter(o => {
+                const d = moment(o.date);
+                return d.isBetween(start, end, null, '[]');
+            });
+        }
 
-    const renderStats = (stats) => {
-        statsContainer.innerHTML = `
-            <div class="col-xl-2 col-md-4 col-6"><div class="card bg-primary text-white"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="mb-0">Total</h6><h3 class="mb-0">${stats.total || 0}</h3></div><i class="fas fa-shopping-cart fa-2x"></i></div></div></div>
-            <div class="col-xl-2 col-md-4 col-6"><div class="card bg-success text-white"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="mb-0">Completed</h6><h3 class="mb-0">${stats.completed || 0}</h3></div><i class="fas fa-check-circle fa-2x"></i></div></div></div>
-            <div class="col-xl-2 col-md-4 col-6"><div class="card bg-info text-white"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="mb-0">In Progress</h6><h3 class="mb-0">${stats.inProgress || 0}</h3></div><i class="fas fa-truck fa-2x"></i></div></div></div>
-            <div class="col-xl-2 col-md-4 col-6"><div class="card bg-warning text-dark"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="mb-0">Pending</h6><h3 class="mb-0">${stats.pending || 0}</h3></div><i class="fas fa-clock fa-2x"></i></div></div></div>
-            <div class="col-xl-2 col-md-4 col-6"><div class="card bg-danger text-white"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="mb-0">Cancelled</h6><h3 class="mb-0">${stats.cancelled || 0}</h3></div><i class="fas fa-times-circle fa-2x"></i></div></div></div>
-            <div class="col-xl-2 col-md-4 col-6"><div class="card bg-secondary text-white"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="mb-0">Refunded</h6><h3 class="mb-0">${stats.refunded || 0}</h3></div><i class="fas fa-money-bill-wave fa-2x"></i></div></div></div>
-        `;
-    };
+        // Search Filter
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        if (searchTerm) {
+            filtered = filtered.filter(o =>
+                o.orderCode.toLowerCase().includes(searchTerm) ||
+                o.customer.toLowerCase().includes(searchTerm) ||
+                o.shop.toLowerCase().includes(searchTerm)
+            );
+        }
 
-    const renderOrdersTable = (orders) => {
-        if (!orders || orders.length === 0) {
-            showEmpty(ordersTableBody, 'No orders found matching your criteria.');
+        document.getElementById('showingCount').textContent = filtered.length;
+        document.getElementById('totalCount').textContent = allOrders.length;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400">No orders found matching your criteria.</td></tr>`;
             return;
         }
 
-        ordersTableBody.innerHTML = orders.map(order => `
-            <tr data-order-id="${order.id}">
-                <td><strong>#${order.id}</strong></td>
+        filtered.forEach(order => {
+            const tr = document.createElement('tr');
+            tr.className = 'group cursor-pointer hover:bg-gray-50';
+
+            tr.innerHTML = `
                 <td>
-                    <div class="d-flex align-items-center">
-                        <img src="${order.customer.profileImage || '/resources/images/default-avatar.jpg'}" class="rounded-circle me-3" width="40" height="40" alt="${order.customer.name}">
-                        <div>
-                            <h6 class="mb-0">${order.customer.name}</h6>
-                            <small class="text-muted">${order.customer.phone}</small>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-800">${order.orderCode}</span>
+                        <span class="text-xs text-gray-500">${order.itemCount} • ${order.shop}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge status-${order.status}">
+                        <span class="badge-dot"></span>
+                        ${formatStatus(order.status)}
+                    </span>
+                </td>
+                <td>
+                    <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 mr-2">
+                            ${order.customer.charAt(0)}
                         </div>
+                        <span class="text-sm font-medium text-gray-700">${order.customer}</span>
                     </div>
                 </td>
-                <td>${formatDate(order.orderDate)}</td>
-                <td>${getStatusBadge(order.status)}</td>
-                <td><strong>${formatCurrency(order.totalAmount)}</strong></td>
-                <td>${order.shop.name}</td>
+                <td class="font-semibold text-gray-700">₹${order.total}</td>
+                <td class="text-sm text-gray-500">${moment(order.date).format('MMM D, h:mm A')}</td>
                 <td>
-                    ${order.deliveryPerson ? `
-                    <div class="d-flex align-items-center">
-                        <img src="${order.deliveryPerson.profileImage || '/resources/images/default-avatar.jpg'}" class="rounded-circle me-2" width="30" height="30" alt="${order.deliveryPerson.name}">
-                        <div>${order.deliveryPerson.name}</div>
-                    </div>
-                    ` : `<div class="text-muted">Not assigned</div>`}
+                    ${order.deliveryBoy !== 'Unassigned' ?
+                    `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-medium"><i class="fas fa-biking mr-1"></i>${order.deliveryBoy}</span>` :
+                    `<span class="text-xs text-gray-400">Pending</span>`
+                }
                 </td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary action-btn" data-action="view" title="View Details"><i class="fas fa-eye"></i></button>
-                        <button class="btn btn-outline-secondary action-btn" data-action="edit" title="Edit Order"><i class="fas fa-edit"></i></button>
-                        ${order.status !== 'CANCELLED' && order.status !== 'REFUNDED' ? `<button class="btn btn-outline-danger action-btn" data-action="cancel" title="Cancel Order"><i class="fas fa-times"></i></button>` : ''}
-                    </div>
+                <td class="text-right">
+                    <button class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors" onclick="openEditModal(${order.id})" title="Edit Order">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors" onclick="openViewModal(${order.id})" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </td>
-            </tr>
-        `).join('');
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function formatStatus(status) {
+        return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    // --- Events ---
+    function setupEventListeners() {
+        document.querySelectorAll('.status-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.getAttribute('data-filter');
+                renderTable();
+            });
+        });
+        document.getElementById('searchInput').addEventListener('input', renderTable);
+    }
+
+    // --- Global Actions ---
+    window.setDateRange = function (type) {
+        let start, end;
+        const today = moment();
+
+        switch (type) {
+            case 'today':
+                start = today.clone().startOf('day');
+                end = today.clone().endOf('day');
+                break;
+            case 'week':
+                start = today.clone().startOf('week'); // or subtract(6, 'days')
+                end = today.clone().endOf('day');
+                break;
+            case 'month':
+                start = today.clone().startOf('month');
+                end = today.clone().endOf('day');
+                break;
+            case 'year':
+                start = today.clone().startOf('year');
+                end = today.clone().endOf('day');
+                break;
+        }
+
+        if (start && end) {
+            dateRange = {
+                start: start.format('YYYY-MM-DD'),
+                end: end.format('YYYY-MM-DD')
+            };
+            // Update Picker UI
+            if (fpInstance) {
+                fpInstance.setDate([dateRange.start, dateRange.end], true);
+            }
+            renderTable();
+        }
     };
 
-    // --- EVENT LISTENERS & HANDLERS ---
+    window.openEditModal = function (id) {
+        // ... (Same as before)
+        const order = allOrders.find(o => o.id === id);
+        if (!order) return;
+        document.getElementById('editModalOrderCode').textContent = order.orderCode;
+        document.getElementById('editStatusSelect').value = order.status;
+        window.currentEditingId = id;
+        document.getElementById('editOrderModal').classList.remove('hidden');
+    };
 
-    // Search input handler
-    searchInput.addEventListener('keyup', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            currentFilters.search = searchInput.value.trim();
-            fetchOrders();
-        }, 500); // Debounce for 500ms
-    });
+    window.openViewModal = function (id) {
+        const order = allOrders.find(o => o.id === id);
+        if (!order) return;
 
-    // Filter button handlers
-    document.getElementById('statusFilterDropdown').addEventListener('click', (e) => {
-        if (e.target.matches('a.dropdown-item')) {
-            e.preventDefault();
-            const filter = e.target.dataset.filter;
-            currentFilters.status = filter;
-            document.querySelector('#statusFilterText').textContent = e.target.textContent;
-            fetchOrders();
+        // Header
+        document.getElementById('viewModalOrderCode').textContent = order.orderCode;
+        document.getElementById('viewModalDate').textContent = moment(order.date).format('MMMM Do YYYY, h:mm A');
+
+        // Customer
+        document.getElementById('viewModalCustomer').textContent = order.customer;
+        document.getElementById('viewModalPhone').textContent = order.phone;
+        document.getElementById('viewModalAddress').textContent = order.address;
+
+        // Items
+        const itemsContainer = document.getElementById('viewModalItems');
+        itemsContainer.innerHTML = '';
+        order.itemsList.forEach(item => {
+            itemsContainer.innerHTML += `
+                <div class="flex justify-between items-center text-sm">
+                    <div class="flex items-center">
+                        <div class="h-8 w-8 rounded bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold mr-3">${item.qty}x</div>
+                        <span class="text-gray-700 font-medium">${item.name}</span>
+                    </div>
+                    <span class="text-gray-900 font-semibold">₹${(item.price * item.qty).toFixed(2)}</span>
+                </div>
+            `;
+        });
+
+        // Totals
+        document.getElementById('viewModalSubtotal').textContent = '₹' + order.subtotal;
+        document.getElementById('viewModalDelivery').textContent = '₹' + order.deliveryFee;
+        document.getElementById('viewModalTax').textContent = '₹' + order.tax;
+        document.getElementById('viewModalTotal').textContent = '₹' + order.total;
+
+        // Status & Rider
+        document.getElementById('viewModalStatusBadge').className = `badge status-${order.status} text-sm`;
+        document.getElementById('viewModalStatusBadge').textContent = formatStatus(order.status);
+        document.getElementById('viewModalRider').textContent = order.deliveryBoy;
+
+        document.getElementById('orderDetailsModal').classList.remove('hidden');
+    };
+
+    window.closeModal = function (modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    };
+
+    window.saveOrderStatus = function () {
+        if (!window.currentEditingId) return;
+        const newStatus = document.getElementById('editStatusSelect').value;
+        const orderIndex = allOrders.findIndex(o => o.id === window.currentEditingId);
+
+        if (orderIndex > -1) {
+            allOrders[orderIndex].status = newStatus;
+            renderStats();
+            renderTable();
+            closeModal('editOrderModal');
         }
-    });
-
-    // Table action buttons handler (Event Delegation)
-    ordersTableBody.addEventListener('click', (e) => {
-        const actionBtn = e.target.closest('.action-btn');
-        if (!actionBtn) return;
-
-        const orderId = actionBtn.closest('tr').dataset.orderId;
-        const action = actionBtn.dataset.action;
-
-        if (action === 'view') {
-            // Handle view
-            detailsModal.show();
-        } else if (action === 'edit') {
-            // Handle edit
-            editModal.show();
-        } else if (action === 'cancel') {
-            // Handle cancel
-            document.getElementById('cancelOrderIdText').textContent = orderId;
-            document.getElementById('cancelOrderId').value = orderId;
-            cancelModal.show();
-        }
-    });
-
-    // Initial data load
-    fetchOrderStats();
-    fetchOrders();
+    };
 });

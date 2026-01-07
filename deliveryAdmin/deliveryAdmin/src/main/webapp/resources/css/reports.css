@@ -1,68 +1,129 @@
-/* Styling for the report tables */
-.table th {
-    font-weight: 600;
-    white-space: nowrap;
+/* Zenith Premium Aesthetic - Reports Page CSS */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #4f46e5, #3b82f6);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    --text-color: #1f2937;
+    --text-muted: #6b7280;
 }
 
-.table td {
+body {
+    background-color: #f3f4f6;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+}
+
+/* Glass Components */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+/* Tabs */
+.report-tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.report-tab {
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.report-tab:hover {
+    color: #4f46e5;
+    background: rgba(79, 70, 229, 0.05);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.report-tab.active {
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
+    font-weight: 600;
+}
+
+/* Table overrides */
+.custom-table th {
+    background: rgba(249, 250, 251, 0.8);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 1rem;
+}
+
+.custom-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
     vertical-align: middle;
 }
 
-/* Status badge styling */
+.custom-table tr:hover {
+    background-color: rgba(249, 250, 251, 0.8);
+}
+
+/* Badges */
 .badge {
-    padding: 0.5em 0.75em;
-    font-size: 0.85em;
-    font-weight: 500;
-}
-
-.status-active, .status-delivered {
-    background-color: #d1e7dd;
-    color: #0f5132;
-}
-
-.status-pending, .status-in-transit {
-    background-color: #fff3cd;
-    color: #664d03;
-}
-
-.status-inactive, .status-failed {
-    background-color: #f8d7da;
-    color: #842029;
-}
-
-/* Action buttons in tables */
-.action-btn {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    padding: 0.375rem 0.75rem;
-    color: #6c757d;
-}
-
-.action-btn:hover {
-    color: #0d6efd;
-}
-
-/* Modal content styling */
-#modalContent h5 {
-    font-size: 1.2rem;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: #0d6efd;
-    margin-bottom: 1rem;
 }
 
-#modalContent p {
-    margin-bottom: 0.5rem;
+.badge-success {
+    background: #dcfce7;
+    color: #166534;
 }
 
-#modalContent strong {
-    display: inline-block;
-    width: 150px;
-    color: #495057;
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
 }
 
-/* Page header styling */
-.page-header {
-    border-bottom: 1px solid #dee2e6;
-    margin-bottom: 1.5rem;
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

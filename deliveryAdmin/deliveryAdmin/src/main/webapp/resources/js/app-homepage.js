@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- API and Authentication Configuration ---
-    const BASE_URL = 'http://113.11.231.115:1279'; // Ensure this is your correct API URL
+    const BASE_URL = 'http://meatsfresh.org.in:8082'; // Ensure this is your correct API URL
     const USERNAME = 'user';
     const PASSWORD = 'user';
     const AUTH_HEADER = `Basic ${btoa(`${USERNAME}:${PASSWORD}`)}`;

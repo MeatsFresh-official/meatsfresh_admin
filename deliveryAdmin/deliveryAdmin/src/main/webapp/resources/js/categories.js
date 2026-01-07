@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================================
     const API_BASE = 'http://meatsfresh.org.in:8080/api/vendor';
     const ADMIN_API = `${API_BASE}/admin`;
-    const IMAGE_BASE_URL = 'http://113.11.231.115:8080/';
+    const IMAGE_BASE_URL = 'http:///meatsfresh.org.in:8080/';
 
-    // ===================================================================
+    // ===================================================================ṭūñṅr̥ṭñ
     // GLOBAL STATE & DOM ELEMENTS
     // ===================================================================
     let allCategories = [];

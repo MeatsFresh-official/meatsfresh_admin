@@ -10,10 +10,12 @@
 .dashboard-container {
     display: flex;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .main-content {
-    margin-left: 250px; /* Must match sidebar width */
+    margin-left: 250px;
+    /* Must match sidebar width */
     padding: 20px;
     width: calc(100% - 250px);
     min-height: 100vh;
@@ -249,7 +251,8 @@
     border-left: 3px solid transparent;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: #5e72e4;
     background-color: #f8f9fe;
     border-left: 3px solid #5e72e4;
@@ -438,12 +441,15 @@
 
 /* Adjust main content to accommodate footer */
 .main-content {
-    padding-top: 80px;
-    padding-bottom: 80px; /* Ensure footer doesn't overlap content */
+    padding-top: 20px;
+    /* Reduced from 80px */
+    padding-bottom: 80px;
+    /* Ensure footer doesn't overlap content */
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+
     .footer-copyright,
     .footer-links {
         text-align: center;

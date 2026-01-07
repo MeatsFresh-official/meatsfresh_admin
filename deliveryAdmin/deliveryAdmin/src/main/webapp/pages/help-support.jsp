@@ -1,7 +1,7 @@
 <%@ include file="/includes/header.jsp" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <main class="main-content" data-context-path="${pageContext.request.contextPath}">
     <%-- Hidden inputs to provide context to the JavaScript --%>
     <input type="hidden" id="currentUserId" value="${currentStaff.id}">

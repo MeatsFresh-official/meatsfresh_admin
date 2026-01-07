@@ -1,145 +1,143 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+        <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+            <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<%@ include file="/includes/header.jsp" %>
+                <!-- HEADER & SIDEBAR INCLUDED via header.jsp -->
+                <%@ include file="/includes/header.jsp" %>
 
-<main class="main-content">
-    <div class="container-fluid">
-        <div class="page-header py-3 d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Business Reports</h1>
-            <div>
-                <button class="btn btn-outline-secondary" id="printReportBtn">
-                    <i class="fas fa-print me-2"></i>Print Report
-                </button>
-                <button class="btn btn-primary" id="downloadPdfBtn">
-                    <i class="fas fa-file-pdf me-2"></i>Download PDF
-                </button>
-            </div>
-        </div>
+                    <!-- External Libraries -->
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+                        rel="stylesheet">
+                    <link rel="stylesheet"
+                        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        <!-- User Data Card -->
-        <div class="card mb-4">
-            <div class="card-header py-3">
-                <h4 class="m-0"><i class="fas fa-users me-2"></i>User Data</h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="usersTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>User ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Registration Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data will be loaded by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                    <!-- Custom CSS -->
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/reports.css">
 
-        <!-- Vendor Data Card -->
-        <div class="card mb-4">
-            <div class="card-header py-3">
-                <h4 class="m-0"><i class="fas fa-store-alt me-2"></i>Vendor Data</h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="vendorsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Vendor ID</th>
-                                <th>Company Name</th>
-                                <th>Contact Person</th>
-                                <th>Joined Date</th>
-                                <th>Rating</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data will be loaded by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                    <main class="main-content p-6">
 
-        <!-- Delivery Data Card -->
-        <div class="card mb-4">
-            <div class="card-header py-3">
-                <h4 class="m-0"><i class="fas fa-truck-loading me-2"></i>Delivery Data</h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="deliveriesTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Delivery Person</th>
-                                <th>Status</th>
-                                <th>Last Update</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data will be loaded by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
+                        <!-- DASHBOARD HEADER -->
+                        <div
+                            class="glass-header rounded-xl px-6 py-4 mb-8 flex flex-col md:flex-row justify-between items-center shadow-sm">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">Business Reports</h1>
+                                <p class="text-sm text-gray-500 mt-1">Comprehensive data view</p>
+                            </div>
 
-<!-- ======================= MODALS AND TOASTS ======================= -->
+                            <div class="flex items-center gap-4 mt-4 md:mt-0">
+                                <!-- Search -->
+                                <div class="relative">
+                                    <input type="text" id="searchInput"
+                                        class="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 shadow-sm"
+                                        placeholder="Search reports...">
+                                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                                </div>
 
-<!-- DETAILS VIEWER MODAL -->
-<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalLabel">Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="modalContent" class="p-2">
-                    <!-- Dynamic content will be injected here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+                                <button
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-all flex items-center"
+                                    id="downloadPdfBtn">
+                                    <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                                </button>
+                            </div>
+                        </div>
 
-<!-- SUCCESS NOTIFICATION TOAST -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="successToast" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body"><i class="fas fa-check-circle me-2"></i><span id="toastMessage"></span></div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
+                        <!-- TABS -->
+                        <div class="report-tabs">
+                            <div class="report-tab active" onclick="switchTab('users')">Users</div>
+                            <div class="report-tab" onclick="switchTab('vendors')">Vendors</div>
+                            <div class="report-tab" onclick="switchTab('deliveries')">Delivery Partners</div>
+                        </div>
 
-<!-- ERROR NOTIFICATION TOAST -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="errorToast" class="toast align-items-center text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body"><i class="fas fa-exclamation-circle me-2"></i><span id="errorToastMessage"></span></div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
+                        <!-- CONTENT SECTIONS -->
+                        <div id="reportsContent">
 
-<%@ include file="/includes/footer.jsp" %>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="${pageContext.request.contextPath}/resources/js/report.js"></script>
+                            <!-- USERS TABLE -->
+                            <div id="usersSection" class="glass-panel animate-fade-in">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4 px-4 pt-2">Registered Users</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="custom-table w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>User ID</th>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Reg. Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="usersTableBody">
+                                            <!-- JS Insert -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Pagination Placeholder -->
+                                <div class="p-4 border-t border-gray-100 flex justify-end">
+                                    <span class="text-sm text-gray-500" id="usersCount">Showing 0 users</span>
+                                </div>
+                            </div>
+
+                            <!-- VENDORS TABLE -->
+                            <div id="vendorsSection" class="glass-panel animate-fade-in hidden">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4 px-4 pt-2">Active Vendors</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="custom-table w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>Vendor ID</th>
+                                                <th>Store Name</th>
+                                                <th>Owner</th>
+                                                <th>Rating</th>
+                                                <th>Status</th>
+                                                <th>Joined</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="vendorsTableBody">
+                                            <!-- JS Insert -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="p-4 border-t border-gray-100 flex justify-end">
+                                    <span class="text-sm text-gray-500" id="vendorsCount">Showing 0 vendors</span>
+                                </div>
+                            </div>
+
+                            <!-- DELIVERIES TABLE -->
+                            <div id="deliveriesSection" class="glass-panel animate-fade-in hidden">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4 px-4 pt-2">Delivery Partner Performance
+                                </h3>
+                                <div class="overflow-x-auto">
+                                    <table class="custom-table w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Name</th>
+                                                <th>Deliveries</th>
+                                                <th>Rating</th>
+                                                <th>Status</th>
+                                                <th>Vehicle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="deliveriesTableBody">
+                                            <!-- JS Insert -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="p-4 border-t border-gray-100 flex justify-end">
+                                    <span class="text-sm text-gray-500" id="deliveriesCount">Showing 0 partners</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </main>
+
+                    <!-- SCRIPTS -->
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+                    <script src="${pageContext.request.contextPath}/resources/js/reports.js"></script>
+
+                    <%@ include file="/includes/footer.jsp" %>

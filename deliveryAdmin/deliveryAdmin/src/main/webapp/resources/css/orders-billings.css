@@ -1,54 +1,250 @@
-/* Order Status Styles */
-.order-status {
-    padding: 0.3em 0.8em;
-    border-radius: 1em;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: center;
-    color: #fff;
-    text-transform: capitalize;
+/* Zenith Premium Aesthetic - Orders Page CSS */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #4f46e5, #3b82f6);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    --danger-color: #ef4444;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+}
+
+body {
+    background-color: #f3f4f6;
+    /* Light gray background for contrast */
+    font-family: 'Inter', sans-serif;
+    color: #1f2937;
+    overflow-x: hidden;
+}
+
+/* --- Glassmorphism Components --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 16px;
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* --- Stats Cards --- */
+.stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+/* --- Tab Navigation --- */
+.status-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 4px;
+}
+
+.status-tabs-container::-webkit-scrollbar {
+    display: none;
+}
+
+.status-tab {
     display: inline-block;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    /* Pill shape */
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.5);
 }
 
-.order-status.status-accepted { background-color: #198754; }
-.order-status.status-packing { background-color: #0dcaf0; }
-.order-status.status-shipping { background-color: #6c757d; }
-.order-status.status-delivered { background-color: #0d6efd; }
-.order-status.status-cancelled { background-color: #dc3545; }
-.order-status.status-refunded { background-color: #212529; }
-.order-status.status-pending { background-color: #ffc107; color: #000; }
-
-/* Table Styling */
-.table-hover tbody tr {
-    transition: background-color 0.2s ease-in-out;
+.status-tab:hover {
+    background: rgba(255, 255, 255, 0.8);
+    color: #374151;
 }
 
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa;
+.status-tab.active {
+    background: #ffffff;
+    color: #2563eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-color: rgba(37, 99, 235, 0.1);
+    font-weight: 600;
 }
 
-/* Skeleton Loading Effect */
-@keyframes pulse-bg {
-    0% { background-color: #eee; }
-    50% { background-color: #e0e0e0; }
-    100% { background-color: #eee; }
+/* --- Table Styles --- */
+.custom-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
 }
 
-.skeleton {
-    animation: pulse-bg 1.5s infinite;
-    border-radius: 0.25rem;
+.custom-table thead th {
+    background: rgba(249, 250, 251, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
 }
 
-.skeleton-text {
-    height: 1em;
-    margin-bottom: 0.5em;
-    width: 80%;
-}
-.skeleton-text:last-child {
-    width: 60%;
+.custom-table tbody tr {
+    transition: background-color 0.15s ease;
 }
 
-/* Modal styling */
-#productsTable tfoot td {
-    border-top: 2px solid #dee2e6;
+.custom-table tbody tr:hover {
+    background-color: rgba(243, 244, 246, 0.7);
+}
+
+.custom-table td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.custom-table td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding-left: 24px;
+}
+
+.custom-table td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    padding-right: 24px;
+}
+
+
+/* --- Status Badges --- */
+.badge {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+.badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+/* Status Colors */
+.status-PENDING_VENDOR_APPROVAL,
+.status-PLACED,
+.status-PAYMENT_PENDING {
+    background-color: #fef3c7;
+    color: #d97706;
+    /* Amber */
+}
+
+.status-ACCEPTED_BY_VENDOR,
+.status-ORDER_PREPARING,
+.status-ORDER_READY,
+.status-AWAITING_DELIVERY_PARTNER_CONFIRMATION {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    /* Sky */
+}
+
+.status-DELIVERY_PARTNER_ASSIGNED,
+.status-REACHED_VENDOR,
+.status-ORDER_PICKED,
+.status-ON_THE_WAY,
+.status-REACHED_CUSTOMER {
+    background-color: #ddd6fe;
+    color: #7c3aed;
+    /* Violet */
+}
+
+.status-DELIVERED,
+.status-APPROVED,
+.status-COLLECTED_ORDER {
+    background-color: #dcfce7;
+    color: #059669;
+    /* Emerald */
+}
+
+.status-VENDOR_DECLINED,
+.status-CANCELLED,
+.status-REJECTED_BY_PARTNER,
+.status-RETURN {
+    background-color: #fee2e2;
+    color: #dc2626;
+    /* Red */
+}
+
+
+/* --- Modals & Animations --- */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

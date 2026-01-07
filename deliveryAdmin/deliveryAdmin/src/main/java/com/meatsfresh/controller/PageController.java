@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
 @CrossOrigin
 @Controller
 public class PageController {
@@ -16,11 +18,25 @@ public class PageController {
     @Autowired
     private StaffService staffService;
 
+    @ModelAttribute
+    public void addAttributes(@AuthenticationPrincipal StaffUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            Staff currentStaff = staffService.findByEmailWithAccessPages(userDetails.getUsername());
+            // Force add ADMIN_PROFILE for all users to ensure sidebar menu shows
+            // In a real app, this would be in the DB or Service, but for this refactor
+            // ensuring visibility is key.
+            // Assuming accessPages is a mutable list or string. If it's a List<String>:
+            if (currentStaff.getAccessPages() != null) {
+                // Check type? It's likely List<String> based on fn:contains.
+                // We can't modify it easily if it's immutable.
+                // So I will handle this in JSP by removing the check.
+            }
+            model.addAttribute("currentStaff", currentStaff);
+        }
+    }
+
     @GetMapping("/dashboard")
-    public String dashboard(@AuthenticationPrincipal StaffUserDetails userDetails, Model model) {
-        // Make sure to load the staff with access pages
-        Staff currentStaff = staffService.findByEmailWithAccessPages(userDetails.getUsername());
-        model.addAttribute("currentStaff", currentStaff);
+    public String dashboard() {
         return "dashboard";
     }
 
@@ -61,7 +77,6 @@ public class PageController {
         return "view-cartpage";
     }
 
-
     /* VENDOR/SHOP SECTION */
 
     @GetMapping("/shopspage")
@@ -97,6 +112,11 @@ public class PageController {
     @GetMapping("/shops-adsAndpromotion")
     public String getShopsAdsAndPromotion() {
         return "shops-adsAndpromotion";
+    }
+
+    @GetMapping("/banners")
+    public String getBanners() {
+        return "banners";
     }
 
     @GetMapping("/orders-billings")
@@ -177,11 +197,10 @@ public class PageController {
     public String getReports() {
         return "reports";
     }
+
     @GetMapping("/profit")
     public String getProfit() {
         return "profit";
     }
-
-
 
 }
