@@ -14,59 +14,133 @@
                         <h5 class="mb-0">Adjust Order Charges</h5>
                     </div>
                     <div class="card-body">
-                        <form id="chargesForm" action="${pageContext.request.contextPath}/admin/orders/updateCharges" method="post">
+                        <form id="chargesForm" action="http://meatsfresh.org.in:8082/api/fee-config" method="post">
                             <input type="hidden" name="orderId" value="${order.id}">
 
                             <div class="row">
+
+                                <!-- LEFT COLUMN -->
                                 <div class="col-md-6">
+
+                                    <!-- Base Delivery Fee -->
                                     <div class="card card-toggle mb-3">
                                         <div class="card-body">
                                             <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input charge-toggle" type="checkbox" id="toggleDeliveryFee"
-                                                       name="deliveryFeeEnabled" ${order.deliveryFee > 0 ? 'checked' : ''}>
-                                                <label class="form-check-label fw-medium" for="toggleDeliveryFee">Delivery Fee</label>
+                                                <input class="form-check-input charge-toggle" type="checkbox" id="toggleBaseDeliveryFee"
+                                                       name="deliveryFeeEnabled" ${order.baseDeliveryFee > 0 ? 'checked' : ''}>
+                                                <label class="form-check-label fw-medium" for="toggleBaseDeliveryFee">Base Delivery Fee</label>
                                             </div>
-                                            <div class="input-group ${order.deliveryFee <= 0 ? 'd-none' : ''}" id="deliveryFeeGroup">
+                                            <div class="input-group ${order.baseDeliveryFee <= 0 ? 'd-none' : ''}" id="baseDeliveryFeeGroup">
                                                 <span class="input-group-text">${currencySymbol}</span>
-                                                <input type="number" class="form-control" name="deliveryFee"
-                                                       value="${order.deliveryFee > 0 ? order.deliveryFee : ''}" step="0.01" min="0">
+                                                <input type="number" class="form-control" name="baseDeliveryFee"
+                                                       value="${order.baseDeliveryFee > 0 ? order.baseDeliveryFee : ''}" step="0.01" min="0">
                                             </div>
                                         </div>
                                     </div>
 
+                                    <!-- Delivery Fee Per KM -->
                                     <div class="card card-toggle mb-3">
                                         <div class="card-body">
                                             <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input charge-toggle" type="checkbox" id="toggleReinFee"
-                                                       name="reinFeeEnabled" ${order.reinFee > 0 ? 'checked' : ''}>
-                                                <label class="form-check-label fw-medium" for="toggleReinFee">Rein Fee</label>
+                                                <label class="form-check-label fw-medium" for="toggleDeliveryFeePerKm">Delivery Fee Per KM</label>
                                             </div>
-                                            <div class="input-group ${order.reinFee <= 0 ? 'd-none' : ''}" id="reinFeeGroup">
+                                            <div class="input-group ${order.deliveryFeePerKm <= 0 ? 'd-none' : ''}" id="deliveryFeePerKmGroup">
                                                 <span class="input-group-text">${currencySymbol}</span>
-                                                <input type="number" class="form-control" name="reinFee"
-                                                       value="${order.reinFee > 0 ? order.reinFee : ''}" step="0.01" min="0">
+                                                <input type="number" class="form-control" name="deliveryFeePerKm"
+                                                       value="${order.deliveryFeePerKm > 0 ? order.deliveryFeePerKm : ''}" step="0.01" min="0">
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Rain Fee -->
+                                    <div class="card card-toggle mb-3">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input charge-toggle" type="checkbox" id="toggleRainFee"
+                                                       name="rainFeeEnabled" ${order.rainFee > 0 ? 'checked' : ''}>
+                                                <label class="form-check-label fw-medium" for="toggleRainFee">Rain Fee</label>
+                                            </div>
+                                            <div class="input-group ${order.rainFee <= 0 ? 'd-none' : ''}" id="rainFeeGroup">
+                                                <span class="input-group-text">${currencySymbol}</span>
+                                                <input type="number" class="form-control" name="rainFee"
+                                                       value="${order.rainFee > 0 ? order.rainFee : ''}" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Packaging Charge -->
+                                    <div class="card card-toggle mb-3">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input charge-toggle" type="checkbox" id="togglePackagingCharge"
+                                                       name="packagingChargeEnabled" ${order.packagingCharge > 0 ? 'checked' : ''}>
+                                                <label class="form-check-label fw-medium" for="togglePackagingCharge">Packaging Charge</label>
+                                            </div>
+                                            <div class="input-group ${order.packagingCharge <= 0 ? 'd-none' : ''}" id="packagingChargeGroup">
+                                                <span class="input-group-text">${currencySymbol}</span>
+                                                <input type="number" class="form-control" name="packagingCharge"
+                                                       value="${order.packagingCharge > 0 ? order.packagingCharge : ''}" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
+                                <!-- RIGHT COLUMN -->
                                 <div class="col-md-6">
+
+                                    <!-- Platform Fee -->
                                     <div class="card card-toggle mb-3">
                                         <div class="card-body">
                                             <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input charge-toggle" type="checkbox" id="togglePlatformFee"
-                                                       name="platformFeeEnabled" ${order.platformFee > 0 ? 'checked' : ''}>
-                                                <label class="form-check-label fw-medium" for="togglePlatformFee">Platform Fee</label>
+                                                       name="platformFeeEnabled" ${order.platformFeeRate > 0 ? 'checked' : ''}>
+                                                <label class="form-check-label fw-medium" for="togglePlatformFee">Platform Fee (%)</label>
                                             </div>
-                                            <div class="input-group ${order.platformFee <= 0 ? 'd-none' : ''}" id="platformFeeGroup">
-                                                <span class="input-group-text">${currencySymbol}</span>
-                                                <input type="number" class="form-control" name="platformFee"
-                                                       value="${order.platformFee > 0 ? order.platformFee : ''}" step="0.01" min="0">
+                                            <div class="input-group ${order.platformFeeRate <= 0 ? 'd-none' : ''}" id="platformFeeGroup">
+                                                <span class="input-group-text">%</span>
+                                                <input type="number" class="form-control" name="platformFeeRate"
+                                                       value="${order.platformFeeRate > 0 ? order.platformFeeRate : ''}" step="0.01" min="0">
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Service Charge -->
+                                    <div class="card card-toggle mb-3">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input charge-toggle" type="checkbox" id="toggleServiceCharge"
+                                                       name="serviceChargeEnabled" ${order.serviceCharge > 0 ? 'checked' : ''}>
+                                                <label class="form-check-label fw-medium" for="toggleServiceCharge">Service Charge</label>
+                                            </div>
+                                            <div class="input-group ${order.serviceCharge <= 0 ? 'd-none' : ''}" id="serviceChargeGroup">
+                                                <span class="input-group-text">${currencySymbol}</span>
+                                                <input type="number" class="form-control" name="serviceCharge"
+                                                       value="${order.serviceCharge > 0 ? order.serviceCharge : ''}" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- GST -->
+                                    <div class="card card-toggle mb-3">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input charge-toggle" type="checkbox" id="toggleGstRate"
+                                                       name="gstRateEnabled" ${order.gstRate > 0 ? 'checked' : ''}>
+                                                <label class="form-check-label fw-medium" for="toggleGstRate">GST (%)</label>
+                                            </div>
+                                            <div class="input-group ${order.gstRate <= 0 ? 'd-none' : ''}" id="gstRateGroup">
+                                                <span class="input-group-text">%</span>
+                                                <input type="number" class="form-control" name="gstRate"
+                                                       value="${order.gstRate > 0 ? order.gstRate : ''}" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
+
                             </div>
+
 
                             <!-- Custom Fees Section -->
                             <div class="card">

@@ -16,9 +16,9 @@
  *              easy to update the base URL or endpoints in one place.
  */
 const API_CONFIG = {
-    baseUrl: 'https://localhost:8082/api',
+    baseUrl: 'http://meatsfresh.org.in:8082',
     endpoints: {
-        updateCharges: '/orders/updateCharges',
+        updateCharges: '/api/fee-config',
         getOrder: '/orders' // Note: Order ID will be appended to this.
     }
 };
@@ -132,7 +132,7 @@ function initFormSubmission() {
         // 3. Prepare form data for the API.
         // `FormData` is a standard browser API that makes it easy to construct a set of
         // key/value pairs representing form fields and their values.
-        const formData = new FormData(this);
+        //const formData = new FormData(this);
 
         // 4. Provide user feedback by showing a loading state on the submit button.
         const $submitBtn = $(this).find('button[type="submit"]');
@@ -140,7 +140,7 @@ function initFormSubmission() {
         $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Updating...');
 
         // 5. Make the API call to update the charges.
-        updateOrderCharges(formData)
+        updateOrderChargesJSON()
             .then(data => {
                 // Handle a successful API response.
                 if (data.success) {
@@ -183,27 +183,63 @@ function initTooltips() {
  * @param {FormData} formData - The FormData object containing all form values.
  * @returns {Promise<object>} A promise that resolves to the JSON response from the server.
  */
-function updateOrderCharges(formData) {
-    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.updateCharges}`;
+function updateOrderChargesJSON() {
 
-    // Using the modern `fetch` API for the request.
-    return fetch(url, {
-        method: 'POST',
-        body: formData,
-        // Note: When using FormData, you should NOT set the 'Content-Type' header yourself.
-        // The browser will automatically set it to 'multipart/form-data' with the correct boundary.
+    const body = {
+        baseDeliveryFee: Number($('input[name="baseDeliveryFee"]').val() || 0),
+        deliveryFeePerKm: Number($('input[name="deliveryFeePerKm"]').val() || 0),
+
+        deliveryFeeEnabled: $('#toggleBaseDeliveryFee').is(':checked'),
+
+        platformFeeRate: Number($('input[name="platformFeeRate"]').val() || 0),
+        platformFeeEnabled: $('#togglePlatformFee').is(':checked'),
+
+        rainFee: Number($('input[name="rainFee"]').val() || 0),
+        rainFeeEnabled: $('#toggleRainFee').is(':checked'),
+
+        packagingCharge: Number($('input[name="packagingCharge"]').val() || 0),
+        packagingChargeEnabled: $('#togglePackagingCharge').is(':checked'),
+
+        serviceCharge: Number($('input[name="serviceCharge"]').val() || 0),
+        serviceChargeEnabled: $('#toggleServiceCharge').is(':checked'),
+
+        gstRate: Number($('input[name="gstRate"]').val() || 0),
+        gstRateEnabled: $('#toggleGstRate').is(':checked'),
+
+        customFees: collectCustomFees()
+    };
+
+    function collectCustomFees() {
+        const fees = [];
+
+        $('.custom-fee-entry').each(function () {
+            const name = $(this).find('input[name="customFeeNames"]').val();
+            const value = Number($(this).find('input[name="customFeeValues"]').val() || 0);
+
+            if (name && value > 0) {
+                fees.push({
+                    name: name,
+                    value: value
+                });
+            }
+        });
+
+        return fees;
+    }
+
+
+    console.log("Sending JSON:", body);
+
+    return fetch("http://meatsfresh.org.in:8082/api/fee-config", {
+        method: "POST",
         headers: {
-            // This header is often used by server-side frameworks (like Spring, Rails)
-            // to identify AJAX requests.
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
     })
-    .then(response => {
-        if (!response.ok) {
-            // Handle HTTP errors like 404 or 500.
-            throw new Error(`Server responded with status: ${response.status}`);
-        }
-        return response.json(); // Parse the JSON response body.
+    .then(res => {
+        if (!res.ok) throw new Error("API failed");
+        return res.json();
     });
 }
 
