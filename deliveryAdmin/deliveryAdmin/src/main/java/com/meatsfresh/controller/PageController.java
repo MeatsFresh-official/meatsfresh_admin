@@ -203,4 +203,9 @@ public class PageController {
         return "profit";
     }
 
+    @GetMapping("/recipes")
+    public String getRecipes() {
+        return "recipes";
+    }
+
 }

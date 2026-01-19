@@ -1,8 +1,8 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // ===================================================================
     // API ENDPOINTS & CONFIG
     // ===================================================================
-    const API_BASE = 'http://113.11.231.115:8080/api';
+    const API_BASE = 'http://meatsfresh.org.in:8083/api';
     const RIDER_API = `${API_BASE}/delivery`;
     const ADMIN_API = `${API_BASE}/delivery/admin`;
     const PAYOUT_API = `${API_BASE}/payouts`;
@@ -17,7 +17,7 @@ $(document).ready(function() {
     const username = 'user';
     const password = 'user';
     $.ajaxSetup({
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
             const authHeader = 'Basic ' + btoa(username + ':' + password);
             xhr.setRequestHeader('Authorization', authHeader);
         }
@@ -38,16 +38,16 @@ $(document).ready(function() {
     // ===================================================================
     // EVENT HANDLERS
     // ===================================================================
-    $(document).on('click', '#approveBtn', function() {
+    $(document).on('click', '#approveBtn', function () {
         if (confirm('Are you sure you want to approve this rider?')) {
             updateRiderStatus(`${ADMIN_API}/${riderId}/approve-partner`, 'PATCH', 'Rider approved successfully');
         }
     });
 
-    $(document).on('click', '#rejectBtn', function() {
+    $(document).on('click', '#rejectBtn', function () {
         const reason = prompt("Please enter the reason for rejection:");
         if (reason && reason.trim()) {
-             updateRiderStatus(`${ADMIN_API}/${riderId}/reject-partner?rejectionReason=${encodeURIComponent(reason.trim())}`, 'PUT', 'Rider rejected successfully');
+            updateRiderStatus(`${ADMIN_API}/${riderId}/reject-partner?rejectionReason=${encodeURIComponent(reason.trim())}`, 'PUT', 'Rider rejected successfully');
         } else if (reason !== null) {
             showError('Rejection reason cannot be empty.');
         }
@@ -62,14 +62,14 @@ $(document).ready(function() {
         $('#loading-spinner').removeClass('d-none');
 
         $.get(`${RIDER_API}/${riderId}`)
-            .done(function(rider) {
+            .done(function (rider) {
                 renderHeaderAndPersonalTabs(rider);
                 loadFinancialData();
                 loadEarningsChartData();
                 $('#loading-spinner').addClass('d-none');
                 $('#rider-content').removeClass('d-none');
             })
-            .fail(function(xhr) {
+            .fail(function (xhr) {
                 $('#loading-spinner').html(`<div class="alert alert-danger">Failed to load rider details: ${getErrorMessage(xhr)}</div>`);
             });
     }
@@ -81,10 +81,10 @@ $(document).ready(function() {
             $.get(`${PAYOUT_API}/cash-status?deliveryPartnerId=${riderId}`),
             $.get(`${PAYOUT_API}/summary?deliveryPartnerId=${riderId}`),
             $.get(`${WALLET_API}/${riderId}/transactions`)
-        ).done(function(partnerSummary, cashStatus, payoutHistory, transactions) {
+        ).done(function (partnerSummary, cashStatus, payoutHistory, transactions) {
             // $.when wraps responses in an array: [data, textStatus, jqXHR]
             renderWalletTab(partnerSummary[0], cashStatus[0], payoutHistory[0], transactions[0]);
-        }).fail(function(xhr) {
+        }).fail(function (xhr) {
             $('#wallet').html(`<div class="alert alert-warning">Could not load wallet or payout details: ${getErrorMessage(xhr)}</div>`);
         });
     }
@@ -108,9 +108,9 @@ $(document).ready(function() {
         if (status.text === 'Pending' || status.text === 'Rejected') {
             $('#admin-actions').removeClass('d-none');
             if (status.text === 'Rejected' && rider.rejectionReason) {
-                 $('#rejection-reason-display').text(`Reason: ${rider.rejectionReason}`).removeClass('d-none');
+                $('#rejection-reason-display').text(`Reason: ${rider.rejectionReason}`).removeClass('d-none');
             } else {
-                 $('#rejection-reason-display').addClass('d-none');
+                $('#rejection-reason-display').addClass('d-none');
             }
         } else {
             $('#admin-actions').addClass('d-none');
@@ -255,7 +255,7 @@ $(document).ready(function() {
 
     function renderEarningsTab(data) {
         const ctx = document.getElementById('weeklyEarningsChart').getContext('2d');
-        if(window.weeklyChart instanceof Chart) {
+        if (window.weeklyChart instanceof Chart) {
             window.weeklyChart.destroy();
         }
         window.weeklyChart = new Chart(ctx, {
@@ -276,7 +276,7 @@ $(document).ready(function() {
             url: url,
             method: method,
             beforeSend: () => $('#approveBtn, #rejectBtn').prop('disabled', true),
-            success: function() {
+            success: function () {
                 showToast(successMessage);
                 loadCoreRiderDetails();
             },
@@ -314,7 +314,7 @@ $(document).ready(function() {
     function getErrorMessage(xhr) {
         if (xhr && xhr.responseJSON && xhr.responseJSON.message) return xhr.responseJSON.message;
         if (xhr && xhr.responseText) {
-            try { return JSON.parse(xhr.responseText).message; } catch (e) {}
+            try { return JSON.parse(xhr.responseText).message; } catch (e) { }
         }
         return xhr.statusText || 'An unknown error occurred.';
     }

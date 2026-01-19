@@ -56,6 +56,9 @@
                   <li><a href="${pageContext.request.contextPath}/pie-chart"
                       class="nav-link ${pageContext.request.requestURI.endsWith('/users-reviewAndratings') ? 'active' : ''}">
                       <i class="fas fa-star"></i> Pie Chart</a></li>
+                  <li><a href="${pageContext.request.contextPath}/recipes"
+                      class="nav-link ${pageContext.request.requestURI.endsWith('/recipes') ? 'active' : ''}">
+                      <i class="fas fa-book-open"></i> Recipes</a></li>
                 </ul>
               </div>
             </li>
@@ -103,16 +106,19 @@
                         class="nav-link ${pageContext.request.requestURI.endsWith('/commissions-report') ? 'active' : ''}">
                         <i class="fas fa-chart-pie"></i> Commissions Report</a></li>
                   </c:if>
-                  <!-- Banner Management -->
-                  <!-- Assuming 'BANNERS' permission or just showing it for now -->
-                  <li class="nav-item">
-                    <a href="${pageContext.request.contextPath}/banners"
-                      class="nav-link ${pageContext.request.requestURI.endsWith('/banners') ? 'active' : ''}">
-                      <i class="fas fa-images"></i> Banners
-                    </a>
-                  </li>
+
                 </ul>
               </div>
+            </li>
+          </c:if>
+
+          <!-- Banner Management (Separate Page) -->
+          <c:if test="${fn:contains(currentStaff.accessPages, 'BANNERS')}">
+            <li class="nav-item">
+              <a href="${pageContext.request.contextPath}/banners"
+                class="nav-link ${pageContext.request.requestURI.endsWith('/banners') ? 'active' : ''}">
+                <i class="fas fa-images"></i> <span>Banners</span>
+              </a>
             </li>
           </c:if>
 
@@ -170,11 +176,7 @@
                         class="nav-link ${pageContext.request.requestURI.endsWith('/admin-staff') ? 'active' : ''}">
                         <i class="fas fa-user-shield"></i> Admin & Staff</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'WEBSITE_ANALYTICS')}">
-                    <li><a href="${pageContext.request.contextPath}/website-analysis"
-                        class="nav-link ${pageContext.request.requestURI.endsWith('/website-analysis') ? 'active' : ''}">
-                        <i class="fas fa-chart-line"></i> Website Analytics</a></li>
-                  </c:if>
+
                   <c:if test="${fn:contains(currentStaff.accessPages, 'APP_HOMEPAGE')}">
                     <li><a href="${pageContext.request.contextPath}/app-homepage"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/app-homepage') ? 'active' : ''}">
@@ -216,11 +218,11 @@
               </a>
             </li>
           </c:if>
+          <!-- Profit Section -->
           <li class="nav-item">
-            <a class="nav-link ${pageContext.request.requestURI.contains('/reports') ? 'active' : ''}"
-              href="${pageContext.request.contextPath}/profit"
-              aria-current="${pageContext.request.requestURI.endsWith('/reports') ? 'active' : ''}">
-              <i class="fas fa-chart-bar"></i>
+            <a class="nav-link ${pageContext.request.requestURI.contains('/profit') ? 'active' : ''}"
+              href="${pageContext.request.contextPath}/profit">
+              <i class="fas fa-hand-holding-usd"></i>
               <span>Profit</span>
             </a>
           </li>

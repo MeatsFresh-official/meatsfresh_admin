@@ -2,104 +2,75 @@
  * @file This script manages the user list page for the admin panel.
  * @description It handles fetching, displaying, filtering, deleting, and exporting user data.
  * @author Your Sai Manikanta/MeatsFresh
- * @version 1.0
+ * @version 1.1 - Added Server-Side Pagination
  */
 
 // ===================================================================================
 // CONFIGURATION & GLOBAL STATE
 // ===================================================================================
 
-/**
- * Centralized configuration for all API requests.
- * Storing this here makes it easy to update the base URL or endpoints in one place.
- */
 const API_CONFIG = {
     baseUrl: 'http://localhost:8080',
     baseUrl2: 'http://meatsfresh.org.in:8082',
+    baseUrl3: 'http://meatsfresh.org.in:8083',
     endpoints: {
         users: '/api/dashboard/table',
         stats: '/deliveryAdmin/api/dashboard/users-card',
-        globalSearch:'/api/dashboard/users/search',
-        deleteUser: '/api/users/', // Note: User ID will be appended to this
+        globalSearch: '/api/dashboard/users/search',
+        deleteUser: '/api/users/',
         exportBasic: '/api/export/basic',
         exportAdvanced: '/api/export/advanced',
         exportNumbers: '/api/export/numbers'
     }
 };
 
-/**
- * @global
- * @description Holds the currently active filter settings. This is used to re-apply
- * filters when refreshing data (e.g., after a deletion) and for export requests.
- */
 let currentFilters = {};
-
-/**
- * @global
- * @description Caches the latest user statistics fetched from the API.
- */
 let userStats = {};
+
+// Pagination State
+let currentPage = 0;
+let itemsPerPage = 10; // Default
+let totalPages = 0;
+let totalElements = 0;
 
 // ===================================================================================
 // UI & DOM UTILITY FUNCTIONS
 // ===================================================================================
 
-/**
- * Shows or hides the loading indicator.
- * @param {boolean} show - If true, displays the loading spinner; otherwise, hides it.
- */
 function showLoading(show) {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const usersTableBody = document.getElementById('usersTableBody');
+    const paginationContainer = document.getElementById('userPagination');
 
     if (show) {
         loadingIndicator.style.display = 'block';
-        // Clear the table while loading to prevent showing stale data.
         usersTableBody.innerHTML = '';
+        if (paginationContainer) paginationContainer.style.display = 'none';
     } else {
         loadingIndicator.style.display = 'none';
+        if (paginationContainer) paginationContainer.style.display = 'block';
     }
 }
 
-/**
- * Displays an error message to the user.
- * NOTE: This is a simple implementation using `alert`. For a better user experience,
- * replace this with a more sophisticated toast notification library (e.g., Toastr, SweetAlert2).
- * @param {string} message - The error message to display.
- */
 function showError(message) {
     alert('Error: ' + message);
 }
 
-/**
- * Displays a success message to the user.
- * NOTE: Like showError, this can be upgraded to a toast notification.
- * @param {string} message - The success message to display.
- */
 function showSuccess(message) {
     alert('Success: ' + message);
 }
 
-/**
- * Formats a number into a compact Indian currency string (e.g., 150000 -> ₹1.5L).
- * @param {number} amount - The currency amount to format.
- * @returns {string} The formatted currency string.
- */
 function formatCurrency(amount) {
+    if (!amount) return '₹0';
     if (amount >= 100000) {
-        return '₹' + (amount / 100000).toFixed(2) + 'L';
+        return '₹' + +(amount / 100000).toFixed(1) + 'L';
     } else if (amount >= 1000) {
-        return '₹' + (amount / 1000).toFixed(2) + 'k';
+        return '₹' + +(amount / 1000).toFixed(1) + 'k';
     } else {
         return '₹' + amount;
     }
 }
 
-/**
- * Formats a date string into a readable format (e.g., "05 Sep 2025").
- * @param {string} dateString - The ISO date string from the server.
- * @returns {string} The formatted date string.
- */
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', {
@@ -109,11 +80,6 @@ function formatDate(dateString) {
     });
 }
 
-/**
- * Formats a date string into a readable time format (e.g., "03:50 PM").
- * @param {string} dateString - The ISO date string from the server.
- * @returns {string} The formatted time string.
- */
 function formatTime(dateString) {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-IN', {
@@ -123,19 +89,10 @@ function formatTime(dateString) {
     });
 }
 
-/**
- * Updates the "Showing X of Y users" count in the UI.
- * @param {number} count - The number of users currently displayed in the table.
- */
 function updateUserCount(count) {
-    //document.getElementById('showingCount').textContent = count;
-    // The total count is now updated from the stats object, so we can use that.
-    //document.getElementById('totalCount').textContent = userStats.totalUsers || 0;
+    // Optionally update specific count element if exists
 }
 
-/**
- * Updates the statistic cards at the top of the page with the latest data.
- */
 function updateStatsDisplay() {
     document.getElementById('totalUsers').textContent = userStats.totalUsers || 0;
     document.getElementById('activeUsers').textContent = userStats.activeUsersLast30Days || 0;
@@ -143,31 +100,31 @@ function updateStatsDisplay() {
     document.getElementById('avgOrderValue').textContent = formatCurrency(userStats.avgOrderValue || 0);
 }
 
-/**
- * Binds event listeners to the "select all" and individual row checkboxes.
- * This needs to be called every time the table rows are re-rendered.
- */
+function isUserActive(lastActiveDate) {
+    if (!lastActiveDate) return false;
+    const lastActive = new Date(lastActiveDate);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return lastActive >= thirtyDaysAgo;
+}
+
 function bindCheckboxEvents() {
     const selectAll = document.getElementById('selectAll');
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
 
-    if (!selectAll) return; // Guard clause if the element doesn't exist
+    if (!selectAll) return;
 
-    // Event listener for the "Select All" checkbox in the table header.
-    selectAll.addEventListener('change', function() {
+    selectAll.addEventListener('change', function () {
         rowCheckboxes.forEach(checkbox => {
             checkbox.checked = selectAll.checked;
         });
     });
 
-    // Event listeners for each individual row checkbox.
     rowCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+        checkbox.addEventListener('change', function () {
             if (!this.checked) {
-                // If any row is unchecked, the "Select All" checkbox must also be unchecked.
                 selectAll.checked = false;
             } else {
-                // Check if all row checkboxes are now checked.
                 const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
                 selectAll.checked = allChecked;
             }
@@ -176,19 +133,110 @@ function bindCheckboxEvents() {
 }
 
 // ===================================================================================
+// PAGINATION LOGIC
+// ===================================================================================
+
+function renderPaginationControls() {
+    const container = document.getElementById('userPagination');
+    if (!container) return;
+
+    if (totalElements === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    // Adjust page index (0-based in backend, 1-based in UI)
+    const uiPage = currentPage + 1;
+
+    let html = `
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-2 bg-light rounded-3 shadow-sm border border-light">
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-2">Show</span>
+            <select class="form-select form-select-sm" style="width: 70px;" onchange="changePageSize(this.value)">
+                <option value="5" ${itemsPerPage == 5 ? 'selected' : ''}>5</option>
+                <option value="10" ${itemsPerPage == 10 ? 'selected' : ''}>10</option>
+                <option value="25" ${itemsPerPage == 25 ? 'selected' : ''}>25</option>
+                <option value="50" ${itemsPerPage == 50 ? 'selected' : ''}>50</option>
+                <option value="100" ${itemsPerPage == 100 ? 'selected' : ''}>100</option>
+            </select>
+            <span class="text-muted small ms-2">entries</span>
+        </div>
+        
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-3">
+                Showing ${currentPage * itemsPerPage + 1} to ${Math.min((currentPage + 1) * itemsPerPage, totalElements)} of ${totalElements}
+            </span>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item ${uiPage === 1 ? 'disabled' : ''}">
+                        <button class="page-link border-0 rounded-start" onclick="changePage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>
+                    </li>
+    `;
+
+    const maxVisibleButtons = 5;
+    let startPage = Math.max(1, uiPage - Math.floor(maxVisibleButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+
+    if (endPage - startPage + 1 < maxVisibleButtons) {
+        startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+    }
+
+    if (startPage > 1) {
+        html += `<li class="page-item"><button class="page-link border-0" onclick="changePage(0)">1</button></li>`;
+        if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link border-0">...</span></li>`;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const isActive = i === uiPage;
+        // pass i - 1 because generic 'changePage' expects 0-based index
+        html += `
+            <li class="page-item ${isActive ? 'active' : ''}">
+                <button class="page-link border-0 ${isActive ? 'bg-primary text-white shadow-sm' : ''}" onclick="changePage(${i - 1})">${i}</button>
+            </li>
+        `;
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += `<li class="page-item disabled"><span class="page-link border-0">...</span></li>`;
+        html += `<li class="page-item"><button class="page-link border-0" onclick="changePage(${totalPages - 1})">${totalPages}</button></li>`;
+    }
+
+    html += `
+                    <li class="page-item ${uiPage === totalPages ? 'disabled' : ''}">
+                        <button class="page-link border-0 rounded-end" onclick="changePage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+// Global functions for pagination onclick events
+window.changePage = function (page) {
+    if (page >= 0 && page < totalPages) {
+        console.log("Changing to page:", page); // Debug
+        fetchUsers({ page: page });
+    }
+};
+
+window.changePageSize = function (size) {
+    console.log("Changing page size to:", size); // Debug
+    fetchUsers({ page: 0, size: parseInt(size) });
+};
+
+
+// ===================================================================================
 // API INTERACTION FUNCTIONS
 // ===================================================================================
 
-/**
- * Builds a URL query string from a filter object, ignoring 'all' or empty values.
- * @param {object} filters - The filter object (e.g., { activity: 'active', search: 'john' }).
- * @returns {URLSearchParams} A URLSearchParams object ready to be appended to a URL.
- */
 function buildQueryString(filters) {
     const queryParams = new URLSearchParams();
     for (const key in filters) {
         const value = filters[key];
-        // Only add the parameter if it has a meaningful value.
         if (value && value !== 'all') {
             queryParams.append(key, value);
         }
@@ -196,72 +244,121 @@ function buildQueryString(filters) {
     return queryParams;
 }
 
-/**
- * Fetches user statistics from the API based on the provided filters.
- * @param {object} filters - The filter object to send to the API.
- */
 async function fetchStats(filters = {}) {
     try {
         const queryParams = buildQueryString(filters);
         const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.stats}?${queryParams}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-        // Store the response in the global state and update the UI.
         userStats = await response.json();
         updateStatsDisplay();
 
     } catch (error) {
         console.error('Error fetching stats:', error);
-        // Don't show a user-facing error here, as the main user list might still load.
     }
 }
 
-/**
- * Main function to fetch the list of users and their aggregate stats.
- * It orchestrates showing the loading state, fetching data, and rendering the results.
- * @param {object} [filters={}] - An object containing all filter criteria.
- */
 async function fetchUsers(filters = {}) {
     try {
         showLoading(true);
-        currentFilters = filters; // Update the global state with the latest filters.
+
+        // Determine Page and Size
+        // If filters has page, use it. Else use current global state.
+        // If filters comes from 'Apply Filter' button, it might want to reset page to 0.
+        // We'll trust the caller. If specific page not requested in filters, use current.
+
+        let newPage = filters.page !== undefined ? filters.page : currentPage;
+        let newSize = filters.size !== undefined ? filters.size : itemsPerPage;
+
+        // If we represent a completely new filter criteria (e.g. searching, filter change),
+        // we likely want to reset to page 0. But 'filters' passed here handles that.
+        // 'applyFilters' should pass page: 0.
+
+        // Update Global State
+        currentPage = newPage;
+        itemsPerPage = newSize;
+
+        // Merge filters. However, we should be careful. 'filters' argument contains the *changes*.
+        // We need to merge it with currentFilters, but remove page/size from currentFilters first if we want to be clean?
+        // Actually, currentFilters should store the *criteria* (activity, spending, search).
+        // Page and Size are effectively metadata.
+
+        // Let's separate criteria from pagination.
+        // If 'filters' has criteria, update currentFilters.
+        if (filters.activity !== undefined || filters.spending !== undefined || filters.search !== undefined || filters.startDate !== undefined) {
+            currentFilters = { ...filters };
+            delete currentFilters.page;
+            delete currentFilters.size;
+        }
+
+        // Prepare Request
         const username = "user";
         const password = "user";
         const basicAuth = btoa(`${username}:${password}`);
+
+        // Construct payload combining persisted criteria + current pagination
         const requestBody = {
-                    activityStatus: (filters.activity || "ALL").toUpperCase(),
-                    spendingLevel: (filters.spending || "ALL").toUpperCase(),
-                    startDate: filters.startDate || null,
-                    endDate: filters.endDate || null,
-                    page: filters.page ?? 0,
-                    size: filters.size ?? 1000
+            activityStatus: ((currentFilters.activity || document.getElementById('activityFilter')?.value || "ALL")).toUpperCase(),
+            spendingLevel: ((currentFilters.spending || document.getElementById('spendingFilter')?.value || "ALL")).toUpperCase(),
+            startDate: currentFilters.startDate || null,
+            endDate: currentFilters.endDate || null,
+            search: currentFilters.search || document.getElementById('userSearch')?.value || "", // Support search in main fetch
+            page: currentPage,
+            size: itemsPerPage
         };
 
-        // Fetch stats and users concurrently for better performance.
+        // Note: The original code used a different endpoint for global search. 
+        // We should unify this if possible, or support both.
+        // The original fetchUsers didn't use 'search' in body, but 'globalFilterUser' used 'globalSearch' endpoint.
+        // THIS IS TRICKY. The user has two separate logic paths.
+        // Ideally, the main list endpoint supports search. If not, we have to branch.
+
+        // Strategy: If search is present, use globalSearch endpoint, else users endpoint.
+        // BUT currentFilters might not have search if it was cleared.
+
+        let endpoint = API_CONFIG.endpoints.users;
+        const searchVal = document.getElementById('userSearch')?.value;
+        if (searchVal) {
+            endpoint = API_CONFIG.endpoints.globalSearch;
+            requestBody.search = searchVal;
+        }
+
+        // Fetch stats and users concurrently
         await Promise.all([
-            fetchStats(filters),
+            fetchStats(currentFilters),
             (async () => {
-                const queryParams = buildQueryString(filters);
-                const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.users}`,
-                                               {
-                                                 method: 'POST',
-                                                 headers: {
-                                                              'Content-Type': 'application/json',
-                                                               'Authorization': `Basic ${basicAuth}`
-                                                           },
-                                                  body: JSON.stringify(requestBody)
-                                               }
-                                             );
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const response = await fetch(`${API_CONFIG.baseUrl2}${endpoint}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Basic ${basicAuth}`
+                        },
+                        body: JSON.stringify(requestBody)
+                    }
+                );
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
                 const result = await response.json();
+
+                // Handle different response structures
+                // content/data typically contains the array
+                // totalPages/totalElements typically at root
                 const users = result.data || result.content || [];
-                renderUsers(users); // Render the table with the fetched user data.
-                updateUserCount(users.length); // Update the user count display.
+                totalElements = result.totalElements || result.total || 0;
+                totalPages = result.totalPages || Math.ceil(totalElements / itemsPerPage) || 0;
+
+                // If endpoint returns just array (no pagination metadata), handle gracefully
+                // (Though user requested server side pagination, implying API supports it)
+                if (!result.totalPages && !result.totalElements && Array.isArray(users)) {
+                    totalElements = users.length;
+                    totalPages = 1;
+                }
+
+                renderUsers(users);
+                renderPaginationControls();
+                updateUserCount(users.length); // or totalElements
             })()
         ]);
 
@@ -269,67 +366,21 @@ async function fetchUsers(filters = {}) {
         console.error('Error fetching users:', error);
         showError('Failed to load users. Please try again.');
     } finally {
-        // The 'finally' block ensures the loading indicator is hidden,
-        // regardless of whether the fetch succeeded or failed.
         showLoading(false);
     }
 }
+
+// Renaming globalFilterUser to just trigger fetch with search
+// functionality merged into fetchUsers for consistency
 async function globalFilterUser() {
-    try {
-        showLoading(true);
-        let filters = {};
-        const username = "user";
-        const password = "user";
-        const basicAuth = btoa(`${username}:${password}`);
-        const requestBody = {
-                    search: document.getElementById('userSearch').value,
-                    page: 0,
-                    size: 1000
-        };
-
-        // Fetch stats and users concurrently for better performance.
-        await Promise.all([
-            fetchStats(filters),
-            (async () => {
-                const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.globalSearch}`,
-                                               {
-                                                 method: 'POST',
-                                                 headers: {
-                                                              'Content-Type': 'application/json',
-                                                               'Authorization': `Basic ${basicAuth}`
-                                                           },
-                                                  body: JSON.stringify(requestBody)
-                                               }
-                                             );
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const result = await response.json();
-                const users = result.data || result.content || [];
-                renderUsers(users); // Render the table with the fetched user data.
-            })()
-        ]);
-
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        showError('Failed to load users. Please try again.');
-    } finally {
-        // The 'finally' block ensures the loading indicator is hidden,
-        // regardless of whether the fetch succeeded or failed.
-        showLoading(false);
-    }
+    fetchUsers({ page: 0 }); // Will pick up search value from DOM
 }
 
-/**
- * Renders the user data into the HTML table.
- * @param {Array<object>} users - An array of user objects from the API.
- */
 function renderUsers(users) {
     const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = ''; // Clear any existing content.
+    tbody.innerHTML = '';
 
-    // Display a message if no users match the criteria.
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="9" class="text-center py-4">
@@ -341,13 +392,9 @@ function renderUsers(users) {
         return;
     }
 
-    // Create a table row for each user.
     users.forEach(user => {
         const row = document.createElement('tr');
-        // Set data-* attributes. This can be useful for advanced filtering or styling.
         row.setAttribute('data-user-id', user.id);
-
-        // Use template literals for clean and readable HTML generation.
         row.innerHTML = `
             <td>
                 <div class="form-check">
@@ -356,39 +403,39 @@ function renderUsers(users) {
             </td>
             <td>
                 <div class="d-flex align-items-center">
-                    <div class="avatar me-3">
-                        <img src="${user.profileImage || '/resources/images/default-avatar.jpg'}"
-                             class="rounded-circle" width="40" height="40" alt="${user.name}">
-                    </div>
+                    <img src="${user.profileImage || '/resources/images/default-avatar.jpg'}"
+                            class="avatar-group-item me-3" alt="${user.name}">
                     <div>
-                        <h6 class="mb-0">${user.name}</h6>
+                        <h6 class="mb-0 text-dark fw-bold" style="font-size: 0.9rem;">${user.name}</h6>
+                        <small class="text-muted" style="font-size: 0.75rem;">${user.email || 'No email'}</small>
                     </div>
                 </div>
             </td>
+            <td><div class="fw-medium text-dark">${user.phone}</div></td>
+            <td><small class="text-secondary">${user.address || 'N/A'}</small></td>
+            <td><div class="fw-bold text-primary">${user.orders}</div></td>
+            <td><div class="fw-bold text-success">${formatCurrency(user.totalSpent)}</div></td>
             <td>
-                <div class="fw-medium">${user.phone}</div>
+                <div class="text-nowrap fw-medium" style="font-size: 0.85rem;">${formatDate(user.lastActive)}</div>
+                <small class="text-muted" style="font-size: 0.75rem;">${formatTime(user.lastActive)}</small>
             </td>
             <td>
-                <small class="fw-medium">${user.address}</small>
-            </td>
-            <td>
-                <div class="fw-medium">${user.orders}</div>
-            </td>
-            <td class="fw-bold text-success">${formatCurrency(user.totalSpent)}</td>
-            <td>
-                <div class="text-nowrap">${formatDate(user.lastActive)}</div>
-                <small class="text-muted">${formatTime(user.lastActive)}</small>
-            </td>
-            <td>
-                <span class="badge ${user.lastActiveDays <= 30 ? 'bg-success' : 'bg-secondary'}">
-                    ${user.lastActiveDays <= 30 ? 'Active' : 'Inactive'}
+                <span class="badge badge-zenith ${isUserActive(user.lastActive) ? 'badge-rider' : 'badge-inactive'}">
+                    <i class="fas fa-circle me-1" style="font-size: 6px;"></i>
+                    ${isUserActive(user.lastActive) ? 'Active' : 'Inactive'}
                 </span>
             </td>
-            <td>
-                <div class="btn-group btn-group-sm" role="group">
-                    <a href="user-view?id=${user.id}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
-                    <a href="user-edit?id=${user.id}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
-                    <button class="btn btn-outline-danger" onclick="confirmDelete('${user.id}')" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+            <td class="text-end">
+                <div class="d-flex justify-content-end">
+                    <a href="user-view?id=${user.id}" class="btn-icon" data-bs-toggle="tooltip" title="View Details">
+                        <i class="fas fa-eye text-primary"></i>
+                    </a>
+                    <a href="user-edit?id=${user.id}" class="btn-icon" data-bs-toggle="tooltip" title="Edit User">
+                        <i class="fas fa-edit text-secondary"></i>
+                    </a>
+                    <button class="btn-icon" onclick="confirmDelete('${user.id}')" data-bs-toggle="tooltip" title="Delete User">
+                        <i class="fas fa-trash text-danger"></i>
+                    </button>
                 </div>
             </td>
         `;
@@ -396,43 +443,24 @@ function renderUsers(users) {
         tbody.appendChild(row);
     });
 
-    // IMPORTANT: After adding new elements to the DOM, any libraries that interact with them
-    // (like Bootstrap's Tooltip) must be re-initialized.
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-    // We also need to re-bind events for the new checkboxes.
     bindCheckboxEvents();
 }
 
-// ===================================================================================
-// EVENT HANDLER & BUSINESS LOGIC FUNCTIONS
-// ===================================================================================
-
-/**
- * Gathers all filter values from the input fields and triggers a user fetch.
- */
 function applyFilters() {
     const filters = {
         activity: document.getElementById('activityFilter').value,
         spending: document.getElementById('spendingFilter').value,
-        //type: document.getElementById('typeFilter').value,
-        search: document.getElementById('userSearch').value
+        page: 0 // Reset to first page
     };
-
     fetchUsers(filters);
 }
 
-/**
- * Handles the logic for downloading user data in various formats.
- * @param {string} type - The type of export ('basic', 'advanced', 'numbers').
- */
 async function downloadData(type) {
     try {
-        // Collect IDs of selected users for a targeted export.
         const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value);
-
-        // Combine current filters with export-specific parameters.
         const params = {
             ...currentFilters,
             selectedIds: selectedIds.length > 0 ? selectedIds.join(',') : 'all'
@@ -443,14 +471,10 @@ async function downloadData(type) {
         const url = `${API_CONFIG.baseUrl}${endpoint}?${queryParams}`;
 
         const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Extract filename from the 'Content-Disposition' header sent by the server.
         const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = `users_export_${type}.csv`; // A sensible default.
+        let filename = `users_export_${type}.csv`;
         if (contentDisposition) {
             const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
             if (filenameMatch && filenameMatch.length === 2) {
@@ -458,8 +482,6 @@ async function downloadData(type) {
             }
         }
 
-        // To trigger a file download, we convert the response body into a 'blob',
-        // create a temporary URL for it, and programmatically click a hidden link.
         const blob = await response.blob();
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -467,8 +489,6 @@ async function downloadData(type) {
         link.download = filename;
         document.body.appendChild(link);
         link.click();
-
-        // Clean up by removing the link and revoking the temporary URL.
         link.remove();
         window.URL.revokeObjectURL(downloadUrl);
 
@@ -478,21 +498,12 @@ async function downloadData(type) {
     }
 }
 
-/**
- * Shows a confirmation modal before deleting a user.
- * @param {string} userId - The ID of the user to be deleted.
- */
 function confirmDelete(userId) {
-    // Pass the user ID to the modal's hidden input field.
     document.getElementById('deleteUserId').value = userId;
-    // Use Bootstrap's JavaScript API to show the modal.
     const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
     modal.show();
 }
 
-/**
- * Executes the actual user deletion after confirmation.
- */
 async function deleteUser() {
     const userId = document.getElementById('deleteUserId').value;
     const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
@@ -500,92 +511,60 @@ async function deleteUser() {
     try {
         const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.deleteUser}${userId}`, {
             method: 'DELETE'
-            // Headers for CSRF token or Authorization would go here if needed.
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         showSuccess('User deleted successfully');
-        // Refresh the user list to reflect the deletion, using the last active filters.
-        fetchUsers(currentFilters);
+        fetchUsers(); // Refresh current view
 
     } catch (error) {
         console.error('Error deleting user:', error);
         showError('Failed to delete user. Please try again.');
     } finally {
-        // Ensure the modal is hidden after the operation.
         if (modal) modal.hide();
     }
 }
 
-// ===================================================================================
-// INITIALIZATION
-// ===================================================================================
-
-/**
- * This is the main entry point. The 'DOMContentLoaded' event ensures that this
- * script runs only after the entire HTML document has been loaded and parsed.
- */
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap components like tooltips.
+document.addEventListener('DOMContentLoaded', function () {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-    // --- Initial Data Load ---
-    // Fetch the initial list of users and stats without any filters.
+    // Initial Load
     fetchUsers();
 
-    // --- Event Listener Setup ---
-    // Attach event listeners to all interactive elements on the page.
-
-    // Filter controls
+    // Event Listener Setup
     document.getElementById('activityFilter').addEventListener('change', applyFilters);
     document.getElementById('spendingFilter').addEventListener('change', applyFilters);
-    //document.getElementById('typeFilter').addEventListener('change', applyFilters);
-    document.getElementById('searchBtn').addEventListener('click', globalFilterUser);
+
+    // Wire up search button and enter key
+    document.getElementById('searchBtn').addEventListener('click', () => fetchUsers({ page: 0 }));
     document.getElementById('userSearch').addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') applyFilters();
+        if (event.key === 'Enter') fetchUsers({ page: 0 });
     });
 
-    // Reset filters button
     document.getElementById('resetFiltersBtn').addEventListener('click', () => {
         document.getElementById('activityFilter').value = 'all';
         document.getElementById('spendingFilter').value = 'all';
-        //document.getElementById('typeFilter').value = 'all';
         document.getElementById('userSearch').value = '';
-        fetchUsers(); // Fetch with no filters.
+        currentFilters = {};
+        fetchUsers({ page: 0, size: 10 });
     });
 
-    // Date range modal "Apply" button
     document.getElementById('applyDateRange').addEventListener('click', () => {
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
 
-        // Simple validation
         if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
             showError('Please select a valid date range.');
             return;
         }
 
-        // Hide the modal and apply the date range along with other active filters.
         bootstrap.Modal.getInstance(document.getElementById('dateRangeModal')).hide();
-        const filtersWithDate = { ...currentFilters, startDate, endDate };
-        fetchUsers(filtersWithDate);
+        fetchUsers({ startDate, endDate, page: 0 });
     });
 
-    // Download buttons
-    document.getElementById('downloadBasicBtn').addEventListener('click', (e) => {
-        e.preventDefault(); downloadData('basic');
-    });
-    document.getElementById('downloadAdvancedBtn').addEventListener('click', (e) => {
-        e.preventDefault(); downloadData('advanced');
-    });
-    document.getElementById('downloadNumbersBtn').addEventListener('click', (e) => {
-        e.preventDefault(); downloadData('numbers');
-    });
-
-    // Final confirmation button in the delete modal
-    //document.getElementById('confirmDeleteBtn').addEventListener('click', deleteUser);
+    document.getElementById('downloadBasicBtn').addEventListener('click', (e) => { e.preventDefault(); downloadData('basic'); });
+    document.getElementById('downloadAdvancedBtn').addEventListener('click', (e) => { e.preventDefault(); downloadData('advanced'); });
+    document.getElementById('downloadNumbersBtn').addEventListener('click', (e) => { e.preventDefault(); downloadData('numbers'); });
 });

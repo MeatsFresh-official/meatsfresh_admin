@@ -1,246 +1,201 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ===================================================================
-    // API ENDPOINTS & CONFIG
-    // ===================================================================
-    const API_BASE = 'http://meatsfresh.org.in:8080/api/vendor';
-    const ADMIN_API = `${API_BASE}/admin`;
-    const IMAGE_BASE_URL = 'http:///meatsfresh.org.in:8080/';
 
-    // ===================================================================ṭūñṅr̥ṭñ
-    // GLOBAL STATE & DOM ELEMENTS
-    // ===================================================================
-    let allCategories = [];
+    // --- Mock Data ---
+    let categories = [
+        { id: '1', name: 'Premium Cuts', commission: 15, image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=150&q=80' },
+        { id: '2', name: 'Organic Chicken', commission: 12, image: 'https://images.unsplash.com/photo-1587593810167-a6492031e5fd?auto=format&fit=crop&w=150&q=80' },
+        { id: '3', name: 'Marinated Specials', commission: 18, image: '' }, // Test no image
+        { id: '4', name: 'Deli & Cold Cuts', commission: 10, image: 'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=150&q=80' },
+        { id: '5', name: 'Ready to Cook', commission: 25, image: 'https://images.unsplash.com/photo-1544377892-74cc2188fa6c?auto=format&fit=crop&w=150&q=80' },
+        { id: '6', name: 'Seafood', commission: 14, image: 'https://images.unsplash.com/photo-1615141982880-13f572a73081?auto=format&fit=crop&w=150&q=80' },
+    ];
+
+    // --- DOM Elements ---
     const loadingSpinner = document.getElementById('loading-spinner');
     const pageContent = document.getElementById('page-content');
-    const categoriesTableBody = document.getElementById('categories-table-body');
-    const categoryForm = document.getElementById('categoryForm');
-    const categoryModalEl = document.getElementById('categoryModal');
-    const categoryModal = new bootstrap.Modal(categoryModalEl);
-    const categoryModalLabel = document.getElementById('categoryModalLabel');
-    const categoryIdInput = document.getElementById('categoryId');
-    const categoryNameInput = document.getElementById('categoryName');
-    const categoryCommissionInput = document.getElementById('categoryCommission');
-    const categoryImageInput = document.getElementById('categoryImage');
+
+    // NEW: Grid Container
+    const gridContainer = document.getElementById('categories-grid');
+    const noResultsDiv = document.getElementById('no-results');
+
     const searchInput = document.getElementById('search-input');
     const sortSelect = document.getElementById('sort-select');
-    const noResultsDiv = document.getElementById('no-results');
-    const imagePreviewContainer = document.getElementById('image-preview-container');
+
+    // Stats
+    const statTotal = document.getElementById('stat-total-categories');
+    const statAvg = document.getElementById('stat-avg-commission');
+    const statNoImage = document.getElementById('stat-no-image');
+    const statTop = document.getElementById('stat-top-commission');
+
+    // Modal
+    const modalEl = document.getElementById('categoryModal');
+    const modal = new bootstrap.Modal(modalEl);
+    const modalTitle = document.getElementById('categoryModalLabel');
+    const catIdInput = document.getElementById('categoryId');
+    const catNameInput = document.getElementById('categoryName');
+    const catCommInput = document.getElementById('categoryCommission');
+    const catFileInput = document.getElementById('categoryImage');
     const imagePreview = document.getElementById('image-preview');
-    const imageHelpText = document.getElementById('image-help-text');
-    const saveCategoryBtn = document.getElementById('saveCategoryBtn');
 
-    // ===================================================================
-    // HELPER: API Fetch Function
-    // ===================================================================
-    const fetchAPI = async (url, options = {}) => {
-        const username = 'user';
-        const password = 'user';
-        const encodedCredentials = btoa(`${username}:${password}`);
-        const headers = { ...options.headers };
-        if (!(options.body instanceof FormData)) {
-             if (!headers['Content-Type']) {
-                headers['Content-Type'] = 'application/json';
-             }
-        } else {
-            delete headers['Content-Type']; // Let browser set Content-Type for FormData
-        }
-        headers['Authorization'] = `Basic ${encodedCredentials}`;
-        const fetchOptions = { ...options, cache: 'no-cache', headers };
-        try {
-            const response = await fetch(url, fetchOptions);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: response.statusText }));
-                throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
-            }
-            if (response.status === 200 && response.headers.get('content-length') === '0') {
-                 return { success: true };
-            }
-            return response.json();
-        } catch (error) {
-            console.error('API Error:', error);
-            alert(`An error occurred: ${error.message}`);
-            return null;
-        }
-    };
+    let currentImage = null;
 
-    // ===================================================================
-    // DATA & RENDER FUNCTIONS
-    // ===================================================================
-    const calculateStats = (categories) => {
-        const total = categories.length;
-        document.getElementById('stat-total-categories').textContent = total;
-        if (total === 0) {
-            document.getElementById('stat-avg-commission').textContent = '0%';
-            document.getElementById('stat-no-image').textContent = '0';
-            document.getElementById('stat-top-commission').textContent = '0%';
-            return;
-        }
-        document.getElementById('stat-no-image').textContent = categories.filter(c => !c.image).length;
-        const totalCommission = categories.reduce((sum, c) => sum + (c.commission || c.commision || 0), 0);
-        document.getElementById('stat-avg-commission').textContent = `${(totalCommission / total).toFixed(2)}%`;
-        const topCommission = categories.reduce((max, c) => Math.max(max, (c.commission || c.commision || 0)), 0);
-        document.getElementById('stat-top-commission').textContent = `${topCommission.toFixed(2)}%`;
-    };
+    // --- Simulation Init ---
+    setTimeout(() => {
+        loadingSpinner.classList.add('d-none');
+        pageContent.classList.remove('d-none');
+        updateStats();
+        renderGrid(categories); // Renamed to renderGrid
+    }, 800);
 
-    const renderCategories = (categories) => {
-        noResultsDiv.classList.add('d-none');
-        if (categories.length === 0) {
-            categoriesTableBody.innerHTML = allCategories.length > 0 ? '' : '<tr><td colspan="4" class="text-center text-muted p-5"><i class="fas fa-folder-open fa-3x mb-3"></i><h4>No categories found.</h4></td></tr>';
-            if (allCategories.length > 0) noResultsDiv.classList.remove('d-none');
-            return;
-        }
-        categoriesTableBody.innerHTML = categories.map(cat => {
-            const imageUrl = cat.image ? `${IMAGE_BASE_URL}${cat.image}` : 'resources/images/default-category.png';
-            const commission = (cat.commission || cat.commision || 0).toFixed(2);
-            // This is the critical line that needs `cat.categoryId` from the API.
-            return `
-                <tr>
-                    <td class="ps-4 align-middle"><img src="${imageUrl}" class="rounded" width="60" height="60" alt="${cat.name}" style="object-fit: cover;" onerror="this.onerror=null;this.src='resources/images/default-category.png';"></td>
-                    <td class="align-middle fw-bold">${cat.name}</td>
-                    <td class="align-middle">${commission}%</td>
-                    <td class="text-end pe-4 align-middle">
-                        <button class="btn btn-sm btn-outline-secondary edit-btn" data-id="${cat.categoryId}">
-                            <i class="fas fa-edit me-1"></i> Edit
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${cat.categoryId}" data-name="${cat.name}">
-                            <i class="fas fa-trash me-1"></i> Delete
-                        </button>
-                    </td>
-                </tr>`;
-        }).join('');
-    };
 
-    const applyFiltersAndSort = () => {
-        let filtered = [...allCategories];
-        const searchTerm = searchInput.value.toLowerCase();
-        if (searchTerm) {
-            filtered = filtered.filter(cat => cat.name.toLowerCase().includes(searchTerm));
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', handleSearchSort);
+    sortSelect.addEventListener('change', handleSearchSort);
+
+    catFileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const url = URL.createObjectURL(this.files[0]);
+            imagePreview.src = url;
+            currentImage = url;
         }
-        const sortValue = sortSelect.value;
+    });
+
+
+    // --- Core Logic ---
+
+    function handleSearchSort() {
+        const term = searchInput.value.toLowerCase();
+        const sortVal = sortSelect.value;
+
+        let filtered = categories.filter(c => c.name.toLowerCase().includes(term));
+
         filtered.sort((a, b) => {
-            const commissionA = a.commission || a.commision || 0;
-            const commissionB = b.commission || b.commision || 0;
-            switch (sortValue) {
-                case 'name-asc': return a.name.localeCompare(b.name);
-                case 'name-desc': return b.name.localeCompare(a.name);
-                case 'comm-asc': return commissionA - commissionB;
-                case 'comm-desc': return commissionB - commissionA;
-                default: return 0;
-            }
+            if (sortVal === 'name-asc') return a.name.localeCompare(b.name);
+            if (sortVal === 'name-desc') return b.name.localeCompare(a.name);
+            if (sortVal === 'comm-desc') return b.commission - a.commission;
+            if (sortVal === 'comm-asc') return a.commission - b.commission;
+            return 0;
         });
-        renderCategories(filtered);
-    };
 
-    // ===================================================================
-    // CORE LOGIC & EVENT HANDLERS
-    // ===================================================================
-    const loadCategories = async () => {
-        const categories = await fetchAPI(`${ADMIN_API}/categories`);
-        if (categories) {
-            allCategories = categories;
-            loadingSpinner.classList.add('d-none');
-            pageContent.classList.remove('d-none');
-            calculateStats(allCategories);
-            applyFiltersAndSort();
+        renderGrid(filtered);
+    }
+
+    function updateStats() {
+        statTotal.textContent = categories.length;
+
+        const totalComm = categories.reduce((sum, c) => sum + Number(c.commission), 0);
+        const avg = categories.length ? (totalComm / categories.length).toFixed(1) : 0;
+        statAvg.textContent = avg + '%';
+
+        const noImgCount = categories.filter(c => !c.image).length;
+        statNoImage.textContent = noImgCount;
+
+        const maxComm = Math.max(...categories.map(c => Number(c.commission)), 0);
+        statTop.textContent = maxComm + '%';
+    }
+
+    // NEW: Render Grid Function
+    function renderGrid(data) {
+        gridContainer.innerHTML = '';
+
+        if (data.length === 0) {
+            noResultsDiv.classList.remove('d-none');
+            return;
+        }
+
+        noResultsDiv.classList.add('d-none');
+
+        data.forEach(cat => {
+            const imgUrl = cat.image || 'https://via.placeholder.com/150?text=No+Img';
+
+            const col = document.createElement('div');
+            col.className = 'col-6 col-md-4 col-xl-3'; // Responsive columns
+
+            col.innerHTML = `
+                <div class="category-box">
+                    <img src="${imgUrl}" class="cat-box-img" alt="${cat.name}">
+                    <h5 class="cat-box-title">${cat.name}</h5>
+                    <span class="cat-box-badge">
+                        <i class="fas fa-percentage text-xs me-1"></i> ${cat.commission}% Comm.
+                    </span>
+                    
+                    <div class="cat-box-actions">
+                        <button class="cat-box-btn btn-edit" onclick="editCategory('${cat.id}')">
+                            Edit
+                        </button>
+                        <button class="cat-box-btn btn-delete" onclick="deleteCategory('${cat.id}')">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            gridContainer.appendChild(col);
+        });
+    }
+
+
+    // --- Global Actions ---
+
+    window.prepareAddCategory = function () {
+        modalTitle.textContent = 'Add New Category'; // Match header text
+        catIdInput.value = '';
+        catNameInput.value = '';
+        catCommInput.value = '';
+        catFileInput.value = '';
+        imagePreview.src = 'https://via.placeholder.com/120?text=Upload';
+        currentImage = null;
+    }
+
+    window.editCategory = function (id) {
+        const cat = categories.find(c => c.id === id);
+        if (!cat) return;
+
+        modalTitle.textContent = 'Edit Category';
+        catIdInput.value = cat.id;
+        catNameInput.value = cat.name;
+        catCommInput.value = cat.commission;
+        imagePreview.src = cat.image || 'https://via.placeholder.com/120?text=Upload';
+        currentImage = cat.image;
+
+        modal.show();
+    }
+
+    window.saveCategory = function () {
+        if (!catNameInput.value.trim()) {
+            alert('Category Name is required');
+            return;
+        }
+        if (catCommInput.value === '') {
+            alert('Commission is required');
+            return;
+        }
+
+        const id = catIdInput.value;
+        const newCat = {
+            id: id || 'c' + Date.now(),
+            name: catNameInput.value.trim(),
+            commission: parseFloat(catCommInput.value),
+            image: currentImage || ''
+        };
+
+        if (id) {
+            const idx = categories.findIndex(c => c.id === id);
+            if (idx !== -1) categories[idx] = newCat;
         } else {
-            loadingSpinner.innerHTML = '<p class="text-danger">Failed to load categories.</p>';
-        }
-    };
-
-    categoryForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const categoryId = categoryIdInput.value;
-        const name = categoryNameInput.value;
-        const commission = parseFloat(categoryCommissionInput.value);
-        const imageFile = categoryImageInput.files[0];
-
-        const categoryData = { name, commission };
-        if (categoryId) {
-            categoryData.categoryId = parseInt(categoryId);
-        }
-        const formData = new FormData();
-        formData.append('category', new Blob([JSON.stringify(categoryData)], { type: 'application/json' }));
-        if (imageFile) {
-            formData.append('image', imageFile);
+            categories.unshift(newCat);
         }
 
-        const url = categoryId ? `${ADMIN_API}/categories/${categoryId}` : `${ADMIN_API}/categories`;
-        const method = categoryId ? 'PUT' : 'POST';
+        renderGrid(categories); // Re-render
+        updateStats(); // Refresh stats
+        modal.hide();
+    }
 
-        saveCategoryBtn.disabled = true;
-        saveCategoryBtn.querySelector('.spinner-border').classList.remove('d-none');
-
-        const result = await fetchAPI(url, { method, body: formData });
-
-        saveCategoryBtn.disabled = false;
-        saveCategoryBtn.querySelector('.spinner-border').classList.add('d-none');
-
-        if (result) {
-            alert(`Category ${categoryId ? 'updated' : 'added'} successfully!`);
-            categoryModal.hide();
-            loadCategories();
+    window.deleteCategory = function (id) {
+        if (confirm('Are you sure you want to delete this category?')) {
+            categories = categories.filter(c => c.id !== id);
+            renderGrid(categories);
+            updateStats();
         }
-    });
+    }
 
-    categoriesTableBody.addEventListener('click', async (e) => {
-        const editBtn = e.target.closest('.edit-btn');
-        const deleteBtn = e.target.closest('.delete-btn');
-
-        if (editBtn) {
-            const categoryId = editBtn.dataset.id;
-            // This check is what triggers your "Cannot edit" alert. It is correct.
-            if (!categoryId || categoryId === 'undefined') {
-                alert("Cannot edit: Category ID is missing. Please ensure the API is providing the 'categoryId'.");
-                return;
-            }
-            const category = allCategories.find(c => c.categoryId == categoryId);
-            if (!category) {
-                alert("Could not find category details. Please refresh the page.");
-                return;
-            }
-
-            categoryModalLabel.textContent = 'Edit Category';
-            categoryIdInput.value = category.categoryId;
-            categoryNameInput.value = category.name;
-            categoryCommissionInput.value = category.commission || category.commision || 0;
-            if (category.image) {
-                imagePreview.src = `${IMAGE_BASE_URL}${category.image}`;
-                imagePreviewContainer.classList.remove('d-none');
-                imageHelpText.textContent = 'Leave blank to keep the current image.';
-            }
-            categoryModal.show();
-        }
-
-        if (deleteBtn) {
-            const categoryId = deleteBtn.dataset.id;
-            const categoryName = deleteBtn.dataset.name;
-            // This check is what triggers your "Cannot delete" alert. It is correct.
-            if (!categoryId || categoryId === 'undefined') {
-                alert("Cannot delete: Category ID is missing. Please ensure the API is providing the 'categoryId'.");
-                return;
-            }
-            if (confirm(`Are you sure you want to delete the category "${categoryName}"?`)) {
-                const result = await fetchAPI(`${ADMIN_API}/categories/${categoryId}`, { method: 'DELETE' });
-                if (result) {
-                    alert('Category deleted successfully.');
-                    loadCategories();
-                }
-            }
-        }
-    });
-
-    searchInput.addEventListener('input', applyFiltersAndSort);
-    sortSelect.addEventListener('change', applyFiltersAndSort);
-
-    categoryModalEl.addEventListener('hidden.bs.modal', () => {
-        categoryForm.reset();
-        categoryIdInput.value = '';
-        categoryModalLabel.textContent = 'Add New Category';
-        imagePreviewContainer.classList.add('d-none');
-        imagePreview.src = '';
-        imageHelpText.textContent = 'A new image will replace the old one.';
-    });
-
-    // Initial data load
-    loadCategories();
 });

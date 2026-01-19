@@ -118,3 +118,73 @@ window.deleteStaff = function () {
     // Perform delete action (e.g., submit form or AJAX)
     window.location.href = `deleteStaff?id=${staffId}`;
 };
+
+// --- Permissions Modal Logic ---
+window.openPermissionsModal = function (staffId) {
+    const row = document.querySelector(`tr[data-staff-id="${staffId}"]`);
+    if (!row) return;
+
+    const accessPagesStr = row.getAttribute('data-access-pages') || '';
+    const accessPages = accessPagesStr.split(',');
+
+    document.getElementById('permStaffId').value = staffId;
+
+    // Reset all checkboxes
+    document.querySelectorAll('.perm-check').forEach(cb => {
+        if (cb.value === 'DASHBOARD') {
+            cb.checked = true; // Always checked
+        } else {
+            cb.checked = false;
+        }
+    });
+
+    // Check allowed pages
+    accessPages.forEach(page => {
+        const checkbox = document.querySelector(`.perm-check[value="${page}"]`);
+        if (checkbox) checkbox.checked = true;
+    });
+
+    const modal = new bootstrap.Modal(document.getElementById('permissionsModal'));
+    modal.show();
+};
+
+window.savePermissions = function () {
+    const staffId = document.getElementById('permStaffId').value;
+    const selectedPages = [];
+
+    document.querySelectorAll('.perm-check:checked').forEach(cb => {
+        selectedPages.push(cb.value);
+    });
+
+    // Add CSRF token
+    const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+    const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+    // Show loading state
+    const btn = document.querySelector('#permissionsModal .btn-zenith-primary');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    btn.disabled = true;
+
+    $.ajax({
+        url: `${pageContext.request.contextPath}/admin-staff/update-access-pages`,
+        type: 'POST',
+        traditional: true, // Important for sending array of strings
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader(header, token);
+        },
+        data: {
+            staffId: staffId,
+            accessPages: selectedPages
+        },
+        success: function (response) {
+            // Reload page to reflect changes (simplest approach)
+            window.location.href = `${pageContext.request.contextPath}/admin-staff?success=Permissions updated successfully`;
+        },
+        error: function (xhr) {
+            alert('Error updating permissions: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+};

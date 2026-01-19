@@ -1,135 +1,166 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@ include file="/includes/header.jsp" %>
 
-<%@ include file="/includes/header.jsp" %>
+        <main class="main-content bg-gray-50/50 min-h-screen">
+            <div class="container-fluid px-6 py-8">
 
-<main class="main-content">
-    <div class="container-fluid">
-        <div class="page-header py-3">
-            <h1 class="m-0">App Home Management</h1>
-        </div>
-
-        <!-- Banner Management Card -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center py-3">
-                <div>
-                    <h4 class="m-0">Homepage Banners</h4>
-                    <small class="text-muted">Max 10 banners allowed</small>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-primary" id="addBannerBtn">
-                        <i class="fas fa-plus me-2"></i>Add Banner
-                    </button>
-                </div>
-            </div>
-            <div class="card-body">
-                <!--
-                  This container is a placeholder.
-                  JavaScript will fetch the banners and render them here on page load.
-                -->
-                <div id="bannerContainer" class="row g-3">
-                    <!-- JavaScript will add a loading message or banner cards here -->
+                <!-- Header -->
+                <div class="mb-12 animate-fade-in-down">
+                    <h1
+                        class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-indigo-900">
+                        App Homepage</h1>
+                    <p class="text-lg text-gray-500 font-medium max-w-2xl">Control the visual experience of your mobile
+                        app's home screen. Manage banners, promotional videos, and featured content.</p>
                 </div>
 
-                <!-- ADD NEW BANNER FORM (Initially Hidden) -->
-                <div id="newBannerForm" class="card mt-3 d-none">
-                    <div class="card-body">
-                        <h5 class="card-title">Upload New Banner</h5>
-                        <form id="bannerUploadForm" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label for="bannerImage" class="form-label">Banner Image</label>
-                                <input class="form-control" type="file" id="bannerImage" name="image" accept="image/jpeg, image/png, image/webp" required>
-                                <small class="text-muted">Recommended size: 1200x600px (Max 2MB)</small>
-                                <div id="imageError" class="text-danger mt-1 d-none"></div>
+                <!-- Section 1: Normal Banners -->
+                <section class="mb-16 animate-fade-in-up delay-100">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-6">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <i class="fas fa-images text-lg"></i>
                             </div>
-                            <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-secondary me-2" id="cancelBannerBtn">Cancel</button>
-                                <button type="submit" class="btn btn-primary" id="uploadBannerBtn">Upload Banner</button>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">Normal Banners</h2>
+                                <p class="text-sm text-gray-500">Standard static banners for promotions.</p>
                             </div>
-                        </form>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="normalBannersGrid">
+                            <!-- Upload Card -->
+                            <div class="aspect-[5/3] rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 bg-gray-50 hover:bg-blue-50/30 transition-all cursor-pointer group flex flex-col items-center justify-center text-center p-4"
+                                onclick="document.getElementById('normalFileInput').click()">
+                                <div
+                                    class="w-12 h-12 rounded-full bg-white text-gray-400 group-hover:text-blue-500 shadow-sm flex items-center justify-center mb-3 transition-colors">
+                                    <i class="fas fa-plus text-xl"></i>
+                                </div>
+                                <h4 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Add
+                                    Banner</h4>
+                                <p class="text-xs text-gray-400 mt-1">1200x600px recommended</p>
+                            </div>
+                        </div>
+                        <input type="file" id="normalFileInput" hidden accept="image/*">
+                    </div>
+                </section>
+
+                <!-- Section 2: Special Banners -->
+                <section class="mb-12 animate-fade-in-up delay-200">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-6">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                                <i class="fas fa-star text-lg"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">Special Banners</h2>
+                                <p class="text-sm text-gray-500">Interactive banners with video support.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+                            <button
+                                class="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-100 text-gray-900"
+                                id="typeImageBtn" onclick="setUploadType('image')">Image</button>
+                            <button
+                                class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 transition-all"
+                                id="typeVideoBtn" onclick="setUploadType('video')">Video</button>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-gradient-to-br from-purple-50 to-white rounded-3xl p-8 shadow-sm border border-purple-100 relative overflow-hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="specialBannersGrid">
+                            <!-- Upload Card -->
+                            <div class="aspect-[4/5] rounded-2xl border-2 border-dashed border-purple-200 hover:border-purple-500 bg-white/50 hover:bg-purple-50 transition-all cursor-pointer group flex flex-col items-center justify-center text-center p-4"
+                                onclick="document.getElementById('specialFileInput').click()">
+                                <div
+                                    class="w-14 h-14 rounded-full bg-white text-purple-300 group-hover:text-purple-500 shadow-sm flex items-center justify-center mb-3 transition-all transform group-hover:scale-110">
+                                    <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                                </div>
+                                <h4 class="font-bold text-gray-900 group-hover:text-purple-600 transition-colors">Upload
+                                    Special</h4>
+                                <p class="text-xs text-gray-400 mt-1" id="specialUploadText">Image or Video</p>
+                            </div>
+                        </div>
+                        <!-- Independent Inputs -->
+                        <input type="file" id="specialFileInput" hidden accept="image/*,video/*">
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+
+        <!-- Video Preview Modal -->
+        <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content bg-transparent border-0 shadow-none">
+                    <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl">
+                        <button type="button"
+                            class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center transition-colors backdrop-blur-md"
+                            data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <video id="modalVideoPlayer" controls class="w-full max-h-[80vh] block"></video>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
 
-<!-- ======================= MODALS AND TOASTS ======================= -->
+        <style>
+            .animate-fade-in-down {
+                animation: fadeInDown 0.8s ease-out;
+            }
 
-<!-- IMAGE VIEWER MODAL -->
-<div class="modal fade" id="imageViewerModal" tabindex="-1" aria-labelledby="imageViewerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imageViewerModalLabel">Banner Image</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modalImage" src="" class="img-fluid" alt="Banner Image">
-            </div>
-        </div>
-    </div>
-</div>
+            .animate-fade-in-up {
+                animation: fadeInUp 0.8s ease-out;
+            }
 
-<!-- UPDATE BANNER MODAL -->
-<div class="modal fade" id="updateBannerModal" tabindex="-1" aria-labelledby="updateBannerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateBannerModalLabel">Update Banner</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="bannerUpdateForm" novalidate>
-                <div class="modal-body">
-                    <input type="hidden" id="updateBannerId" name="id">
-                    <div class="mb-3 text-center">
-                        <p class="mb-2 text-muted">Current Image:</p>
-                        <img id="currentBannerImage" src="" alt="Current Banner" class="img-fluid rounded border" style="max-height: 200px;">
-                    </div>
-                    <div class="mb-3">
-                        <label for="updateBannerImage" class="form-label">Upload New Image</label>
-                        <input class="form-control" type="file" id="updateBannerImage" name="image" accept="image/jpeg, image/png, image/webp" required>
-                        <small class="text-muted">Select a new file to replace the current one.</small>
-                        <div id="updateImageError" class="text-danger mt-1 d-none"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveBannerUpdateBtn">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+            .delay-100 {
+                animation-delay: 0.1s;
+            }
 
-<!-- DELETE CONFIRMATION MODAL -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Confirm Delete</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this banner?</p>
-                <p class="text-muted">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-            </div>
-        </div>
-    </div>
-</div>
+            .delay-200 {
+                animation-delay: 0.2s;
+            }
 
-<!-- SUCCESS NOTIFICATION TOAST -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="successToast" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body"><i class="fas fa-check-circle me-2"></i><span id="toastMessage"></span></div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
+            @keyframes fadeInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
 
-<%@ include file="/includes/footer.jsp" %>
-<script src="${pageContext.request.contextPath}/resources/js/app-homepage.js"></script>
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Custom Switch */
+            .toggle-checkbox:checked {
+                right: 0;
+                border-color: #68D391;
+            }
+
+            .toggle-checkbox:checked+.toggle-label {
+                background-color: #68D391;
+            }
+        </style>
+
+        <%@ include file="/includes/footer.jsp" %>
+            <script src="${pageContext.request.contextPath}/resources/js/app-homepage.js"></script>

@@ -1,8 +1,8 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // ===================================================================
     // API ENDPOINTS & CONFIG
     // ===================================================================
-    const API_BASE = 'http://113.11.231.115:8080/api';
+    const API_BASE = 'http://meatsfresh.org.in:8080/api';
     const RIDER_API = `${API_BASE}/delivery`;
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,7 +16,7 @@ $(document).ready(function() {
     const username = 'user';
     const password = 'user';
     $.ajaxSetup({
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
             // This function runs before every AJAX request and adds the auth header.
             const authHeader = 'Basic ' + btoa(username + ':' + password);
             xhr.setRequestHeader('Authorization', authHeader);
@@ -47,7 +47,7 @@ $(document).ready(function() {
     function loadRiderData() {
         // This $.get request will automatically be authenticated by ajaxSetup
         $.get(`${RIDER_API}/${riderId}`)
-            .done(function(data) {
+            .done(function (data) {
                 originalRiderData = data;
                 populateForm(data);
                 updateStatusUI(data);
@@ -83,7 +83,7 @@ $(document).ready(function() {
         const submitBtn = $(this).find('button[type="submit"]');
 
         const updatedData = { ...originalRiderData };
-        $('#editRiderForm').find('input, select').each(function() {
+        $('#editRiderForm').find('input, select').each(function () {
             const name = $(this).attr('name');
             if (name && updatedData.hasOwnProperty(name)) {
                 updatedData[name] = $(this).val();
@@ -97,7 +97,7 @@ $(document).ready(function() {
             contentType: 'application/json',
             data: JSON.stringify(updatedData),
             beforeSend: () => submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...'),
-            success: function() {
+            success: function () {
                 showToast('Profile updated successfully!');
                 setTimeout(() => window.location.href = `deliveryBoy-view?id=${riderId}`, 1500);
             },
@@ -109,7 +109,7 @@ $(document).ready(function() {
     // ===================================================================
     // HELPER & UTILITY FUNCTIONS
     // ===================================================================
-     function determineRiderStatus(rider) {
+    function determineRiderStatus(rider) {
         if (rider.rejectionReason) return { text: 'Rejected', class: 'bg-danger' };
         if (rider.approved === null) return { text: 'Pending', class: 'bg-warning text-dark' };
         if (rider.approved === true) return { text: 'Active', class: 'bg-success' };
@@ -130,7 +130,7 @@ $(document).ready(function() {
     function getErrorMessage(xhr) {
         if (xhr && xhr.responseJSON && xhr.responseJSON.message) return xhr.responseJSON.message;
         if (xhr && xhr.responseText) {
-            try { return JSON.parse(xhr.responseText).message; } catch (e) {}
+            try { return JSON.parse(xhr.responseText).message; } catch (e) { }
         }
         return xhr.statusText || 'An unknown error occurred.';
     }

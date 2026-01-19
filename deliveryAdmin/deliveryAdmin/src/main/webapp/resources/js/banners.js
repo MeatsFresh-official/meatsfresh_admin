@@ -1,170 +1,215 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    const uploadZone = document.getElementById('uploadZone');
-    const fileInput = document.getElementById('fileInput');
-    const bannerGrid = document.getElementById('bannerGrid');
+    // --- State ---
+    let banners = {
+        vendor: [
+            { id: 'v1', imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', active: true },
+            { id: 'v2', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80', active: true }
+        ],
+        partner: [
+            { id: 'p1', imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80', active: true }
+        ]
+    };
 
-    // --- Mock Data (Demo Mode / No API) ---
-    // User requested "no api", so we use strictly local data.
-    let banners = [
-        { id: '1', imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', active: true },
-        { id: '2', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80', active: true },
-        { id: '3', imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80', active: true },
-        { id: '4', imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80', active: false }
-    ];
-
-    // --- Initial Load ---
-    loadBanners();
-
-    // --- Event Listeners ---
-
-    // Trigger file input on click
-    if (uploadZone) {
-        uploadZone.addEventListener('click', () => fileInput.click());
-
-        // Drag and Drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadZone.addEventListener(eventName, () => uploadZone.classList.add('dragover'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadZone.addEventListener(eventName, () => uploadZone.classList.remove('dragover'), false);
-        });
-
-        uploadZone.addEventListener('drop', handleDrop, false);
-    }
-
-    if (fileInput) {
-        fileInput.addEventListener('change', function (e) {
-            if (this.files && this.files[0]) {
-                handleUpload(this.files[0]);
-            }
-        });
-    }
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        if (files && files[0]) {
-            handleUpload(files[0]);
+    // --- DOM Elements ---
+    const zones = {
+        vendor: {
+            upload: document.getElementById('uploadZoneVendor'),
+            input: document.getElementById('fileInputVendor'),
+            grid: document.getElementById('vendorGrid'),
+            count: document.getElementById('vendorCount')
+        },
+        partner: {
+            upload: document.getElementById('uploadZonePartner'),
+            input: document.getElementById('fileInputPartner'),
+            grid: document.getElementById('partnerGrid'),
+            count: document.getElementById('partnerCount')
         }
+    };
+
+    // --- Init ---
+    renderAll();
+
+    // --- Event Setup Helper ---
+    function setupUpload(type) {
+        const z = zones[type];
+        if (!z.upload || !z.input) return;
+
+        // Click handled by inline onclick in JSP or we can add it here if preferred. 
+        // JSP has onclick="document.getElementById('...').click()" so we just need change event.
+
+        z.input.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) handleUpload(this.files[0], type);
+        });
+
+        // Drag & Drop
+        const prevent = (e) => { e.preventDefault(); e.stopPropagation(); };
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => z.upload.addEventListener(evt, prevent));
+
+        ['dragenter', 'dragover'].forEach(evt => z.upload.addEventListener(evt, () => z.upload.classList.add('dragover')));
+        ['dragleave', 'drop'].forEach(evt => z.upload.addEventListener(evt, () => z.upload.classList.remove('dragover')));
+
+        z.upload.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files && files[0]) handleUpload(files[0], type);
+        });
     }
 
-    // --- Local Logic Functions ---
+    // Setup both
+    setupUpload('vendor');
+    setupUpload('partner');
 
-    function loadBanners() {
-        console.log("Loading sample banners...");
-        renderBanners(banners);
-    }
 
-    function handleUpload(file) {
-        // Validation
+    // --- Core Logic ---
+
+    function handleUpload(file, type) {
         if (!file.type.startsWith('image/')) {
             alert('Please select an image file');
             return;
         }
 
-        // UI loading state
-        if (uploadZone) {
-            uploadZone.classList.add('uploading');
-            const originalText = uploadZone.innerHTML;
-            uploadZone.innerHTML = `
-                <div class="d-flex flex-column align-items-center">
-                    <div class="loading-spinner mb-3"></div>
-                    <h5>Uploading...</h5>
-                </div>
-            `;
+        const z = zones[type];
 
-            // Simulate 1s delay then add
-            setTimeout(() => {
-                // Create a local URL for the uploaded file so it displays immediately
-                const objectUrl = URL.createObjectURL(file);
+        // Loading State
+        z.upload.classList.add('uploading');
+        const originalHtml = z.upload.innerHTML;
+        z.upload.innerHTML = `
+            <div class="d-flex flex-column align-items-center">
+                <div class="loading-spinner mb-3"></div>
+                <h5>Uploading to ${type === 'vendor' ? 'Vendor' : 'Partner'}...</h5>
+            </div>
+        `;
 
-                const newBanner = {
-                    id: Date.now().toString(),
-                    imageUrl: objectUrl, // Use local blob URL
-                    active: true
-                };
+        setTimeout(() => {
+            const newBanner = {
+                id: Date.now().toString(),
+                imageUrl: URL.createObjectURL(file),
+                active: true
+            };
 
-                banners.unshift(newBanner); // Add to top
+            banners[type].unshift(newBanner);
 
-                // Reset UI
-                uploadZone.classList.remove('uploading');
-                uploadZone.innerHTML = originalText;
+            // Reset UI
+            z.upload.classList.remove('uploading');
+            z.upload.innerHTML = originalHtml;
 
-                // Reload grid
-                loadBanners();
-            }, 1000);
-        }
+            renderAll();
+        }, 1200);
     }
 
-    // DELETE Banner
-    window.deleteBanner = function (id) {
-        if (!confirm('Delete this banner? (Demo Mode)')) return;
+    // --- Update Logic (Image Replacement) ---
 
-        banners = banners.filter(b => b.id !== id);
-        loadBanners();
+    // Global Update State
+    let updateState = {
+        id: null,
+        type: null
     };
 
-    // PUT Update Banner
-    window.updateBanner = function (id) {
-        const b = banners.find(item => item.id === id);
-        if (b) {
-            b.active = !b.active;
-            loadBanners();
-        }
+    const updateInput = document.getElementById('updateFileInput');
+
+    if (updateInput) {
+        updateInput.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    return;
+                }
+
+                // Process Update
+                if (updateState.id && updateState.type) {
+                    const list = banners[updateState.type];
+                    const banner = list.find(b => b.id === updateState.id);
+                    if (banner) {
+                        banner.imageUrl = URL.createObjectURL(file); // Update Image
+                        renderAll();
+                    }
+                }
+
+                // Reset State
+                updateState = { id: null, type: null };
+                this.value = ''; // Allow re-selecting same file
+            }
+        });
+    }
+
+    window.triggerUpdate = function (id, type) {
+        // Set state and open file dialog
+        updateState = { id, type };
+        if (updateInput) updateInput.click();
     };
 
 
-    // --- Render Functions ---
-
-    function showLoading() {
-        bannerGrid.innerHTML = '<div class="col-12 text-center py-5"><div class="loading-spinner"></div></div>';
+    window.deleteBanner = function (id, type) {
+        if (!confirm('Delete this banner?')) return;
+        banners[type] = banners[type].filter(b => b.id !== id);
+        renderAll();
     }
 
-    function showError(msg) {
-        bannerGrid.innerHTML = `<div class="col-12 text-center py-5 text-danger">${msg}</div>`;
+    // --- Rendering ---
+
+    function renderAll() {
+        renderSection('vendor');
+        renderSection('partner');
     }
 
-    function renderBanners(banners) {
-        if (!banners || !Array.isArray(banners) || banners.length === 0) {
-            bannerGrid.innerHTML = `
-                <div class="col-12 empty-state">
-                    <i class="fas fa-images fa-3x mb-3 text-gray-300"></i>
-                    <p>No banners found. Upload one to get started!</p>
+    function renderSection(type) {
+        const list = banners[type];
+        const grid = zones[type].grid;
+        const countSpan = zones[type].count;
+
+        if (!grid) return;
+
+        // Update count
+        if (countSpan) countSpan.textContent = `${list.length} Active`;
+
+        if (list.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12 py-5 text-center text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                    <i class="fas fa-image fa-2x mb-2 opacity-50"></i>
+                    <p class="text-sm">No ${type} banners yet.</p>
                 </div>
             `;
             return;
         }
 
-        bannerGrid.innerHTML = banners.map((banner, index) => {
-            // Handle different API response structures (url vs imageUrl)
-            const imageUrl = banner.url || banner.imageUrl || banner.file || '';
-            const bannerId = banner.id || banner.uuid || index; // Fallback ID
-
-            return `
-            <div class="banner-card animate-enter" style="animation-delay: ${index * 0.1}s">
-                <img src="${imageUrl}" class="banner-image" alt="Banner">
-                <div class="banner-overlay">
-                    <button class="btn-delete-banner" onclick="deleteBanner('${bannerId}')" title="Delete Banner">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                     <!-- Optional: Update Button (e.g. reused logic or separate) -->
-                    <!-- <button class="btn btn-sm btn-light ms-2" onclick="updateBanner('${bannerId}', ${banner.active})">
-                        <i class="fas fa-edit"></i>
-                    </button> -->
+        grid.innerHTML = list.map((b, idx) => `
+            <div class="banner-card group relative overflow-hidden rounded-xl shadow-md border border-gray-100 bg-white transition-all hover:shadow-lg animate-enter" style="animation-delay: ${idx * 0.05}s">
+                <!-- Image Section -->
+                <div class="aspect-w-16 aspect-h-9 w-full h-48 relative bg-gray-100 border-b border-gray-100">
+                    <img src="${b.imageUrl}" class="w-full h-full object-cover" alt="Banner">
+                    
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <button onclick="triggerUpdate('${b.id}', '${type}')" class="px-4 py-2 bg-white/90 text-gray-900 rounded-lg font-medium text-sm hover:bg-white shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                            Change Image
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Action Footer -->
+                <div class="p-3 flex justify-between items-center bg-white">
+                     <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">ID: ${b.id.substring(0, 6)}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <!-- Update Button (Icon) -->
+                         <button onclick="triggerUpdate('${b.id}', '${type}')" 
+                                 class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors" 
+                                 title="Update Image">
+                            <i class="fas fa-camera text-xs"></i>
+                        </button>
+                        
+                        <!-- Delete Button -->
+                        <button onclick="deleteBanner('${b.id}', '${type}')" 
+                                class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 hover:text-red-700 transition-colors" 
+                                title="Delete Banner">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        `}).join('');
+        `).join('');
     }
 
 });

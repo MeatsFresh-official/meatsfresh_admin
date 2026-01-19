@@ -20,7 +20,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard-zenith.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/banners.css">
 
-                <!-- Tailwind CSS (for compatibility with existing Zenith styles if needed) -->
+                <!-- Tailwind CSS -->
                 <script src="https://cdn.tailwindcss.com"></script>
                 <script>
                     tailwind.config = {
@@ -47,7 +47,7 @@
                     <%@ include file="/includes/sidebar.jsp" %>
 
                         <!-- Main Content -->
-                        <div class="flex-grow-1" style="margin-left: 260px; min-height: 100vh;">
+                        <div class="flex-grow-1" style="min-height: 100vh;">
 
                             <!-- Main Container -->
                             <div class="main-content">
@@ -56,42 +56,98 @@
                                 <div class="d-flex justify-content-between align-items-end mb-5 animate-enter">
                                     <div>
                                         <h1 class="page-title">Banner Management</h1>
-                                        <p class="page-subtitle">Manage your app's marketing banners and promotional
-                                            visuals.</p>
+                                        <p class="page-subtitle">Manage promotional visuals for Vendors and Delivery
+                                            Partners.</p>
                                         <p class="text-xs text-secondary mt-1"><i class="fas fa-info-circle me-1"></i>
                                             Demo Mode Active</p>
-                                        <script>console.log("Banners Page Loaded (JSP v1.1)");</script>
                                     </div>
                                 </div>
 
-                                <!-- Upload Section -->
-                                <div class="glass-panel mb-5 animate-enter" style="animation-delay: 0.1s;">
-                                    <div class="upload-zone" id="uploadZone">
-                                        <input type="file" id="fileInput" hidden accept="image/*">
-                                        <div class="upload-content">
-                                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                            <div class="upload-text">
-                                                <h5>Click or Drag & Drop to Upload</h5>
-                                                <p>Supports JPG, PNG, WEBP (Max 5MB)</p>
+                                <!-- SECTIONS CONTAINER -->
+                                <div class="space-y-12">
+
+                                    <!-- SECTION 1: VENDOR BANNERS -->
+                                    <section id="vendorSection" class="animate-enter" style="animation-delay: 0.1s;">
+                                        <h2 class="text-2xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+                                            <span class="p-2 bg-blue-100 rounded-lg text-blue-600"><i
+                                                    class="fas fa-store"></i></span>
+                                            Vendor Banners
+                                        </h2>
+
+                                        <!-- Vendor Upload -->
+                                        <div class="glass-panel mb-4 p-0 overflow-hidden">
+                                            <div class="upload-zone" id="uploadZoneVendor"
+                                                onclick="document.getElementById('fileInputVendor').click()">
+                                                <input type="file" id="fileInputVendor" hidden accept="image/*">
+                                                <div class="upload-content">
+                                                    <i class="fas fa-cloud-upload-alt upload-icon text-blue-500"></i>
+                                                    <div class="upload-text">
+                                                        <h5>Upload Vendor Banner</h5>
+                                                        <p>Click or Drag & Drop (Max 5MB)</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <!-- Gallery Section -->
-                                <div class="glass-panel animate-enter" style="animation-delay: 0.2s;">
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <h4 class="m-0 font-bold text-gray-800">Active Banners</h4>
-                                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                                            onclick="loadBanners()">
-                                            <i class="fas fa-sync-alt me-1"></i> Refresh
-                                        </button>
-                                    </div>
+                                        <!-- Vendor Grid -->
+                                        <div class="glass-panel">
+                                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                                <h4
+                                                    class="m-0 font-bold text-gray-800 text-sm uppercase tracking-wider">
+                                                    Active Vendor Banners</h4>
+                                                <span class="badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+                                                    id="vendorCount">0 Active</span>
+                                            </div>
+                                            <div id="vendorGrid" class="banner-grid">
+                                                <!-- JS Injected -->
+                                            </div>
+                                        </div>
+                                    </section>
 
-                                    <div id="bannerGrid" class="banner-grid">
-                                        <!-- Banners will be loaded here via JS -->
-                                    </div>
+
+                                    <!-- SECTION 2: DELIVERY PARTNER BANNERS -->
+                                    <section id="partnerSection" class="animate-enter" style="animation-delay: 0.2s;">
+                                        <h2 class="text-2xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+                                            <span class="p-2 bg-green-100 rounded-lg text-green-600"><i
+                                                    class="fas fa-motorcycle"></i></span>
+                                            Delivery Partner Banners
+                                        </h2>
+
+                                        <!-- Partner Upload -->
+                                        <div class="glass-panel mb-4 p-0 overflow-hidden">
+                                            <div class="upload-zone" id="uploadZonePartner"
+                                                onclick="document.getElementById('fileInputPartner').click()">
+                                                <input type="file" id="fileInputPartner" hidden accept="image/*">
+                                                <div class="upload-content">
+                                                    <i class="fas fa-cloud-upload-alt upload-icon text-green-500"></i>
+                                                    <div class="upload-text">
+                                                        <h5>Upload Partner Banner</h5>
+                                                        <p>Click or Drag & Drop (Max 5MB)</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Partner Grid -->
+                                        <div class="glass-panel">
+                                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                                <h4
+                                                    class="m-0 font-bold text-gray-800 text-sm uppercase tracking-wider">
+                                                    Active Partner Banners</h4>
+                                                <span class="badge bg-green-100 text-green-800 px-3 py-1 rounded-full"
+                                                    id="partnerCount">0 Active</span>
+                                            </div>
+                                            <div id="partnerGrid" class="banner-grid">
+                                                <!-- JS Injected -->
+                                            </div>
+                                        </div>
+                                        <!-- Hidden Input for Updating Banners -->
+                                        <input type="file" id="updateFileInput" hidden accept="image/*">
+
+                                    </section>
+
                                 </div>
+                                <!-- END SECTIONS CONTAINER -->
 
                             </div>
                         </div>

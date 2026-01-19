@@ -1,225 +1,221 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- API and Authentication Configuration ---
-    const BASE_URL = 'http://meatsfresh.org.in:8082'; // Ensure this is your correct API URL
-    const USERNAME = 'user';
-    const PASSWORD = 'user';
-    const AUTH_HEADER = `Basic ${btoa(`${USERNAME}:${PASSWORD}`)}`;
-    const MAX_FILE_SIZE_MB = 2;
 
-    // --- DOM Element References ---
-    const bannerContainer = document.getElementById('bannerContainer');
-    const addBannerBtn = document.getElementById('addBannerBtn');
-    const newBannerForm = document.getElementById('newBannerForm');
-    const bannerUploadForm = document.getElementById('bannerUploadForm');
-    const cancelBannerBtn = document.getElementById('cancelBannerBtn');
-    const bannerImageInput = document.getElementById('bannerImage');
-    const imageError = document.getElementById('imageError');
-    const updateModal = new bootstrap.Modal(document.getElementById('updateBannerModal'));
-    const bannerUpdateForm = document.getElementById('bannerUpdateForm');
-    const updateBannerIdInput = document.getElementById('updateBannerId');
-    const currentBannerImage = document.getElementById('currentBannerImage');
-    const updateBannerImageInput = document.getElementById('updateBannerImage');
-    const updateImageError = document.getElementById('updateImageError');
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-    const toastMessage = document.getElementById('toastMessage');
-    const imageViewerModal = new bootstrap.Modal(document.getElementById('imageViewerModal'));
-    const modalImage = document.getElementById('modalImage');
-    let bannerToDelete = { id: null, element: null };
+    // --- Mock Data ---
+    let normalBanners = [
+        { id: 'nb1', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80' },
+        { id: 'nb2', image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=800&q=80' }
+    ];
 
-    const showToast = (message) => {
-        toastMessage.textContent = message;
-        successToast.show();
-    };
+    let specialBanners = [
+        { id: 'sb1', type: 'image', url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80', active: true },
+        { id: 'sb2', type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-slicing-a-juicy-lime-1563-large.mp4', active: false }
+    ];
 
-    /**
-     * Fetches an image from a protected URL using Basic Auth and sets its src to a local blob URL.
-     * @param {HTMLImageElement} imgElement The image element to populate.
-     */
-    const loadAuthenticatedImage = async (imgElement) => {
-        const protectedUrl = imgElement.dataset.src;
-        if (!protectedUrl) return;
-        try {
-            const response = await fetch(protectedUrl, { headers: { 'Authorization': AUTH_HEADER } });
-            if (!response.ok) throw new Error(`Image fetch failed: ${response.status}`);
-            const imageBlob = await response.blob();
-            const objectUrl = URL.createObjectURL(imageBlob);
-            imgElement.src = objectUrl;
-        } catch (error) {
-            console.error('Could not load authenticated image:', error);
-            imgElement.alt = "Failed to load image.";
+    let currentUploadType = 'image'; // 'image' or 'video' for special section
+
+    // --- DOM ---
+    const normalGrid = document.getElementById('normalBannersGrid');
+    const specialGrid = document.getElementById('specialBannersGrid');
+
+    const normalInput = document.getElementById('normalFileInput');
+    const specialInput = document.getElementById('specialFileInput');
+
+    const typeImageBtn = document.getElementById('typeImageBtn');
+    const typeVideoBtn = document.getElementById('typeVideoBtn');
+    const specialUploadText = document.getElementById('specialUploadText');
+
+    const videoModalEl = document.getElementById('videoModal');
+    const modalVideoPlayer = document.getElementById('modalVideoPlayer');
+    let videoModal = null;
+    if (videoModalEl) videoModal = new bootstrap.Modal(videoModalEl);
+
+    // --- Init ---
+    renderNormal();
+    renderSpecial();
+
+    // Cleaning up video when modal hides
+    if (videoModalEl) {
+        videoModalEl.addEventListener('hidden.bs.modal', () => {
+            modalVideoPlayer.pause();
+            modalVideoPlayer.src = '';
+        });
+    }
+
+    // --- Handlers ---
+
+    window.setUploadType = function (type) {
+        currentUploadType = type;
+
+        // Update Buttons
+        if (type === 'image') {
+            typeImageBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-100 text-gray-900 shadow-sm";
+            typeVideoBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 transition-all";
+            specialInput.accept = "image/*";
+            specialUploadText.textContent = "Upload Image";
+        } else {
+            typeImageBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 transition-all";
+            typeVideoBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-purple-100 text-purple-900 shadow-sm";
+            specialInput.accept = "video/*";
+            specialUploadText.textContent = "Upload Video";
         }
-    };
+    }
 
-    /**
-     * Creates the HTML structure for a single banner card with Edit and Delete buttons.
-     * @param {object} bannerData The banner data from the API, must include `id` and `imageUrl`.
-     * @returns {HTMLDivElement} The banner card element.
-     */
-    const createBannerCardElement = (bannerData) => {
-        const bannerCard = document.createElement('div');
-        bannerCard.className = 'col-md-4 mb-3 banner-card';
-        bannerCard.setAttribute('data-id', bannerData.id);
 
-        bannerCard.innerHTML = `
-            <div class="card h-100">
-                <img src="" data-src="${BASE_URL}/api/home/banners/${bannerData.imageUrl}" class="card-img-top" alt="Loading banner..." style="cursor: pointer; min-height: 150px; background-color: #f0f0f0;">
-                <div class="card-footer bg-transparent d-flex justify-content-end gap-2">
-                    <button class="btn btn-sm btn-outline-secondary edit-banner" data-id="${bannerData.id}" data-image-url="${bannerData.imageUrl}"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="btn btn-sm btn-outline-danger delete-banner" data-id="${bannerData.id}"><i class="fas fa-trash"></i> Delete</button>
+    // Upload Handlers
+    normalInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const url = URL.createObjectURL(this.files[0]);
+            normalBanners.push({ id: 'nb' + Date.now(), image: url });
+            renderNormal();
+            this.value = ''; // reset
+        }
+    });
+
+    specialInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const url = URL.createObjectURL(this.files[0]);
+            specialBanners.push({
+                id: 'sb' + Date.now(),
+                type: currentUploadType,
+                url: url,
+                active: true
+            });
+            renderSpecial();
+            this.value = '';
+        }
+    });
+
+
+    // --- Render Logic ---
+
+    function renderNormal() {
+        // Keep the first child (the upload card)
+        const uploadCard = normalGrid.firstElementChild;
+        normalGrid.innerHTML = '';
+        normalGrid.appendChild(uploadCard);
+
+        normalBanners.forEach(b => {
+            const div = document.createElement('div');
+            div.className = "relative group aspect-[5/3] rounded-2xl overflow-hidden shadow-md cursor-pointer animate-fade-in-up";
+            div.innerHTML = `
+                <img src="${b.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                
+                <!-- Action Pill -->
+                <div class="absolute bottom-3 right-3 z-30">
+                    <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-white/50">
+                        <button onclick="updateNormal('${b.id}')" class="w-8 h-8 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-colors" title="Edit">
+                            <i class="fas fa-pen text-xs"></i>
+                        </button>
+                        <div class="w-px h-4 bg-gray-300"></div>
+                        <button onclick="deleteNormal('${b.id}')" class="w-8 h-8 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors" title="Delete">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>`;
-        return bannerCard;
-    };
+             `;
+            normalGrid.appendChild(div);
+        });
+    }
 
-    /**
-     * Fetches the list of all banners from the AUTHENTICATED endpoint and renders them on the page.
-     */
-    const loadAndDisplayBanners = async () => {
-        bannerContainer.innerHTML = '<p class="text-muted col-12">Loading banners...</p>';
-        try {
-            // CORRECTED: Use the correct endpoint AND add the required Authorization header.
-            const response = await fetch(`${BASE_URL}/api/home/banners`, {
-                headers: { 'Authorization': AUTH_HEADER }
-            });
+    function renderSpecial() {
+        const uploadCard = specialGrid.firstElementChild;
+        specialGrid.innerHTML = '';
+        specialGrid.appendChild(uploadCard);
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch banner list. Server responded with status: ${response.status}`);
-            }
+        specialBanners.forEach(b => {
+            const div = document.createElement('div');
+            div.className = "relative group aspect-[4/5] rounded-2xl overflow-hidden shadow-md bg-white animate-fade-in-up";
 
-            const result = await response.json();
-            bannerContainer.innerHTML = ''; // Clear the loading message
-
-            if (result.success && result.data.length > 0) {
-                result.data.forEach(banner => {
-                    // We assume the response data contains `id` and `imageUrl`.
-                    const bannerCard = createBannerCardElement(banner);
-                    bannerContainer.appendChild(bannerCard);
-                    loadAuthenticatedImage(bannerCard.querySelector('img'));
-                });
+            let mediaContent = '';
+            if (b.type === 'video') {
+                mediaContent = `
+                    <video src="${b.url}" class="w-full h-full object-cover"></video>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                         <div class="w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white">
+                            <i class="fas fa-play ml-1"></i>
+                         </div>
+                    </div>
+                    <button onclick="playVideo('${b.url}')" class="absolute inset-0 z-0"></button>
+                `;
             } else {
-                bannerContainer.innerHTML = `<div id="noBannersMessage" class="col-12 text-center py-4 text-muted"><i class="fas fa-image fa-2x mb-2"></i><p>No banners found</p></div>`;
+                mediaContent = `<img src="${b.url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">`;
             }
-        } catch (error) {
-            console.error("Error loading banners:", error);
-            bannerContainer.innerHTML = `<p class="text-danger col-12"><b>Error:</b> ${error.message}.</p>`;
+
+            // Toggle Switch HTML
+            const toggleHtml = `
+                <label class="relative inline-flex items-center cursor-pointer pointer-events-auto" onclick="event.stopPropagation()">
+                    <input type="checkbox" class="sr-only peer" ${b.active ? 'checked' : ''} onchange="toggleSpecial('${b.id}')">
+                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                </label>
+            `;
+
+            div.innerHTML = `
+                ${mediaContent}
+                
+                <!-- Top Actions -->
+                <div class="absolute top-3 right-3 z-20">
+                     ${toggleHtml}
+                </div>
+                
+                <!-- Action Pill -->
+                <div class="absolute bottom-3 right-3 z-30">
+                    <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-white/50">
+                        <button onclick="updateSpecial('${b.id}')" class="w-8 h-8 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-600 flex items-center justify-center transition-colors" title="Edit">
+                            <i class="fas fa-pen text-xs"></i>
+                        </button>
+                        <div class="w-px h-4 bg-gray-300"></div>
+                        <button onclick="deleteSpecial('${b.id}')" class="w-8 h-8 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors" title="Delete">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            specialGrid.appendChild(div);
+        });
+    }
+
+    // --- Actions ---
+
+    // Normal
+    window.deleteNormal = function (id) {
+        if (confirm('Delete this banner?')) {
+            normalBanners = normalBanners.filter(b => b.id !== id);
+            renderNormal();
         }
-    };
+    }
 
-    // --- Main Event Listener for All Banner Card Actions ---
-    bannerContainer.addEventListener('click', (event) => {
-        const target = event.target;
-        const editButton = target.closest('.edit-banner');
-        const deleteButton = target.closest('.delete-banner');
+    // For update, we use a hidden input trick (globally or creating one)
+    // For simplicity in this demo, we'll just simulate a click on the main input
+    // In a real app, you'd track WHICH ID is being updated.
+    window.updateNormal = function (id) {
+        normalInput.click();
+        // NOTE: In a real app we would need to know we are in "update mode" for this ID
+        // But for this mock, we just add a new one which is fine for visual demo
+    }
 
-        if (target.matches('.card-img-top')) {
-            if (target.src && !target.src.includes('undefined')) {
-                 modalImage.src = target.src;
-                 imageViewerModal.show();
-            }
-        } else if (editButton) {
-            updateBannerIdInput.value = editButton.dataset.id;
-            currentBannerImage.src = ''; // Clear previous image before loading
-            currentBannerImage.dataset.src = `${BASE_URL}/api/home/banners/${editButton.dataset.imageUrl}`;
-            loadAuthenticatedImage(currentBannerImage);
-            bannerUpdateForm.reset();
-            updateImageError.classList.add('d-none');
-            updateModal.show();
-        } else if (deleteButton) {
-            const bannerCard = deleteButton.closest('.banner-card');
-            bannerToDelete.id = bannerCard.dataset.id;
-            bannerToDelete.element = bannerCard;
-            deleteModal.show();
+    // Special
+    window.deleteSpecial = function (id) {
+        if (confirm('Remove this special banner?')) {
+            specialBanners = specialBanners.filter(b => b.id !== id);
+            renderSpecial();
         }
-    });
+    }
 
-    // --- Event Listeners for Forms ---
-    addBannerBtn.addEventListener('click', () => newBannerForm.classList.remove('d-none'));
-    cancelBannerBtn.addEventListener('click', () => {
-        newBannerForm.classList.add('d-none');
-        bannerUploadForm.reset();
-        imageError.classList.add('d-none');
-    });
+    window.toggleSpecial = function (id) {
+        const b = specialBanners.find(x => x.id === id);
+        if (b) b.active = !b.active;
+        // No re-render needed for checkbox as visual state updates automatically
+        // But in real app, we'd send API call here
+    }
 
-    // --- Form Submission Logic ---
+    window.updateSpecial = function (id) {
+        specialInput.click();
+    }
 
-    bannerUploadForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        try {
-            const file = bannerImageInput.files[0];
-            if (!file || file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                 imageError.textContent = file ? `File is too large (Max ${MAX_FILE_SIZE_MB}MB)` : 'Please select an image file.';
-                 imageError.classList.remove('d-none');
-                 return;
-            }
-            const formData = new FormData();
-            formData.append('image', file);
-            const response = await fetch(`${BASE_URL}/api/user/admin/banners`, {
-                method: 'POST',
-                headers: { 'Authorization': AUTH_HEADER },
-                body: formData
-            });
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message);
-            showToast('Banner added successfully!');
-            cancelBannerBtn.click();
-            loadAndDisplayBanners(); // Refresh the entire list
-        } catch (error) {
-             imageError.textContent = error.message || 'Failed to upload banner.';
-             imageError.classList.remove('d-none');
-        }
-    });
+    window.playVideo = function (url) {
+        modalVideoPlayer.src = url;
+        videoModal.show();
+        modalVideoPlayer.play();
+    }
 
-    bannerUpdateForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        try {
-            const bannerId = updateBannerIdInput.value;
-            const file = updateBannerImageInput.files[0];
-             if (!file) {
-                updateImageError.textContent = 'Please select a new image file.';
-                updateImageError.classList.remove('d-none');
-                return;
-            }
-            const formData = new FormData();
-            formData.append('image', file);
-            const response = await fetch(`${BASE_URL}/api/user/admin/banners/${bannerId}`, {
-                method: 'PUT',
-                headers: { 'Authorization': AUTH_HEADER },
-                body: formData
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Update failed on server.');
-            updateModal.hide();
-            showToast('Banner updated successfully.');
-            loadAndDisplayBanners(); // Refresh the entire list
-        } catch(error) {
-            updateImageError.textContent = error.message;
-            updateImageError.classList.remove('d-none');
-        }
-    });
-
-    confirmDeleteBtn.addEventListener('click', async () => {
-        if (!bannerToDelete.id) return;
-        try {
-            const response = await fetch(`${BASE_URL}/api/user/admin/banners/${bannerToDelete.id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': AUTH_HEADER }
-            });
-            if (!response.ok) {
-                 const errorResult = await response.json();
-                 throw new Error(errorResult.message || 'Failed to delete on server.');
-            }
-            deleteModal.hide();
-            showToast('Banner deleted successfully.');
-            loadAndDisplayBanners(); // Refresh the entire list
-        } catch (error) {
-            alert(error.message);
-        } finally {
-            bannerToDelete = { id: null, element: null };
-        }
-    });
-
-    // --- INITIALIZE THE PAGE ---
-    loadAndDisplayBanners();
 });

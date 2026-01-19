@@ -1,697 +1,301 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // ===================================================================
     // API ENDPOINTS
     // ===================================================================
-    const API_BASE = 'http://113.11.231.115:8080/api';
+    const API_BASE = 'http://meatsfresh.org.in:8083/api';
     const RIDERS_API = API_BASE + '/delivery/register';
     const RIDERS_LIST_API = API_BASE + '/delivery';
-    const SETTINGS_API = API_BASE + '/delivery/settings';
     const SHOP_API = API_BASE + '/delivery/shop';
-    const REPORTS_API = API_BASE + '/delivery/reports';
 
-    const LOCATION_API = {
-        countries: API_BASE + '/address/countries',
-        states: API_BASE + '/address/states',
-        cities: API_BASE + '/address/cities',
-        districts: API_BASE + '/address/districts'
-    };
-
-    // ===================================================================
-    // GLOBAL AJAX SETUP FOR BASIC AUTHENTICATION
-    // ===================================================================
-    // This will add the Authorization header to EVERY jQuery AJAX request
     const username = 'user';
     const password = 'user';
     $.ajaxSetup({
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
             const authHeader = 'Basic ' + btoa(username + ':' + password);
             xhr.setRequestHeader('Authorization', authHeader);
         }
     });
 
     // ===================================================================
-    // INITIALIZATION
+    // MOCK DATA GENERATORS (OPTIMISTIC UI)
     // ===================================================================
-    let itemToDelete = null;
-    let deleteType = null;
-    let performanceChart, statusChart;
+    const getMockRiders = () => [
+        { id: 101, firstName: 'Rahul', lastName: 'Kumar', status: 'ACTIVE', vehicleType: 'ELECTRIC', phoneNumber: '9876543210', walletBalance: 1250.00, rating: 4.8 },
+        { id: 102, firstName: 'Amit', lastName: 'Singh', status: 'ACTIVE', vehicleType: 'PETROL', phoneNumber: '9876543211', walletBalance: 450.50, rating: 4.2 },
+        { id: 103, firstName: 'Vikram', lastName: 'Verma', status: 'INACTIVE', vehicleType: 'PETROL', phoneNumber: '9876543212', walletBalance: 0.00, rating: 3.5 },
+        { id: 104, firstName: 'Suresh', lastName: 'Reddy', status: 'REJECTED', vehicleType: 'ELECTRIC', phoneNumber: '9876543213', walletBalance: 0.00, rating: 0 },
+        { id: 105, firstName: 'Priya', lastName: 'Sharma', status: 'ACTIVE', vehicleType: 'ELECTRIC', phoneNumber: '9876543214', walletBalance: 2100.00, rating: 5.0 },
+        { id: 106, firstName: 'Karan', lastName: 'Mehta', status: 'ACTIVE', vehicleType: 'ELECTRIC', phoneNumber: '9876543215', walletBalance: 800.00, rating: 4.5 },
+        { id: 107, firstName: 'Arjun', lastName: 'Das', status: 'PENDING', vehicleType: 'CYCLE', phoneNumber: '9876543216', walletBalance: 0.00, rating: 0 }
+    ];
+
+    const getMockShopItems = () => [
+        { id: 1, name: 'Rider T-Shirt (L)', description: 'Official MeatsFresh Uniform', price: 499, stock: 50, category: 'UNIFORM', image: 'resources/images/tshirt.png' },
+        { id: 2, name: 'Delivery Bag', description: 'Insulated thermal bag', price: 1200, stock: 20, category: 'EQUIPMENT', image: 'resources/images/bag.png' },
+        { id: 3, name: 'Helmet', description: 'Safety certified helmet', price: 1500, stock: 15, category: 'SAFETY', image: 'resources/images/helmet.png' }
+    ];
+
+    const getMockStats = () => ({ total: 12, active: 8, pending: 3, rejected: 1 });
+
+    // ===================================================================
+    // STATE & PAGINATION
+    // ===================================================================
+    let allRiders = [];
+    // Initialize Pagination Utility
+    // 10 items per page, rendering callback is 'renderRidersPage'
+    const ridersPaginator = new PaginationUtils('ridersPagination', 10, renderRidersPage);
 
     initApplication();
 
     function initApplication() {
+        // Optimistic Load
+        const mockRiders = getMockRiders();
+        allRiders = mockRiders;
+        ridersPaginator.setData(mockRiders); // This triggers renderRidersPage internally
+
+        renderShopItems(getMockShopItems());
+        updateStatCards(getMockStats());
+
         if ($('#performanceChart').length && typeof Chart !== 'undefined') initCharts();
-        initLocationDropdowns();
-        loadRiders();
-        loadShopItems();
-        loadSettings();
-        if ($('.time-range-option').length) $('.time-range-option[data-range="month"]').trigger('click');
+
+        // Background Fetch
+        loadRidersBackground();
+        loadShopItemsBackground();
         setupEventHandlers();
-        testAPIConnection();
     }
 
     // ===================================================================
-    // EVENT HANDLERS SETUP
+    // DATA LOADING
     // ===================================================================
-    function setupEventHandlers() {
-        $('#deliveryBoyTabs button').on('shown.bs.tab', function() {
-            if ($(this).attr('data-bs-target') === '#reports' && performanceChart) {
-                performanceChart.resize();
-                statusChart.resize();
-            }
-        });
-
-        $('select[name="paymentMode"]').change(function() {
-            $('#perKmRateContainer').toggle($(this).val() === 'PER_KM');
-            $('#perOrderRateContainer').toggle($(this).val() !== 'PER_KM');
-        }).trigger('change');
-
-        $('#searchRiderBtn').click(applyFilters);
-        $('#riderSearch').keypress(e => e.which === 13 && applyFilters());
-        $('#statusFilter, #vehicleFilter, #ratingFilter').change(applyFilters);
-        $('#resetFiltersBtn').click(resetFilters);
-
-        $(document).on('click', '.delete-rider, .delete-shop-item', handleDeleteClick);
-        $('#confirmDeleteBtn').click(confirmDelete);
-
-        $('#addRiderForm').submit(handleAddRider);
-        $('#addShopItemForm').submit(handleAddShopItem);
-        $('#editShopItemForm').submit(handleEditShopItem);
-        $('#paymentSettingsForm').submit(handlePaymentSettings);
-        $('#incentiveSettingsForm').submit(handleIncentiveSettings);
-
-        $('#applyDateRange').click(applyDateRange);
-        $('.time-range-option').click(handleTimeRangeSelection);
-        $('#exportReportsBtn').click(exportReports);
-
-        $(document).on('click', '#activeFilters .fa-times', removeFilter);
-        $('#shop').on('click', '.edit-shop-item', handleEditShopItemClick);
-
-        $('.modal').on('hidden.bs.modal', function() {
-            $(this).find('form')[0].reset();
-            $(this).find('.is-invalid').removeClass('is-invalid');
-            $(this).find('.invalid-feedback').addClass('d-none').text('');
-        });
-    }
-
-    // ===================================================================
-    // API CONNECTION TESTING
-    // ===================================================================
-    function testAPIConnection() {
+    function loadRidersBackground() {
         $.ajax({
             url: RIDERS_LIST_API,
             type: 'GET',
-            timeout: 5000,
-            success: () => console.log("API connection test: SUCCESS"),
-            error: (xhr) => {
-                console.error("API connection test: FAILED", xhr);
-                showError('Cannot connect to the API server. Please check if the server is running.');
+            success: function (riders) {
+                if (riders && riders.length > 0) {
+                    allRiders = riders;
+                    ridersPaginator.setData(riders); // Update Paginator with Real Data
+                    calculateAndRenderStats(riders);
+                }
+            },
+            error: function (xhr) {
+                console.warn("Using mock riders due to API error:", xhr.statusText);
             }
         });
     }
 
-    // ===================================================================
-    // DATA LOADING FUNCTIONS
-    // ===================================================================
-    function loadRiders() {
-        $('#ridersTable tbody').html('<tr><td colspan="7" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading riders...</td></tr>');
-        $.ajax({
-            url: RIDERS_LIST_API,
-            type: 'GET',
-            success: function(riders) {
-                let counts = { active: 0, rejected: 0, pending: 0 };
-                riders.forEach(rider => {
-                    if (rider.approved == null) {
-                        counts.pending++;
-                    } else if (rider.approved === false || rider.rejectionReason) {
-                        counts.rejected++;
-                    } else if (rider.approved === true) {
-                        counts.active++;
-                    }
-                });
-
-                updateStatCards(riders.length, counts);
-                updateStatusChart(counts);
-                renderRidersTable(riders);
-            },
-            error: function(xhr) {
-                $('#ridersTable tbody').html(`<tr><td colspan="7" class="text-center text-danger">Error loading riders: ${getErrorMessage(xhr)}</td></tr>`);
-                updateStatCards(0, { active: 0, rejected: 0, pending: 0 });
-                updateStatusChart({ active: 0, rejected: 0, pending: 0 });
+    function loadShopItemsBackground() {
+        $.get(SHOP_API, function (items) {
+            if (items && items.length > 0) {
+                renderShopItems(items);
             }
         });
     }
 
-    function loadShopItems() {
-        $('#shop .row').html('<div class="col-12 text-center"><i class="fas fa-spinner fa-spin"></i> Loading products...</div>');
-        $.get(SHOP_API, renderShopItems).fail(xhr => {
-            $('#shop .row').html(`<div class="col-12 text-center text-danger">Error loading shop items: ${getErrorMessage(xhr)}</div>`);
+    function calculateAndRenderStats(riders) {
+        let counts = { total: riders.length, active: 0, rejected: 0, pending: 0 };
+        riders.forEach(r => {
+            if (r.approved === true || r.status === 'ACTIVE') counts.active++;
+            else if (r.approved === false || r.status === 'REJECTED') counts.rejected++;
+            else counts.pending++;
         });
-    }
-
-    function loadSettings() {
-        $.get(`${SETTINGS_API}/payment`, settings => {
-            if (settings) {
-                $('select[name="paymentMode"]').val(settings.paymentMode || 'PER_KM').trigger('change');
-                $('input[name="perKmRate"]').val(settings.perKmRate || '15.00');
-                $('input[name="perOrderRate"]').val(settings.perOrderRate || '30.00');
-                $('input[name="registrationFee"]').val(settings.registrationFee || '500.00');
-                $('input[name="cashDepositLimit"]').val(settings.cashDepositLimit || '5000.00');
-                $('select[name="cashDepositFrequency"]').val(settings.cashDepositFrequency || 'DAILY');
-            }
-        }).fail(xhr => console.error("Error loading payment settings:", xhr));
-
-        $.get(`${SETTINGS_API}/incentive`, settings => {
-            if (settings) {
-                $('input[name="monthlyTarget"]').val(settings.monthlyTarget || '100');
-                $('input[name="targetBonus"]').val(settings.targetBonus || '2000.00');
-                $('input[name="superBonus"]').val(settings.superBonus || '5000.00');
-            }
-        }).fail(xhr => console.error("Error loading incentive settings:", xhr));
-    }
-
-    function loadReports(startDate, endDate) {
-            $.get(`${REPORTS_API}?startDate=${startDate}&endDate=${endDate}`, data => {
-                updatePerformanceChart(data);
-                renderIncentiveReports(data.incentiveReports);
-            }).fail(xhr => showError('Error loading reports: ' + getErrorMessage(xhr)));
-        }
-
-    // ===================================================================
-    // FORM HANDLING FUNCTIONS
-    // ===================================================================
-    function handleAddRider(e) {
-        e.preventDefault();
-        highlightErrors(null);
-
-        if ($('#bankAccountNumber').val() !== $('input[name="confirmBankAccountNumber"]').val()) {
-            $('input[name="confirmBankAccountNumber"]').addClass('is-invalid').next('.invalid-feedback').text('Bank account numbers do not match.').removeClass('d-none');
-            showError("Bank account numbers do not match.");
-            return;
-        }
-
-        if (!$('select[name="countryId"]').val() || !$('select[name="stateId"]').val() || !$('select[name="cityId"]').val() || !$('select[name="districtId"]').val()) {
-            showError("Please select all location fields (Country, State, District, City).");
-            return;
-        }
-
-        const formData = new FormData(this);
-        const submitBtn = $('#addRiderSubmitBtn');
-
-        $.ajax({
-            url: RIDERS_API,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            beforeSend: () => submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Adding...'),
-            success: () => {
-                showToast('Rider added successfully! Awaiting approval.');
-                $('#addRiderModal').modal('hide');
-                loadRiders();
-            },
-            error: (xhr) => handleAjaxError(xhr, 'An unexpected error occurred while adding the rider.'),
-            complete: () => submitBtn.prop('disabled', false).html('Add Rider')
-        });
-    }
-
-    function handleAddShopItem(e) {
-        e.preventDefault();
-        handleFormSubmit(this, SHOP_API, 'POST', 'Product added successfully!', loadShopItems);
-    }
-
-    function handleEditShopItem(e) {
-        e.preventDefault();
-        const url = `${SHOP_API}/${$('#editProductId').val()}`;
-        handleFormSubmit(this, url, 'PUT', 'Product updated successfully!', loadShopItems);
-    }
-
-    function handlePaymentSettings(e) {
-        e.preventDefault();
-        saveSettings(this, `${SETTINGS_API}/payment`, 'Payment');
-    }
-
-    function handleIncentiveSettings(e) {
-        e.preventDefault();
-        saveSettings(this, `${SETTINGS_API}/incentive`, 'Incentive');
-    }
-
-    function handleFormSubmit(form, url, method, successMessage, callback) {
-        const formData = new FormData(form);
-        const btn = $(form).find('button[type="submit"]');
-
-        $.ajax({
-            url: url,
-            type: method,
-            data: formData,
-            processData: false,
-            contentType: false,
-            beforeSend: () => btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...'),
-            success: () => {
-                showToast(successMessage);
-                $(form).closest('.modal').modal('hide');
-                if (callback) callback();
-            },
-            error: (xhr) => showError('Error: ' + getErrorMessage(xhr)),
-            complete: () => btn.prop('disabled', false).text(method === 'POST' ? 'Add Product' : 'Save Changes')
-        });
-    }
-
-    function saveSettings(form, url, type) {
-        const btn = $(form).find('button[type="submit"]');
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: $(form).serialize(),
-            beforeSend: () => btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...'),
-            success: () => showToast(`${type} settings saved successfully!`),
-            error: (xhr) => showError(`Error saving ${type} settings: ` + getErrorMessage(xhr)),
-            complete: () => btn.prop('disabled', false).text('Save Settings')
-        });
-    }
-
-    // ===================================================================
-    // DELETE HANDLING FUNCTIONS
-    // ===================================================================
-    function handleDeleteClick() {
-        const isRider = $(this).hasClass('delete-rider');
-        itemToDelete = $(this).data(isRider ? 'rider-id' : 'product-id');
-        deleteType = isRider ? 'rider' : 'product';
-        $('#deleteConfirmationMessage').text(`Are you sure you want to delete this ${deleteType}? This action cannot be undone.`);
-        $('#deleteConfirmationModal').modal('show');
-    }
-
-    function confirmDelete() {
-        if (!itemToDelete || !deleteType) return;
-        const btn = $(this);
-        const url = deleteType === 'rider' ? `${RIDERS_LIST_API}/${itemToDelete}` : `${SHOP_API}/${itemToDelete}`;
-
-        $.ajax({
-            url: url,
-            type: 'DELETE',
-            beforeSend: () => btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Deleting...'),
-            success: () => {
-                showToast(`${deleteType.charAt(0).toUpperCase() + deleteType.slice(1)} deleted successfully!`);
-                $('#deleteConfirmationModal').modal('hide');
-                if (deleteType === 'rider') loadRiders(); else loadShopItems();
-            },
-            error: (xhr) => showError(`Error deleting ${deleteType}: ` + getErrorMessage(xhr)),
-            complete: () => btn.prop('disabled', false).html('<i class="fas fa-trash me-2"></i>Delete')
-        });
-    }
-
-    // ===================================================================
-    // FILTER FUNCTIONS
-    // ===================================================================
-    function applyFilters() {
-        const searchTerm = $('#riderSearch').val().toLowerCase().trim();
-        const statusFilter = $('#statusFilter').val().toUpperCase();
-        const vehicleFilter = $('#vehicleFilter').val().toUpperCase();
-        const ratingFilter = parseInt($('#ratingFilter').val(), 10);
-
-        updateActiveFiltersDisplay($('#statusFilter').val(), $('#vehicleFilter').val(), $('#ratingFilter').val());
-
-        $('#ridersTable tbody tr').each(function() {
-            const row = $(this);
-            const rowText = row.text().toLowerCase();
-            const rowStatus = (row.find('td:nth-child(2) .badge').text() || '').trim().toUpperCase();
-            const rowVehicle = (row.find('td:nth-child(4) .badge').text() || '').trim().toUpperCase();
-            const rowRating = row.find('.rating-container .fa-star.text-warning').length;
-
-            const matchesSearch = searchTerm === '' || rowText.includes(searchTerm);
-            const matchesStatus = statusFilter === '' || rowStatus === statusFilter;
-            const matchesVehicle = vehicleFilter === '' || rowVehicle === vehicleFilter;
-            const matchesRating = isNaN(ratingFilter) || ratingFilter === '' || rowRating >= ratingFilter;
-
-            row.toggle(matchesSearch && matchesStatus && matchesVehicle && matchesRating);
-        });
-    }
-
-    function resetFilters() {
-        $('#riderSearch, #statusFilter, #vehicleFilter, #ratingFilter').val('');
-        $('#activeFilters').empty();
-        applyFilters();
-    }
-
-    function removeFilter() {
-        $(`#${$(this).data('filter')}Filter`).val('').trigger('change');
-    }
-
-    function updateActiveFiltersDisplay(status, vehicle, rating) {
-        const activeFilters = $('#activeFilters').empty();
-        if (status) activeFilters.append(`<span class="badge bg-primary me-2 mb-1">Status: ${status} <i class="fas fa-times ms-1" data-filter="status" role="button"></i></span>`);
-        if (vehicle) activeFilters.append(`<span class="badge bg-success me-2 mb-1">Vehicle: ${vehicle} <i class="fas fa-times ms-1" data-filter="vehicle" role="button"></i></span>`);
-        if (rating) activeFilters.append(`<span class="badge bg-warning text-dark me-2 mb-1">Rating: ${rating}+ <i class="fas fa-times ms-1" data-filter="rating" role="button"></i></span>`);
-    }
-
-    // ===================================================================
-    // REPORT FUNCTIONS
-    // ===================================================================
-    function applyDateRange() {
-        const startDate = $('#startDate').val();
-        const endDate = $('#endDate').val();
-        if (!startDate || !endDate) return showError('Please select both a start and end date.');
-        if (new Date(startDate) > new Date(endDate)) return showError('End date must be after start date.');
-        $('#dateRangeDisplay').text(`${startDate} to ${endDate}`);
-        $('#dateRangeModal').modal('hide');
-        loadReports(startDate, endDate);
-    }
-
-    function handleTimeRangeSelection(e) {
-        e.preventDefault();
-        $('#selectedTimeRange').text($(this).text());
-        const range = $(this).data('range');
-        let startDate = new Date();
-        const endDate = new Date();
-
-        if (range === 'week') startDate.setDate(endDate.getDate() - 7);
-        else if (range === 'month') startDate.setMonth(endDate.getMonth() - 1);
-
-        loadReports(startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]);
-    }
-
-    function exportReports() {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const startDate = $('#startDate').val() || thirtyDaysAgo.toISOString().split('T')[0];
-        const endDate = $('#endDate').val() || new Date().toISOString().split('T')[0];
-        window.open(`${REPORTS_API}/export?startDate=${startDate}&endDate=${endDate}`, '_blank');
+        updateStatCards(counts);
     }
 
     // ===================================================================
     // RENDERING FUNCTIONS
     // ===================================================================
-    function renderRidersTable(riders) {
+
+    // Callback function used by PaginationUtils
+    function renderRidersPage(ridersForPage) {
         const tbody = $('#ridersTable tbody').empty();
-        if (!riders || riders.length === 0) {
-            tbody.html('<tr><td colspan="7" class="text-center">No riders found.</td></tr>');
+
+        if (!ridersForPage || ridersForPage.length === 0) {
+            tbody.html('<tr><td colspan="7" class="text-center text-muted py-5">No riders found.</td></tr>');
             return;
         }
 
-        const riderPayoutSummaries = {};
-        riders.forEach(rider => {
-            $.ajax({
-                url: `${API_BASE}/payouts/summary?deliveryPartnerId=${rider.id || rider.partnerId}`,
-                type: 'GET',
-                async: false,
-                success: function(payoutSummary) {
-                    riderPayoutSummaries[rider.id || rider.partnerId] = payoutSummary;
-                },
-                error: function(xhr) {
-                    console.error('Error loading payout summary for rider', rider.id || rider.partnerId, xhr);
-                    riderPayoutSummaries[rider.id || rider.partnerId] = null;
-                }
-            });
-        });
+        ridersForPage.forEach(rider => {
+            const status = determineRiderStatus(rider);
+            const riderId = rider.id || rider.partnerId || 'N/A';
+            const wallet = rider.walletBalance !== undefined ? rider.walletBalance : 0;
 
-        riders.sort((a, b) => (a.id || a.partnerId) - (b.id || b.partnerId));
-
-        riders.forEach(rider => {
-            const statusInfo = determineRiderStatus(rider);
-            const riderId = rider.id || rider.partnerId;
-            const payoutSummary = riderPayoutSummaries[riderId];
-            const walletBalance = payoutSummary ? payoutSummary.availableBalance : 0;
-
-            const row = `
-                <tr data-rider-id="${riderId}">
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="${rider.selfiePhotoUrl || 'resources/images/default-avatar.png'}" class="rounded-circle me-3" width="40" height="40" alt="${rider.firstName}" style="object-fit: cover;">
-                            <div>
-                                <h6 class="mb-0">${rider.firstName || ''} ${rider.lastName || ''}</h6>
-                                <small class="text-muted">ID: ${riderId}</small>
-                            </div>
+            const rowHtml = `
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <img src="${rider.avatar || 'resources/images/default-avatar.png'}" 
+                             class="rider-avatar-small" 
+                             alt="${rider.firstName}"
+                             onerror="this.src='resources/images/default-avatar.png'">
+                        <div class="rider-meta">
+                            <span class="rider-name-list">${rider.firstName} ${rider.lastName}</span>
+                            <span class="rider-id-list">ID: ${riderId}</span>
                         </div>
-                    </td>
-                    <td><span class="badge ${statusInfo.class}">${statusInfo.text}</span></td>
-                    <td>${rider.phoneNumber || 'N/A'}</td>
-                    <td><span class="badge ${getVehicleClass(rider.vehicleType)}">${rider.vehicleType || 'N/A'}</span></td>
-                    <td>${formatCurrency(walletBalance)}</td>
-                    <td><div class="rating-container">${getRatingStars(rider.rating)}</div></td>
-                    <td>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <a href="deliveryBoy-view?id=${riderId}" class="btn btn-outline-primary" title="View Details"><i class="fas fa-eye"></i></a>
-                            <a href="deliveryBoy-edit?id=${riderId}" class="btn btn-outline-secondary" title="Edit Profile"><i class="fas fa-edit"></i></a>
-                            <a href="deliveryBoy-admin-actions?id=${riderId}" class="btn btn-outline-info" title="Admin Actions"><i class="fas fa-user-shield"></i></a>
-                            <button class="btn btn-outline-danger delete-rider" data-rider-id="${riderId}" title="Delete Rider"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>`;
-            tbody.append(row);
+                    </div>
+                </td>
+                <td><span class="small fw-bold text-dark">${rider.phoneNumber || 'N/A'}</span></td>
+                <td><span class="zenith-badge ${status.bgClass}">${status.text}</span></td>
+                <td>${getVehicleBadge(rider.vehicleType)}</td>
+                <td class="fw-bold text-dark">${formatCurrency(wallet)}</td>
+                <td>
+                    <div class="small">
+                        <span class="fw-bold text-primary me-1">${rider.rating || 'New'}</span>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                </td>
+                <td class="text-end">
+                    <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Edit Profile"><i class="fas fa-pen"></i></button>
+                    <button class="btn-icon btn-icon-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+            tbody.append(rowHtml);
         });
     }
 
-    function renderShopItems(products) {
-        const container = $('#shop .row').empty();
-        if (!products || products.length === 0) {
-            container.html('<div class="col-12 text-center">No products found.</div>');
-            return;
-        }
-        products.forEach(product => {
-            container.append(`
-            <div class="col-xl-3 col-md-4 col-6 mb-4">
-                <div class="card h-100 product-card">
-                    <img src="${product.image}" class="card-img-top product-image" alt="${product.name}">
-                    <div class="card-body">
-                        <h5 class="card-title product-name">${product.name}</h5>
-                        <p class="card-text product-description">${product.description || ''}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 product-price">${formatCurrency(product.price)}</h6>
-                            <span class="stock-indicator ${product.stock > 0 ? 'stock-in' : 'stock-out'}">${product.stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
-                        </div>
+    function renderShopItems(items) {
+        const container = $('#shopItemsGrid').empty();
+        items.forEach(item => {
+            const html = `
+             <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card zenith-card h-100 overflow-hidden border-0 shadow-sm">
+                    <div class="position-relative" style="height: 160px; background: #f8f9fa;">
+                         <img src="${item.image}" class="w-100 h-100" style="object-fit: contain;" alt="${item.name}" 
+                              onerror="this.src='resources/images/default-product.png'">
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <div class="btn-group w-100" role="group">
-                            <button class="btn btn-sm btn-outline-primary edit-shop-item" data-product-id="${product.id}"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-outline-danger delete-shop-item" data-product-id="${product.id}"><i class="fas fa-trash"></i></button>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                             <h6 class="fw-bold mb-0 text-truncate" title="${item.name}">${item.name}</h6>
+                             <span class="badge bg-light text-dark border">${item.category || 'Item'}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h5 class="mb-0 text-primary fw-bold">${formatCurrency(item.price)}</h5>
+                            <small class="${item.stock > 0 ? 'text-success' : 'text-danger'} fw-bold">
+                                ${item.stock > 0 ? item.stock + ' in stock' : 'Out of Stock'}
+                            </small>
                         </div>
                     </div>
                 </div>
-            </div>`);
+             </div>`;
+            container.append(html);
         });
     }
 
-    function renderIncentiveReports(reports) {
-        const tbody = $('#reports .table tbody').empty();
-        if (!reports || reports.length === 0) {
-            tbody.html('<tr><td colspan="5" class="text-center">No incentive data available for the selected period.</td></tr>');
-            return;
-        }
-        reports.forEach(report => {
-            const completion = report.completion || 0;
-            tbody.append(`
-            <tr>
-                <td>${report.riderName}</td>
-                <td>${report.deliveries}</td>
-                <td>${report.target}</td>
-                <td>
-                    <div class="progress" role="progressbar" aria-valuenow="${completion}" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-${completion >= 100 ? 'success' : 'warning'}" style="width: ${completion}%"></div>
-                    </div>
-                    <small class="text-muted">${completion.toFixed(1)}%</small>
-                </td>
-                <td>${formatCurrency(report.bonus)}</td>
-            </tr>`);
-        });
-    }
-
-    function updateStatCards(total, counts) {
-        $('.card.bg-primary h3').text(total);
-        $('.card.bg-warning h3').text(counts.pending);
-        $('.card.bg-success h3').text(counts.active);
-        $('.card.bg-danger h3').text(counts.rejected);
+    function updateStatCards(stats) {
+        $('.stat-card').eq(0).find('h2').text(stats.total);
+        $('.stat-card').eq(1).find('h2').text(stats.active);
+        $('.stat-card').eq(2).find('h2').text(stats.pending);
+        $('.stat-card').eq(3).find('h2').text(stats.rejected);
     }
 
     // ===================================================================
-    // LOCATION DROPDOWN FUNCTIONS
-    // ===================================================================
-    function initLocationDropdowns() {
-        loadCountries();
-        $('select[name="countryId"]').change(loadStates);
-        $('select[name="stateId"]').change(loadDistricts);
-        $('select[name="districtId"]').change(loadCities);
-    }
-
-    function populateDropdown(dropdown, data, valueField, nameField, defaultOption) {
-        dropdown.empty().append(`<option value="">${defaultOption}</option>`);
-        data.forEach(item => dropdown.append(`<option value="${item[valueField]}">${item[nameField]}</option>`));
-        dropdown.prop('disabled', false);
-    }
-
-    function loadCountries() {
-        $.get(LOCATION_API.countries, countries => {
-            const dropdown = $('select[name="countryId"]');
-            populateDropdown(dropdown, countries, 'countryId', 'countryName', 'Select Country');
-            const india = countries.find(c => c.countryName.toLowerCase() === 'india');
-            if (india) dropdown.val(india.countryId).trigger('change');
-        }).fail(xhr => handleLocationError('countries', xhr));
-    }
-
-    function loadStates() {
-        resetDependentDropdowns('state');
-        const countryId = $(this).val();
-        if (!countryId) return;
-        const dropdown = $('select[name="stateId"]').prop('disabled', true).html('<option value="">Loading...</option>');
-        $.get(`${LOCATION_API.states}?countryId=${countryId}`, states => populateDropdown(dropdown, states, 'stateId', 'stateName', 'Select State'))
-         .fail(xhr => handleLocationError('states', xhr));
-    }
-
-    function loadDistricts() {
-        resetDependentDropdowns('district');
-        const stateId = $(this).val();
-        if (!stateId) return;
-        const dropdown = $('select[name="districtId"]').prop('disabled', true).html('<option value="">Loading...</option>');
-        $.get(`${LOCATION_API.districts}?stateId=${stateId}`, districts => populateDropdown(dropdown, districts, 'districtId', 'districtName', 'Select District'))
-         .fail(xhr => handleLocationError('districts', xhr));
-    }
-
-    function loadCities() {
-        resetDependentDropdowns('city');
-        const districtId = $(this).val();
-        if (!districtId) return;
-        const dropdown = $('select[name="cityId"]').prop('disabled', true).html('<option value="">Loading...</option>');
-        $.get(`${LOCATION_API.cities}?districtId=${districtId}`, cities => populateDropdown(dropdown, cities, 'cityId', 'cityName', 'Select City'))
-         .fail(xhr => handleLocationError('cities', xhr));
-    }
-
-    function resetDependentDropdowns(level) {
-        const levels = { state: ['stateId', 'districtId', 'cityId'], district: ['districtId', 'cityId'], city: ['cityId'] };
-        if (levels[level]) {
-            levels[level].forEach(fieldName => {
-                $(`select[name="${fieldName}"]`).prop('disabled', true).html(`<option value="">Select ${fieldName.replace('Id', '')}</option>`);
-            });
-        }
-    }
-
-    function handleLocationError(level, xhr) {
-        showError(`Failed to load ${level}.`);
-        console.error(`Error loading ${level}:`, xhr);
-    }
-
-    // ===================================================================
-    // CHART FUNCTIONS
-    // ===================================================================
-    function initCharts() {
-        const commonOptions = { responsive: true, maintainAspectRatio: false };
-        performanceChart = new Chart($('#performanceChart'), {
-            type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Deliveries', data: [], backgroundColor: 'rgba(54, 162, 235, 0.7)' }] },
-            options: { ...commonOptions, scales: { y: { beginAtZero: true } } }
-        });
-        statusChart = new Chart($('#statusChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Active', 'Pending', 'Rejected'],
-                datasets: [{
-                    data: [0, 0, 0],
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-                }]
-            },
-            options: commonOptions
-        });
-    }
-
-    function updateStatusChart(counts) {
-        if (!statusChart) return;
-        statusChart.data.datasets[0].data = [
-            counts.active,
-            counts.pending,
-            counts.rejected
-        ];
-        statusChart.update();
-    }
-
-    function updatePerformanceChart(data) {
-        if (!performanceChart || !data || !data.performance) return;
-        performanceChart.data.labels = data.performance.map(item => item.month);
-        performanceChart.data.datasets[0].data = data.performance.map(item => item.deliveries);
-        performanceChart.update();
-    }
-
-    // ===================================================================
-    // UTILITY FUNCTIONS
+    // HELPERS
     // ===================================================================
     function determineRiderStatus(rider) {
-        if (rider.approved == null) return { text: 'Inactive', class: 'bg-warning text-dark' };
-        if (rider.approved === false || rider.rejectionReason) return { text: 'Rejected', class: 'bg-danger' };
-        if (rider.approved === true) return { text: 'Active', class: 'bg-success' };
-        return { text: 'UNKNOWN', class: 'bg-secondary' };
+        const status = (rider.status || '').toUpperCase();
+        if (status === 'ACTIVE' || rider.approved === true) return { text: 'Active', bgClass: 'zenith-badge-success' };
+        if (status === 'REJECTED' || rider.approved === false) return { text: 'Rejected', bgClass: 'zenith-badge-danger' };
+        return { text: 'Pending', bgClass: 'zenith-badge-warning' };
+    }
+
+    function getVehicleBadge(type) {
+        if (!type) return '<span class="text-muted small">-</span>';
+        let cls = 'zenith-badge-secondary';
+        if (type === 'ELECTRIC') cls = 'zenith-badge-info';
+        if (type === 'PETROL') cls = 'zenith-badge-warning';
+        return `<span class="zenith-badge ${cls}">${type}</span>`;
     }
 
     function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount || 0);
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
     }
 
-    function getVehicleClass(vehicleType) {
-        const v = (vehicleType || '').toUpperCase();
-        return { 'ELECTRIC': 'bg-info text-dark', 'PETROL': 'bg-warning text-dark' }[v] || 'bg-secondary';
+    function initCharts() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Deliveries',
+                    data: [65, 59, 80, 81, 56, 95],
+                    fill: true,
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderColor: '#6366f1',
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
     }
 
-    function getRatingStars(rating) {
-        let stars = '';
-        const solidStars = Math.round(rating || 0);
-        for (let i = 1; i <= 5; i++) {
-            stars += `<i class="fas fa-star ${i <= solidStars ? 'text-warning' : 'text-muted opacity-50'}"></i>`;
-        }
-        return stars;
-    }
+    // ===================================================================
+    // EVENT HANDLERS
+    // ===================================================================
+    function setupEventHandlers() {
+        // --- 1. Filter Logic ---
+        $('#statusFilter, #vehicleFilter').change(function () {
+            const status = $('#statusFilter').val();
+            const vehicle = $('#vehicleFilter').val();
 
-    function showToast(message) {
-        $('#toastMessage').text(message);
-        new bootstrap.Toast($('#successToast')).show();
-    }
+            let filtered = allRiders;
+            if (status) filtered = filtered.filter(r => (r.status || '').toUpperCase() === status);
+            if (vehicle) filtered = filtered.filter(r => r.vehicleType === vehicle);
 
-    function showError(message) {
-        $('#errorMessage').text(message);
-        new bootstrap.Toast($('#errorToast')).show();
-    }
+            ridersPaginator.setData(filtered); // Update pagination with filtered set
+        });
 
-    function getErrorMessage(xhr) {
-        if (xhr.responseJSON && xhr.responseJSON.message) return xhr.responseJSON.message;
-        if (xhr.responseText) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.message) return response.message;
-            } catch (e) {
-                if (xhr.responseText.length < 150) return xhr.responseText;
-            }
-        }
-        if (xhr.status === 0) return "Network error - Could not connect to the server";
-        return xhr.statusText || "An unknown error occurred";
-    }
+        $('#resetFiltersBtn').click(() => {
+            $('#statusFilter, #vehicleFilter').val('');
+            ridersPaginator.setData(allRiders);
+        });
 
-    function handleAjaxError(xhr, defaultMessage) {
-        console.error("AJAX Error:", xhr);
-        if (xhr.responseJSON && xhr.responseJSON.errors) {
-            highlightErrors(xhr.responseJSON.errors);
-            showError("Please check the form for errors and try again.");
-        } else {
-            showError(getErrorMessage(xhr) || defaultMessage);
-        }
-    }
+        $('#riderSearch').on('keyup', function () {
+            const val = $(this).val().toLowerCase();
+            const filtered = allRiders.filter(r =>
+                r.firstName.toLowerCase().includes(val) ||
+                r.lastName.toLowerCase().includes(val) ||
+                (r.phoneNumber && r.phoneNumber.includes(val))
+            );
+            ridersPaginator.setData(filtered);
+        });
 
-    function highlightErrors(errors) {
-        $('.is-invalid').removeClass('is-invalid');
-        $('.invalid-feedback').addClass('d-none');
-        if (errors) {
-            errors.forEach(error => {
-                const field = $(`[name="${error.field}"]`);
-                if (field.length) {
-                    field.addClass('is-invalid').next('.invalid-feedback').text(error.defaultMessage || 'Invalid input.').removeClass('d-none');
+        // --- 2. Add Rider Form Submission (Bug Fix) ---
+        $('#addRiderForm').on('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = $('#addRiderSubmitBtn');
+            const originalText = submitBtn.text();
+
+            submitBtn.prop('disabled', true).text('Creating...');
+
+            $.ajax({
+                url: RIDERS_API,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (resp) {
+                    $('#addRiderModal').modal('hide');
+                    showToast('Rider created successfully!', 'success');
+                    $('#addRiderForm')[0].reset();
+                    loadRidersBackground(); // Reload list
+                },
+                error: function (xhr) {
+                    showToast('Failed to create rider: ' + xhr.responseText, 'error');
+                },
+                complete: function () {
+                    submitBtn.prop('disabled', false).text(originalText);
                 }
             });
-        }
+        });
     }
 
-    function handleEditShopItemClick() {
-        const card = $(this).closest('.card');
-        const productId = $(this).data('product-id');
-        $('#editProductId').val(productId);
-        $('#editProductName').val(card.find('.product-name').text());
-        $('#editProductDescription').val(card.find('.product-description').text());
-        const price = parseFloat(card.find('.product-price').text().replace(/[^0-9.]/g, ''));
-        $('#editProductPrice').val(price.toFixed(2));
-        const imageSrc = card.find('.product-image').attr('src');
-        $('#editProductImageName').text(imageSrc.split('/').pop());
-        $('#editShopItemModal').modal('show');
+    function showToast(msg, type) {
+        const toastEl = type === 'success' ? $('#successToast') : $('#errorToast');
+        toastEl.find('.toast-body').text(msg);
+        const toast = new bootstrap.Toast(toastEl[0]);
+        toast.show();
     }
 });

@@ -2,228 +2,262 @@
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
         <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-            <!-- HEADER & SIDEBAR INCLUDED via header.jsp -->
             <%@ include file="/includes/header.jsp" %>
 
-                <!-- External Libraries -->
-                <script src="https://cdn.tailwindcss.com"></script>
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-                    rel="stylesheet">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <!-- External Libraries (Chart.js & Flatpickr) -->
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
                 <!-- Custom CSS -->
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/profit.css">
 
-                <main class="main-content p-6">
+                <main class="main-content">
+                    <div class="container-fluid px-4 pt-4">
 
-                    <!-- DASHBOARD HEADER -->
-                    <div
-                        class="glass-header rounded-xl px-6 py-4 mb-8 flex flex-col md:flex-row justify-between items-center shadow-sm">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Profit & Revenue Dashboard</h1>
-                            <p class="text-sm text-gray-500 mt-1">Real-time financial overview</p>
-                        </div>
-
-                        <div class="flex items-center gap-4 mt-4 md:mt-0">
-                            <!-- Date Filter -->
-                            <div class="relative">
-                                <input type="text" id="dateRangePicker"
-                                    class="flatpickr-input pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="Select Date Range">
-                                <i class="fas fa-calendar absolute left-3 top-3 text-gray-400"></i>
+                        <!-- DASHBOARD HEADER -->
+                        <div class="d-flex justify-content-between align-items-center mb-5 fade-in-up">
+                            <div>
+                                <h1 class="fw-bold text-dark mb-1">Profit & Revenue Dashboard</h1>
+                                <p class="text-muted small">Real-time financial overview and reports</p>
                             </div>
 
-                            <button
-                                class="bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-200 shadow-sm transition-all"
-                                id="printProfitBtn">
-                                <i class="fas fa-print mr-2"></i> Print
-                            </button>
-                            <button
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-all transform hover:-translate-y-0.5"
-                                id="downloadProfitPdfBtn">
-                                <i class="fas fa-file-arrow-down mr-2"></i> Export PDF
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="profitContent">
-                        <!-- TOP KPI STATS -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <!-- Total Revenue -->
-                            <div class="glass-panel kpi-card animate-enter" style="animation-delay: 0.1s;">
-                                <span class="kpi-title">Total Revenue</span>
-                                <span class="kpi-value text-blue-600" id="totalOrder">₹0</span>
-                                <i class="fas fa-wallet kpi-icon text-blue-500"></i>
-                                <div class="mt-4 text-xs text-green-500 font-semibold flex items-center">
-                                    <i class="fas fa-arrow-up mr-1"></i> 12.5% <span
-                                        class="text-gray-400 font-normal ml-1">vs last period</span>
+                            <div class="d-flex gap-2">
+                                <!-- Date Filter -->
+                                <div class="input-group" style="width: 250px;">
+                                    <span class="input-group-text bg-white"><i
+                                            class="fas fa-calendar-alt text-primary"></i></span>
+                                    <input type="text" id="dateRangePicker" class="form-control"
+                                        placeholder="Select Date Range">
                                 </div>
-                            </div>
 
-                            <!-- Total Commission -->
-                            <div class="glass-panel kpi-card animate-enter" style="animation-delay: 0.2s;">
-                                <span class="kpi-title">Commission Earned</span>
-                                <span class="kpi-value text-indigo-600" id="commission">₹0</span>
-                                <i class="fas fa-percent kpi-icon text-indigo-500"></i>
-                                <div class="mt-4 text-xs text-green-500 font-semibold flex items-center">
-                                    <i class="fas fa-arrow-up mr-1"></i> 8.2% <span
-                                        class="text-gray-400 font-normal ml-1">vs last period</span>
-                                </div>
-                            </div>
-
-                            <!-- Pay to Vendor -->
-                            <div class="glass-panel kpi-card animate-enter" style="animation-delay: 0.3s;">
-                                <span class="kpi-title">Payable to Vendors</span>
-                                <span class="kpi-value text-orange-600" id="payVendor">₹0</span>
-                                <i class="fas fa-store kpi-icon text-orange-500"></i>
-                                <div class="mt-4 text-xs text-gray-500 font-normal flex items-center">
-                                    Pending Settlement
-                                </div>
-                            </div>
-
-                            <!-- Net Profit -->
-                            <div class="glass-panel kpi-card profit-highlight animate-enter"
-                                style="animation-delay: 0.4s;">
-                                <span class="kpi-title text-white">Net Profit</span>
-                                <span class="kpi-value text-white" id="profit">₹0</span>
-                                <i class="fas fa-chart-line kpi-icon text-white"></i>
-                                <div class="mt-4 text-xs text-white font-semibold flex items-center opacity-90">
-                                    <i class="fas fa-check-circle mr-1"></i> Healthy Margin
+                                <div class="btn-group">
+                                    <button class="btn btn-white border shadow-sm" id="printProfitBtn">
+                                        <i class="fas fa-print me-2 text-muted"></i> Print
+                                    </button>
+                                    <button class="btn btn-zenith-primary shadow-sm" id="downloadProfitPdfBtn">
+                                        <i class="fas fa-file-download me-2"></i> Export PDF
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- CHARTS SECTION -->
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                            <!-- Main Trend Chart -->
-                            <div class="glass-panel lg:col-span-2 animate-enter" style="animation-delay: 0.5s;">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">Revenue vs Profit Trend</h3>
-                                <div class="chart-container">
-                                    <canvas id="revenueChart"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- Breakdown Pie Chart -->
-                            <div class="glass-panel animate-enter" style="animation-delay: 0.6s;">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">Revenue Breakdown</h3>
-                                <div class="mini-chart-container flex justify-center">
-                                    <canvas id="breakdownChart"></canvas>
-                                </div>
-                                <div class="mt-6 flex flex-col gap-2">
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-500"><span
-                                                class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2"></span>Platform
-                                            Fees</span>
-                                        <span class="font-semibold" id="piePlatform">₹0</span>
+                        <div id="profitContent">
+                            <!-- TOP KPI STATS -->
+                            <div class="row g-4 mb-4">
+                                <!-- Total Revenue -->
+                                <div class="col-md-6 col-lg-3 animate-enter" style="animation-delay: 0.1s;">
+                                    <div class="glass-panel kpi-card h-100 p-4">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="kpi-title mb-2">Total Revenue</h6>
+                                                <h2 class="kpi-value text-primary mb-0" id="totalOrder">₹0</h2>
+                                            </div>
+                                            <div class="icon-circle bg-primary-light text-primary">
+                                                <i class="fas fa-wallet"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-success small fw-bold">
+                                            <i class="fas fa-arrow-up me-1"></i> 12.5% <span
+                                                class="text-muted fw-normal ms-1">vs last period</span>
+                                        </div>
                                     </div>
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-500"><span
-                                                class="w-2 h-2 rounded-full bg-indigo-500 inline-block mr-2"></span>Service
-                                            Fees</span>
-                                        <span class="font-semibold" id="pieService">₹0</span>
+                                </div>
+
+                                <!-- Total Commission -->
+                                <div class="col-md-6 col-lg-3 animate-enter" style="animation-delay: 0.2s;">
+                                    <div class="glass-panel kpi-card h-100 p-4">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="kpi-title mb-2">Commission Earned</h6>
+                                                <h2 class="kpi-value text-indigo mb-0" id="commission">₹0</h2>
+                                            </div>
+                                            <div class="icon-circle bg-indigo-light text-indigo">
+                                                <i class="fas fa-percent"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-success small fw-bold">
+                                            <i class="fas fa-arrow-up me-1"></i> 8.2% <span
+                                                class="text-muted fw-normal ms-1">vs last period</span>
+                                        </div>
                                     </div>
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-500"><span
-                                                class="w-2 h-2 rounded-full bg-green-500 inline-block mr-2"></span>Delivery
-                                            Fees</span>
-                                        <span class="font-semibold" id="pieDelivery">₹0</span>
+                                </div>
+
+                                <!-- Pay to Vendor -->
+                                <div class="col-md-6 col-lg-3 animate-enter" style="animation-delay: 0.3s;">
+                                    <div class="glass-panel kpi-card h-100 p-4">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="kpi-title mb-2">Payable to Vendors</h6>
+                                                <h2 class="kpi-value text-warning mb-0" id="payVendor">₹0</h2>
+                                            </div>
+                                            <div class="icon-circle bg-warning-light text-warning">
+                                                <i class="fas fa-store"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-muted small">
+                                            Pending Settlement
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Net Profit -->
+                                <div class="col-md-6 col-lg-3 animate-enter" style="animation-delay: 0.4s;">
+                                    <div class="glass-panel kpi-card profit-highlight h-100 p-4 text-white">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="kpi-title text-white-50 mb-2">Net Profit</h6>
+                                                <h2 class="kpi-value text-white mb-0" id="profit">₹0</h2>
+                                            </div>
+                                            <div class="icon-circle bg-white text-success bg-opacity-25">
+                                                <i class="fas fa-chart-line text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-white small opacity-75">
+                                            <i class="fas fa-check-circle me-1"></i> Healthy Margin
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- CHARTS SECTION -->
+                            <div class="row g-4 mb-5">
+                                <!-- Main Trend Chart -->
+                                <div class="col-lg-8 animate-enter" style="animation-delay: 0.5s;">
+                                    <div class="glass-panel p-4 h-100">
+                                        <h5 class="fw-bold mb-4 text-dark">Revenue vs Profit Trend</h5>
+                                        <div class="chart-container" style="position: relative; height: 350px;">
+                                            <canvas id="revenueChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Breakdown Pie Chart -->
+                                <div class="col-lg-4 animate-enter" style="animation-delay: 0.6s;">
+                                    <div class="glass-panel p-4 h-100">
+                                        <h5 class="fw-bold mb-4 text-dark">Revenue Breakdown</h5>
+                                        <div class="mini-chart-container d-flex justify-content-center"
+                                            style="position: relative; height: 250px;">
+                                            <canvas id="breakdownChart"></canvas>
+                                        </div>
+                                        <div class="mt-4 d-flex flex-column gap-2">
+                                            <div class="d-flex justify-content-between small">
+                                                <span class="text-muted"><i
+                                                        class="fas fa-circle text-primary me-2"></i>Platform Fees</span>
+                                                <span class="fw-bold" id="piePlatform">₹0</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small">
+                                                <span class="text-muted"><i
+                                                        class="fas fa-circle text-indigo me-2"></i>Service Fees</span>
+                                                <span class="fw-bold" id="pieService">₹0</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small">
+                                                <span class="text-muted"><i
+                                                        class="fas fa-circle text-success me-2"></i>Delivery Fees</span>
+                                                <span class="fw-bold" id="pieDelivery">₹0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DETAILED FEES BREAKDOWN -->
+                            <div class="mb-5 animate-enter" style="animation-delay: 0.7s;">
+                                <h5 class="fw-bold text-dark mb-3">Detailed Financial Breakdown</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">Platform Fee</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="platformFee">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-primary-light text-primary"><i
+                                                    class="fas fa-desktop"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">Service Fee</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="serviceFee">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-indigo-light text-indigo"><i
+                                                    class="fas fa-concierge-bell"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">User Delivery</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="deliveryUser">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-success-light text-success"><i
+                                                    class="fas fa-user-tag"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">Partner Pay</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="deliveryPartner">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-danger-light text-danger"><i
+                                                    class="fas fa-motorcycle"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">GST Collected</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="gst">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-warning-light text-warning"><i
+                                                    class="fas fa-file-invoice-dollar"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">Rain Fees</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="rainFee">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-info-light text-info"><i
+                                                    class="fas fa-cloud-rain"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div
+                                            class="bg-white rounded-3 p-3 border shadow-sm d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.7rem;">Packaging</small>
+                                                <h5 class="mb-0 fw-bold text-dark" id="packagingFee">₹0</h5>
+                                            </div>
+                                            <div class="icon-circle-sm bg-secondary-light text-secondary"><i
+                                                    class="fas fa-box"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-
-                        <!-- DETAILED FEES BREAKDOWN -->
-                        <h3 class="text-xl font-bold text-gray-800 mb-4 animate-enter" style="animation-delay: 0.7s;">
-                            Detailed Financial Breakdown</h3>
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-enter" style="animation-delay: 0.8s;">
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">Platform Fee</p>
-                                    <p class="text-lg font-bold text-gray-800" id="platformFee">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                                    <i class="fas fa-desktop"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">Service Fee</p>
-                                    <p class="text-lg font-bold text-gray-800" id="serviceFee">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
-                                    <i class="fas fa-concierge-bell"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">User Delivery Fee</p>
-                                    <p class="text-lg font-bold text-gray-800" id="deliveryUser">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">Partner Payments</p>
-                                    <p class="text-lg font-bold text-gray-800" id="deliveryPartner">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center text-red-500">
-                                    <i class="fas fa-motorcycle"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">GST Collected</p>
-                                    <p class="text-lg font-bold text-gray-800" id="gst">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500">
-                                    <i class="fas fa-file-invoice-dollar"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">Rain Fees</p>
-                                    <p class="text-lg font-bold text-gray-800" id="rainFee">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-400">
-                                    <i class="fas fa-cloud-rain"></i>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-semibold">Packaging Fees</p>
-                                    <p class="text-lg font-bold text-gray-800" id="packagingFee">₹0</p>
-                                </div>
-                                <div
-                                    class="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                            </div>
-
-                        </div>
-
                     </div>
                 </main>
 

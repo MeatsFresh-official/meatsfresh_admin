@@ -111,10 +111,12 @@ body {
     position: relative;
     border-radius: 1rem;
     overflow: hidden;
-    aspect-ratio: 16/9;
-    background: #e5e7eb;
+    /* aspect-ratio: 16/9; Removed to allow footer content */
+    background: #ffffff;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .banner-card:hover {

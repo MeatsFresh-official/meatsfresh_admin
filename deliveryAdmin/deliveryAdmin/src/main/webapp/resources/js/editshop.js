@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const API_BASE = 'http://113.11.231.115:1275/api';
+    const API_BASE = 'http://meatsfresh.org.in:8080/api';
     const ADMIN_VENDORS_API = `${API_BASE}/vendor/allVendors`;
     const VENDOR_STATUS_API = (id) => `${API_BASE}/vendor/admin/${id}/status`;
     const VENDOR_UPDATE_API = (id) => `${API_BASE}/vendor/admin/update/${id}`;
-    const IMAGE_BASE_URL = 'http://113.11.231.115:8080/';
+    const IMAGE_BASE_URL = 'http://meatsfresh.org.in:8080/';
 
     const editVendorForm = document.getElementById('editVendorForm');
     const mainTitle = document.getElementById('edit-vendor-title-main');
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (vendor.shopPhoto) {
             shopPhotoEl.innerHTML = `<img src="${IMAGE_BASE_URL}${vendor.shopPhoto}" class="img-fluid rounded" alt="Current Photo" /><small class="text-muted d-block mt-2">Current photo. Upload to replace.</small>`;
         } else {
-             shopPhotoEl.innerHTML = `<span class="text-muted small">No photo uploaded.</span>`;
+            shopPhotoEl.innerHTML = `<span class="text-muted small">No photo uploaded.</span>`;
         }
     };
 

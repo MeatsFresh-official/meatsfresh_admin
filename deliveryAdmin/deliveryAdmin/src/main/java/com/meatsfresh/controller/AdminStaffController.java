@@ -117,16 +117,27 @@ public class AdminStaffController {
         }
     }
 
-    @PostMapping("/permissions/{id}")
+    @PostMapping("/update-access-pages")
     @ResponseBody
-    public ResponseEntity<?> updatePermissions(
-            @PathVariable Long id,
-            @RequestBody List<String> permissions) {
+    public ResponseEntity<?> updateAccessPages(
+            @RequestParam Long staffId,
+            @RequestParam(required = false) List<String> accessPages) {
         try {
-            staffService.updatePermissions(id, permissions);
-            return ResponseEntity.ok().build();
+            if (accessPages == null) {
+                accessPages = new ArrayList<>();
+            }
+            // Ensure dashboard access is preserved if it's mandatory, or let logic decide
+            if (!accessPages.contains("DASHBOARD")) {
+                accessPages.add("DASHBOARD");
+            }
+
+            Staff staff = staffService.getStaffById(staffId);
+            staff.setAccessPages(accessPages);
+            staffService.saveStaff(staff); // Assuming saveStaff updates existing
+
+            return ResponseEntity.ok().body("{\"success\": true, \"message\": \"Permissions updated successfully\"}");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
         }
     }
 

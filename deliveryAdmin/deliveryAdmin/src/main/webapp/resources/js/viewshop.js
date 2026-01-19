@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const API_BASE = 'http://113.11.231.115:1275/api/vendor';
-    const IMAGE_BASE_URL = 'http://113.11.231.115:8080';
+    const API_BASE = 'http://meatsfresh.org.in:8080/api/vendor';
+    const IMAGE_BASE_URL = 'http://meatsfresh.org.in:8080';
 
     const ADMIN_VENDORS_API = `${API_BASE}/allVendors`;
     const VENDOR_STATUS_API = (id) => `${API_BASE}/admin/${id}/status`;
@@ -30,10 +30,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch(url, fetchOptions);
 
             if (!response.ok) {
-                 const errorData = await response.json().catch(() => ({ message: response.statusText }));
-                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
-             if (response.status === 204) return null; // Handle No Content success response
+            if (response.status === 204) return null; // Handle No Content success response
 
             return response.json();
         } catch (error) {

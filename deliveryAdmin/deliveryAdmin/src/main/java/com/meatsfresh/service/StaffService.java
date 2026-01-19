@@ -49,7 +49,6 @@ public class StaffService {
             staff.getAccessPages().add("DASHBOARD");
         }
 
-
         if (profileImage != null && !profileImage.isEmpty()) {
             String fileName = saveProfileImage(profileImage);
             staff.setProfileImage("/" + UPLOAD_DIR + fileName);
@@ -124,8 +123,16 @@ public class StaffService {
     }
 
     public Staff findByEmailWithAccessPages(String email) {
-        return staffRepository.findByEmailWithAccessPages(email).orElseThrow(() -> new UsernameNotFoundException("Staff not found with email: " + email));
+        return staffRepository.findByEmailWithAccessPages(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Staff not found with email: " + email));
+    }
+
+    public Staff getStaffById(Long id) {
+        return staffRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + id));
+    }
+
+    public Staff saveStaff(Staff staff) {
+        return staffRepository.save(staff);
     }
 }
-
-

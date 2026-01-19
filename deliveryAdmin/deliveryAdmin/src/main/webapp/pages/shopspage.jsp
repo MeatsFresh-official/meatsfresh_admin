@@ -1,234 +1,295 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ include file="/includes/header.jsp" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@ include file="/includes/header.jsp" %>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/shop-view.css">
 
-<main class="main-content">
-    <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="pt-4">Shops Management</h1>
-        </div>
-
-        <div class="row" id="shop-stats-container">
-            <!-- JavaScript will populate this section with stat cards -->
-        </div>
-
-        <!--Aggregated Dashboard UI -->
-        <div class="card mb-4 animate-on-load">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-                 <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Aggregated Dashboard</h5>
-                 <div class="d-flex align-items-center mt-2 mt-md-0">
-                    <div class="dropdown me-2">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dashboardDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-calendar-alt me-1"></i> <span>This Month</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dashboardDropdown">
-                            <li><a class="dropdown-item dashboard-range" href="#" data-range="today">Today</a></li>
-                            <li><a class="dropdown-item dashboard-range" href="#" data-range="week">Last 7 Days</a></li>
-                            <li><a class="dropdown-item dashboard-range active" href="#" data-range="month">This Month</a></li>
-                        </ul>
+        <main class="main-content">
+            <div class="container-fluid px-4 pt-4">
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center mb-5 fade-in-up">
+                    <div>
+                        <h1 class="fw-bold text-dark mb-1">Vendor Management</h1>
+                        <p class="text-muted small">Manage all your registered shops and partners</p>
                     </div>
-                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
-                        <i class="fas fa-calendar-check me-1"></i> Custom Range
+                    <button class="btn btn-zenith-primary shadow-sm" data-bs-toggle="modal"
+                        data-bs-target="#addShopModal">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Vendor
                     </button>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="row" id="vendor-dashboard-stats">
-                    <!-- SKELETON LOADER FOR THE NEW DASHBOARD LAYOUT -->
-                    <div class="col-lg-5 mb-4 mb-lg-0">
-                         <div class="card skeleton w-100" style="height: 240px;"></div>
-                    </div>
-                    <div class="col-lg-7">
-                        <div class="row g-3">
-                            <div class="col-md-6"><div class="card skeleton w-100" style="height: 80px;"></div></div>
-                            <div class="col-md-6"><div class="card skeleton w-100" style="height: 80px;"></div></div>
-                            <div class="col-md-6"><div class="card skeleton w-100" style="height: 80px;"></div></div>
-                            <div class="col-md-6"><div class="card skeleton w-100" style="height: 80px;"></div></div>
-                        </div>
-                    </div>
+
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-5" id="shop-stats-container">
+                    <!-- JS populated stats -->
                 </div>
-            </div>
-        </div>
 
-
-        <!-- Main Shops Table Card -->
-        <div class="card mb-4 animate-on-load" style="animation-delay: 0.2s;">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-                <h5 class="mb-0"><i class="fas fa-store me-2"></i>All Shops</h5>
-                <!-- Global Search with Button -->
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-light">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input
-                                type="text"
-                                id="globalShopSearch"
-                                class="form-control"
-                                placeholder="Search by shop name, owner, mobile, email..."
-                            >
-                            <button class="btn btn-primary" id="searchShopBtn">
-                                Search
+                <!-- Filters & Search -->
+                <div class="glass-panel p-3 mb-4 d-flex flex-wrap gap-3 align-items-center justify-content-between fade-in-up"
+                    style="animation-delay: 0.1s;">
+                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                        <div class="input-group" style="max-width: 400px;">
+                            <span class="input-group-text bg-white border-end-0"><i
+                                    class="fas fa-search text-muted"></i></span>
+                            <input type="text" id="globalShopSearch" class="form-control border-start-0 ps-0"
+                                placeholder="Search shops, owners, IDs...">
+                            <button class="btn btn-light border bg-white text-primary"
+                                id="searchShopBtn">Search</button>
+                        </div>
+                        <div class="vr h-50 my-auto text-muted"></div>
+                        <div class="dropdown">
+                            <button class="btn btn-light dropdown-toggle border-0 fw-bold text-secondary" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="fas fa-filter me-2 text-primary"></i> <span id="filterStatusText">All
+                                    Status</span>
                             </button>
+                            <ul class="dropdown-menu shadow border-0">
+                                <li><a class="dropdown-item filter-shops" href="#" data-filter-type="status"
+                                        data-filter-value="all">All Shops</a></li>
+                                <li><a class="dropdown-item filter-shops" href="#" data-filter-type="status"
+                                        data-filter-value="ACCEPTED">Accepted</a></li>
+                                <li><a class="dropdown-item filter-shops" href="#" data-filter-type="status"
+                                        data-filter-value="PENDING">Pending</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item filter-shops" href="#" data-filter-type="availability"
+                                        data-filter-value="true">Active/Online</a></li>
+                                <li><a class="dropdown-item filter-shops" href="#" data-filter-type="availability"
+                                        data-filter-value="false">Offline</a></li>
+                            </ul>
                         </div>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="viewMode" id="view-grid" autocomplete="off" checked>
+                        <label class="btn btn-outline-light text-primary border-0" for="view-grid"><i
+                                class="fas fa-th-large"></i></label>
+
+                        <input type="radio" class="btn-check" name="viewMode" id="view-list" autocomplete="off">
+                        <label class="btn btn-outline-light text-muted border-0" for="view-list"><i
+                                class="fas fa-list"></i></label>
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center mt-2 mt-md-0">
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addShopModal">
-                        <i class="fas fa-plus me-1"></i> Add Vendor
-                    </button>
-                    <div class="btn-group ms-2">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-filter me-1"></i> <span id="filterStatusText">Filter</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item filter-shops" href="#" data-filter-type="status" data-filter-value="all">All Shops</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item filter-shops" href="#" data-filter-type="status" data-filter-value="ACCEPTED">Accepted</a></li>
-                            <li><a class="dropdown-item filter-shops" href="#" data-filter-type="status" data-filter-value="PENDING">Pending</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item filter-shops" href="#" data-filter-type="availability" data-filter-value="true">Available</a></li>
-                            <li><a class="dropdown-item filter-shops" href="#" data-filter-type="availability" data-filter-value="false">Unavailable</a></li>
+                <!-- Shops Grid/List Container -->
+                <div id="shops-container" class="row g-4 fade-in-up" style="animation-delay: 0.2s;">
+                    <!-- Content Rendered via JS -->
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status"><span
+                                class="visually-hidden">Loading...</span></div>
+                    </div>
+                </div>
+                <!-- Pagination -->
+                <div id="shopsPagination"></div>
+            </div>
+        </main>
+
+        <!-- Add Vendor Modal (Existing structure preserved but cleaned if needed) -->
+        <div class="modal fade" id="addShopModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <form class="modal-content border-0 shadow-lg" enctype="multipart/form-data" id="vendorForm">
+                    <div class="modal-header bg-white border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="vendorModalTitle">Add New Vendor</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 bg-light">
+                        <!-- Existing Tab Structure - Preserving functional core -->
+                        <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm d-inline-flex" id="vendorTabs"
+                            role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active rounded-pill px-4"
+                                    id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-info" type="button">Basic
+                                    Info</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill px-4"
+                                    id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-info"
+                                    type="button">Contact</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill px-4"
+                                    id="location-tab" data-bs-toggle="tab" data-bs-target="#location-info"
+                                    type="button">Location</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill px-4"
+                                    id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-info"
+                                    type="button">Bank</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill px-4"
+                                    id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents"
+                                    type="button">Docs</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill px-4"
+                                    id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings"
+                                    type="button">Settings</button></li>
                         </ul>
+
+                        <div class="tab-content" id="vendorTabContent">
+                            <!-- Tab content structure kept same but classes modernized if needed -->
+                            <div class="tab-pane fade show active" id="basic-info">
+                                <div class="glass-panel p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="zenith-form-label">Vendor Name
+                                                *</label><input type="text" name="vendorName"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Contact Person
+                                                *</label><input type="text" name="contactPerson"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">PAN Number
+                                                *</label><input type="text" name="panNumber"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">FSSAI Number
+                                                *</label><input type="text" name="fssaiNumber"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">GST Number</label><input
+                                                type="text" name="gstNumber" class="form-control zenith-input"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="contact-info">
+                                <div class="glass-panel p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="zenith-form-label">Email *</label><input
+                                                type="email" name="email" class="form-control zenith-input" required>
+                                        </div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Phone *</label><input
+                                                type="tel" name="phoneNumber" class="form-control zenith-input"
+                                                required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Alt Phone</label><input
+                                                type="tel" name="alternatePhoneNumber"
+                                                class="form-control zenith-input"></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Zip Code *</label><input
+                                                type="text" name="zipCode" class="form-control zenith-input" required>
+                                        </div>
+                                        <div class="col-12"><label class="zenith-form-label">Address *</label><textarea
+                                                name="address" class="form-control zenith-input" rows="2"
+                                                required></textarea></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="location-info">
+                                <div class="glass-panel p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="zenith-form-label">Country *</label><select
+                                                name="countryId" class="form-select zenith-input" id="countryId"
+                                                required>
+                                                <option value="">Select</option>
+                                            </select></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">State *</label><select
+                                                name="stateId" class="form-select zenith-input" id="stateId" required
+                                                disabled></select></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">District *</label><select
+                                                name="districtId" class="form-select zenith-input" id="districtId"
+                                                required disabled></select></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">City *</label><select
+                                                name="cityId" class="form-select zenith-input" id="cityId" required
+                                                disabled></select></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Latitude</label><input
+                                                type="text" name="latitude" class="form-control zenith-input"
+                                                value="12.9716"></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Longitude</label><input
+                                                type="text" name="longitude" class="form-control zenith-input"
+                                                value="77.5946"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="bank-info">
+                                <div class="glass-panel p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="zenith-form-label">Acc Holder
+                                                *</label><input type="text" name="bankHolderName"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Bank Name *</label><input
+                                                type="text" name="bankName" class="form-control zenith-input" required>
+                                        </div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Account No
+                                                *</label><input type="text" name="accountNumber"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">IFSC Code *</label><input
+                                                type="text" name="ifscCode" class="form-control zenith-input" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="documents">
+                                <div class="glass-panel p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="zenith-form-label">PAN Card *</label><input
+                                                type="file" name="panCardFile" class="form-control zenith-input"
+                                                required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">FSSAI Cert
+                                                *</label><input type="file" name="fssaiFile"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">GST Cert</label><input
+                                                type="file" name="gstCertificateFile" class="form-control zenith-input">
+                                        </div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Shop Photo</label><input
+                                                type="file" name="shopPhotoFile" class="form-control zenith-input"
+                                                accept="image/*"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="settings">
+                                <div class="glass-panel p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="zenith-form-label">Categories
+                                                *</label><input type="text" name="productCategories"
+                                                class="form-control zenith-input" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Open Time *</label><input
+                                                type="time" name="openingTime" class="form-control zenith-input"
+                                                value="09:00" required></div>
+                                        <div class="col-md-6"><label class="zenith-form-label">Close Time
+                                                *</label><input type="time" name="closingTime"
+                                                class="form-control zenith-input" value="21:00" required></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <div class="modal-footer border-top-0 pt-0 bg-light">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-zenith-primary">Add Vendor</button>
+                    </div>
+                </form>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-stylish mb-0" id="shopsTable">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Vendor Info</th>
-                                <th>Contact Details</th>
-                                <th>Status</th>
-                                <th>Availability</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="shopsTableBody">
-                            <tr><td colspan="5" class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>
-                        </tbody>
-                    </table>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Confirm Deletion</h5><button type="button"
+                            class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="deleteConfirmationMessage">Are you sure you want to delete this item? This action cannot
+                            be undone.</p>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger"
+                            id="confirmDeleteBtn">Delete</button></div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
 
-<!-- Add Vendor Modal -->
-<div class="modal fade" id="addShopModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <form class="modal-content" enctype="multipart/form-data" id="vendorForm">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="vendorModalTitle">Add New Vendor & Shop</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <ul class="nav nav-tabs mb-4" id="vendorTabs" role="tablist">
-                    <li class="nav-item" role="presentation"><button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-info" type="button" role="tab">Basic Info</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-info" type="button" role="tab">Contact</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location-info" type="button" role="tab">Location</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-info" type="button" role="tab">Bank Details</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">Documents</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">Settings</button></li>
-                </ul>
-                <div class="tab-content p-2" id="vendorTabContent">
-                    <!-- Basic Info Tab -->
-                    <div class="tab-pane fade show active" id="basic-info" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Vendor Name *</label><input type="text" name="vendorName" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Contact Person *</label><input type="text" name="contactPerson" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">PAN Number *</label><input type="text" name="panNumber" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">FSSAI Number *</label><input type="text" name="fssaiNumber" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">GST Number</label><input type="text" name="gstNumber" class="form-control"></div>
-                        </div>
+        <!-- Date Range Modal -->
+        <div class="modal fade" id="dateRangeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select Date Range</h5><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <!-- Contact Info Tab -->
-                    <div class="tab-pane fade" id="contact-info" role="tabpanel">
-                         <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Email *</label><input type="email" name="email" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Phone Number *</label><input type="tel" name="phoneNumber" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Alternate Phone</label><input type="tel" name="alternatePhoneNumber" class="form-control"></div>
-                            <div class="col-md-6"><label class="form-label">Zip Code *</label><input type="text" name="zipCode" class="form-control" required></div>
-                            <div class="col-12"><label class="form-label">Address *</label><textarea name="address" class="form-control" rows="2" required></textarea></div>
-                        </div>
+                    <div class="modal-body">
+                        <div class="mb-3"><label for="startDate" class="form-label">Start Date</label><input type="date"
+                                class="form-control" id="startDate"></div>
+                        <div class="mb-3"><label for="endDate" class="form-label">End Date</label><input type="date"
+                                class="form-control" id="endDate"></div>
                     </div>
-                    <!-- Location Info Tab -->
-                    <div class="tab-pane fade" id="location-info" role="tabpanel">
-                         <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Country *</label><select name="countryId" class="form-select" id="countryId" required><option value="">Select Country</option></select></div>
-                            <div class="col-md-6"><label class="form-label">State *</label><select name="stateId" class="form-select" id="stateId" required disabled><option value="">Select State</option></select></div>
-                            <div class="col-md-6"><label class="form-label">District *</label><select name="districtId" class="form-select" id="districtId" required disabled><option value="">Select District</option></select></div>
-                            <div class="col-md-6"><label class="form-label">City *</label><select name="cityId" class="form-select" id="cityId" required disabled><option value="">Select City</option></select></div>
-                            <div class="col-md-6"><label class="form-label">Latitude</label><input type="text" name="latitude" class="form-control" value="12.9716"></div>
-                            <div class="col-md-6"><label class="form-label">Longitude</label><input type="text" name="longitude" class="form-control" value="77.5946"></div>
-                        </div>
-                    </div>
-                    <!-- Bank Details Tab -->
-                    <div class="tab-pane fade" id="bank-info" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Bank Account Holder Name *</label><input type="text" name="bankHolderName" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Bank Name *</label><input type="text" name="bankName" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Account Number *</label><input type="text" name="accountNumber" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">IFSC Code *</label><input type="text" name="ifscCode" class="form-control" required></div>
-                        </div>
-                    </div>
-                    <!-- Documents Tab -->
-                    <div class="tab-pane fade" id="documents" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">PAN Card *</label><input type="file" name="panCardFile" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">FSSAI Certificate *</label><input type="file" name="fssaiFile" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">GST Certificate</label><input type="file" name="gstCertificateFile" class="form-control"></div>
-                            <div class="col-md-6"><label class="form-label">Shop Photo</label><input type="file" name="shopPhotoFile" class="form-control" accept="image/*"></div>
-                            <div class="col-md-6"><label class="form-label">Business License</label><input type="file" name="businessLicenseFile" class="form-control"></div>
-                            <div class="col-md-6"><label class="form-label">Additional Documents</label><input type="file" name="additionalDocumentFile" class="form-control"></div>
-                        </div>
-                    </div>
-                    <!-- Settings Tab -->
-                    <div class="tab-pane fade" id="settings" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Product Category *</label><input type="text" name="productCategories" class="form-control" required></div>
-                            <div class="col-md-6"><label class="form-label">Opening Time *</label><input type="time" name="openingTime" class="form-control" value="09:00" required></div>
-                            <div class="col-md-6"><label class="form-label">Closing Time *</label><input type="time" name="closingTime" class="form-control" value="21:00" required></div>
-                        </div>
-                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary"
+                            id="applyDateRange">Apply</button></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="vendorFormSubmitBtn">Add Vendor</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white"><h5 class="modal-title">Confirm Deletion</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
-            <div class="modal-body"><p id="deleteConfirmationMessage">Are you sure you want to delete this item? This action cannot be undone.</p></div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button></div>
         </div>
-    </div>
-</div>
 
-<!-- Date Range Modal -->
-<div class="modal fade" id="dateRangeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Select Date Range</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-            <div class="modal-body">
-                <div class="mb-3"><label for="startDate" class="form-label">Start Date</label><input type="date" class="form-control" id="startDate"></div>
-                <div class="mb-3"><label for="endDate" class="form-label">End Date</label><input type="date" class="form-control" id="endDate"></div>
-            </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="applyDateRange">Apply</button></div>
-        </div>
-    </div>
-</div>
-
-<%@ include file="/includes/footer.jsp" %>
-
-<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/shopspage.css">
-<script src="${pageContext.request.contextPath}/resources/js/shopspage.js"></script>
+        <%@ include file="/includes/footer.jsp" %>
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/shopspage.css">
+            <script src="${pageContext.request.contextPath}/resources/js/pagination-utils.js"></script>
+            <script src="${pageContext.request.contextPath}/resources/js/shopspage.js"></script>

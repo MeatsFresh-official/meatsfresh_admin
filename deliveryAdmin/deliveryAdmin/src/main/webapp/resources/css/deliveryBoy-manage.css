@@ -1,266 +1,322 @@
-/* ===================================================================
- *  General Styles & Enhancements
- * =================================================================== */
+/* =========================================================================
+   ZENITH PREMIUM ADMIN THEME - DELIVERY BOY MANAGEMENT
+   ========================================================================= */
 
-.main-content {
-    background-color: #f8f9fa; /* A light grey background for the main area */
-    padding-bottom: 3rem;
+:root {
+    --zenith-primary: #6366f1;
+    /* Indigo */
+    --zenith-primary-dark: #4f46e5;
+    --zenith-primary-light: rgba(99, 102, 241, 0.1);
+    --zenith-secondary: #ec4899;
+    /* Pink */
+    --zenith-success: #10b981;
+    /* Emerald */
+    --zenith-warning: #f59e0b;
+    /* Amber */
+    --zenith-danger: #ef4444;
+    /* Red */
+    --zenith-bg: #f3f4f6;
+    --zenith-card-bg: rgba(255, 255, 255, 0.9);
+    --zenith-glass-border: rgba(255, 255, 255, 0.6);
+    --zenith-text-main: #111827;
+    --zenith-text-muted: #6b7280;
+    --zenith-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --zenith-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+body {
+    background-color: var(--zenith-bg);
+    color: var(--zenith-text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* --- Page Header with Gradient --- */
 .page-header {
+    background: linear-gradient(135deg, var(--zenith-primary), var(--zenith-secondary));
+    padding: 2.5rem 2rem;
+    border-radius: 1rem;
+    color: white;
     margin-bottom: 2rem;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 1rem;
+    box-shadow: var(--zenith-shadow-lg);
+    position: relative;
+    overflow: hidden;
 }
 
-.card {
+.page-header h1 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+    z-index: 1;
+}
+
+/* --- Glassmorphism Cards --- */
+.zenith-card {
+    background: var(--zenith-card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--zenith-glass-border);
+    border-radius: 1rem;
+    box-shadow: var(--zenith-shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zenith-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--zenith-shadow-lg);
+}
+
+/* --- Stat Cards --- */
+.stat-card {
     border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    position: relative;
+    color: white;
 }
 
-.card-header-tabs {
-    margin: -0.75rem -1.25rem;
+.stat-card .card-body {
+    position: relative;
+    z-index: 2;
+    padding: 1.5rem;
+}
+
+.stat-card i {
+    opacity: 0.3;
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    font-size: 3rem;
+    transform: rotate(-10deg);
+}
+
+/* --- Tab Navigation (Pills Style) --- */
+.nav-pills-zenith {
+    background: white;
+    padding: 0.5rem;
+    border-radius: 50rem;
+    display: inline-flex;
+    box-shadow: var(--zenith-shadow-sm);
+    margin-bottom: 2rem;
+}
+
+.nav-pills-zenith .nav-link {
+    border-radius: 50rem;
+    color: var(--zenith-text-muted);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-pills-zenith .nav-link.active {
+    background: var(--zenith-primary);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+}
+
+/* --- Modern List/Table Styles (Zenith List View) --- */
+.zenith-table-container {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--zenith-shadow-sm);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.zenith-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.zenith-table thead th {
+    background: #f9fafb;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--zenith-text-muted);
+    font-weight: 700;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.zenith-table tbody tr {
+    transition: all 0.2s;
+}
+
+.zenith-table tbody tr:hover {
+    background-color: var(--zenith-primary-light);
+    transform: scale(1.005);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+    position: relative;
+}
+
+.zenith-table td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    color: var(--zenith-text-main);
+    font-size: 0.95rem;
+}
+
+.zenith-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.card-header-tabs .nav-link {
-    padding: 1rem 1.25rem;
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: #6c757d; /* Muted color for inactive tabs */
+.rider-avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+    border: 2px solid white;
+    box-shadow: var(--zenith-shadow-sm);
 }
 
-.card-header-tabs .nav-link.active {
-    color: #0d6efd; /* Primary color for the active tab */
-    border-bottom-color: #0d6efd;
-    background-color: transparent;
+.rider-meta {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-/* ===================================================================
- *  Overview Stat Cards
- * =================================================================== */
-
-.card.bg-primary, .card.bg-warning, .card.bg-success, .card.bg-danger {
-    color: #fff !important;
-    transition: transform 0.2s ease-in-out;
-}
-
-.card.bg-primary:hover, .card.bg-warning:hover, .card.bg-success:hover, .card.bg-danger:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-.card-body i.fas {
-    opacity: 0.5;
-}
-
-/* ===================================================================
- *  Rider List & Table Styles
- * =================================================================== */
-
-#ridersTable th {
+.rider-name-list {
     font-weight: 600;
+    color: var(--zenith-text-main);
 }
 
-#ridersTable td {
-    vertical-align: middle;
-}
-
-#ridersTable .rounded-circle {
-    border: 2px solid #eee;
-}
-
-.rating-container .fa-star {
-    font-size: 0.9rem;
-}
-
-.filter-tags {
-    margin-top: 1rem;
-}
-
-.filter-tags .badge {
-    font-size: 0.8rem;
-    padding: 0.5em 0.75em;
-}
-
-.filter-tags .badge i {
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-}
-
-.filter-tags .badge i:hover {
-    opacity: 1;
-}
-
-/* ===================================================================
- *  Rider Shop Tab
- * =================================================================== */
-
-.product-card {
-    text-align: left;
-    transition: box-shadow 0.3s, transform 0.3s;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-}
-
-.product-image {
-    height: 180px;
-    object-fit: cover; /* Ensures the image covers the area without distortion */
-    border-bottom: 1px solid #eee;
-}
-
-.product-name {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.product-description {
-    font-size: 0.85rem;
-    color: #6c757d;
-    height: 40px; /* Set a fixed height */
-    overflow: hidden; /* Hide overflowing text */
-}
-
-.product-price {
-    font-weight: 700;
-    color: #28a745; /* Success green for price */
-}
-
-.stock-indicator {
+.rider-id-list {
     font-size: 0.75rem;
+    color: var(--zenith-text-muted);
+}
+
+/* --- Badges & Status --- */
+.zenith-badge {
+    padding: 0.35em 0.8em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+
+.zenith-badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--zenith-success);
+}
+
+.zenith-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--zenith-warning);
+}
+
+.zenith-badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--zenith-danger);
+}
+
+.zenith-badge-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+/* --- Forms & Modals --- */
+.modal-content {
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: var(--zenith-shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: transparent;
+    padding: 1.5rem;
+}
+
+.modal-title {
+    font-weight: 700;
+    color: var(--zenith-text-main);
+}
+
+.form-control,
+.form-select {
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--zenith-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.btn-primary {
+    background: var(--zenith-primary);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
     font-weight: 600;
-    padding: 0.25rem 0.5rem;
-    border-radius: 50rem; /* Pill shape */
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+    transition: all 0.2s;
 }
 
-.stock-in {
-    background-color: rgba(40, 167, 69, 0.1);
-    color: #28a745;
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    color: var(--zenith-text-muted);
 }
 
-.stock-out {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
+.btn-icon:hover {
+    background: var(--zenith-bg);
+    color: var(--zenith-primary);
+    transform: scale(1.1);
 }
 
-.product-card .card-footer {
-    opacity: 0;
-    transition: opacity 0.3s;
+.btn-icon-danger:hover {
+    color: var(--zenith-danger);
 }
 
-.product-card:hover .card-footer {
-    opacity: 1;
+/* --- Search & Filters --- */
+.search-bar {
+    background: white;
+    border-radius: 50rem;
+    padding: 0.5rem 1rem;
+    box-shadow: var(--zenith-shadow-sm);
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    transition: all 0.2s;
 }
 
-
-/* ===================================================================
- *  Settings & Reports Tabs
- * =================================================================== */
-
-#settings .card, #reports .card {
-    margin-bottom: 1.5rem;
+.search-bar:focus-within {
+    border-color: var(--zenith-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
-.input-group-text {
-    background-color: #e9ecef;
-}
-
-#reports .table th, #reports .table td {
-    vertical-align: middle;
-}
-
-#reports .progress {
-    height: 10px;
-    margin-bottom: 0.25rem;
-}
-
-/* ===================================================================
- *  Modals
- * =================================================================== */
-
-.modal-header.bg-primary, .modal-header.bg-danger {
-    color: #fff;
-}
-
-.modal-body h5 {
-    font-weight: 600;
-    color: #0d6efd; /* Primary color for subheadings */
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 0.5rem;
-    margin-top: 1rem;
-}
-
-.form-label .text-danger {
-    display: inline; /* Ensure asterisk appears next to the label */
-}
-
-/* Custom styles for invalid feedback to work with JS */
-.form-control.is-invalid, .form-select.is-invalid {
-    border-color: #dc3545;
-}
-
-.invalid-feedback:not(.d-none) {
-    display: block; /* Ensure feedback is shown when JS removes d-none */
-}
-
-
-/* ===================================================================
- *  Toast Notifications
- * =================================================================== */
-
-.toast-container {
-    z-index: 1100; /* Ensure toasts appear above other content */
-}
-
-.toast-header {
-    font-weight: bold;
-}
-
-/* ===================================================================
- *  Responsive Design
- * =================================================================== */
-
-@media (max-width: 768px) {
-    .page-header h1 {
-        font-size: 1.75rem;
-    }
-
-    #deliveryBoyTabs .nav-link {
-        font-size: 0.9rem;
-        padding: 0.75rem 0.5rem;
-    }
-
-    /* Stack search and filter on mobile */
-    #riders .d-flex.justify-content-between {
-        flex-direction: column;
-    }
-
-    #riders .d-flex.justify-content-between .col-md-6 {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-}
-
-.card-body .badge,
-.card-header .badge,
-table .badge {
-    /* --- CORE FIXES --- */
-    position: static !important; /* Force correct positioning */
-    display: inline-block;       /* Allows padding and width to be applied correctly */
-    width: auto;                 /* Ensures width is calculated from the text and padding */
-
-    /* --- STYLE RESETS (to combat potential overrides) --- */
-    padding: 0.35em 0.65em;      /* Restore Bootstrap's default padding */
-    font-size: .75em;            /* Restore default font size */
-    font-weight: 700;            /* Restore default font weight */
-    line-height: 1;
-    text-align: center;
-    white-space: nowrap;         /* Prevent text from wrapping */
-    vertical-align: baseline;
-    border-radius: 0.375rem;     /* Restore rounded corners */
+.search-input {
+    border: none;
+    outline: none;
+    width: 250px;
+    margin-left: 0.5rem;
+    background: transparent;
 }

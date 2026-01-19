@@ -24,6 +24,20 @@
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard.css">
                     <link rel="stylesheet"
                         href="${pageContext.request.contextPath}/resources/css/common/header-menu.css">
+
+                    <!-- TAILWIND CSS CDN (Emergency Add) -->
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <script>
+                        tailwind.config = {
+                            theme: {
+                                extend: {
+                                    colors: {
+                                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81' }
+                                    }
+                                }
+                            }
+                        }
+                    </script>
                     <!-- Scripts -->
                     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

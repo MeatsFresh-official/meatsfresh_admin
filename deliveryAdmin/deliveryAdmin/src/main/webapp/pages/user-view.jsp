@@ -1,356 +1,486 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<fmt:setLocale value="en_IN" />
-<%@ include file="/includes/header.jsp" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+        <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+            <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+                <fmt:setLocale value="en_IN" />
+                <%@ include file="/includes/header.jsp" %>
 
-<%-- Include dummy data --%>
-<%@ include file="/pages/dummy/user-dummy.jsp" %>
-<%@ include file="/pages/dummy/order-dummy.jsp" %>
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/user-view.css">
 
-<%
-// Get the user ID from request parameter
-String currentUserId = request.getParameter("id");
+                    <main class="main-content">
+                        <div class="container-fluid">
+                            <!-- Breadcrumb & Back -->
+                            <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb mb-0">
+                                        <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/user"
+                                                class="text-decoration-none text-muted">Users</a></li>
+                                        <li class="breadcrumb-item active" aria-current="page">User Details</li>
+                                    </ol>
+                                </nav>
+                                <a href="${pageContext.request.contextPath}/user" class="btn btn-zenith-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                                </a>
+                            </div>
 
-// Find the user from the dummy data
-java.util.Map<String, Object> user = null;
-for (java.util.Map<String, Object> u : users) {
-    if (u.get("id").equals(currentUserId)) {
-        user = u;
-        break;
-    }
-}
+                            <!-- Profile Header -->
+                            <div class="profile-header-card fade-in-up">
+                                <img id="header-img" src="" alt="Profile" class="profile-avatar-lg">
+                                <div class="profile-info flex-grow-1">
+                                    <h2 id="header-name">Loading...</h2>
+                                    <div class="profile-meta">
+                                        <span id="header-email"><i class="fas fa-envelope"></i> -</span>
+                                        <span id="header-phone"><i class="fas fa-phone"></i> -</span>
+                                    </div>
+                                </div>
 
-// Get orders for this user
-java.util.List<java.util.Map<String, Object>> userOrders = new java.util.ArrayList<>();
-for (java.util.Map<String, Object> order : orders) {
-    if (order.get("userId").equals(currentUserId)) {
-        userOrders.add(order);
-    }
-}
-
-pageContext.setAttribute("user", user);
-pageContext.setAttribute("userOrders", userOrders);
-%>
-
-<c:if test="${empty user}">
-    <div class="alert alert-danger">
-        User not found!
-    </div>
-</c:if>
-
-<c:if test="${not empty user}">
-<main class="main-content">
-    <div class="container-fluid">
-        <div class="page-header py-2 d-flex justify-content-between align-items-center">
-            <h1>User Details</h1>
-            <div class="d-flex align-items-center">
-               <a href="${pageContext.request.contextPath}/pages/user.jsp" class="btn btn-primary">
-                   <i class="fas fa-arrow-left me-2"></i>Back to Users
-               </a>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">User Information - ${user.id}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3 text-center">
-                                <img src="${not empty user.profileImage ? pageContext.request.contextPath.concat(user.profileImage) : pageContext.request.contextPath.concat('/resources/images/default-avatar.jpg')}"
-                                     class="rounded-circle mb-3" width="150" height="150" alt="${user.name}">
-                                <h4>${user.name}</h4>
-                                <div class="badge-div bg-${user.type == 'PREMIUM' ? 'warning' :
-                                                         user.type == 'PRO' ? 'info' : 'secondary'}">
-                                    ${user.type}
+                                <!-- Quick Stats in Header -->
+                                <div class="d-flex gap-4 border-start ps-4">
+                                    <div class="text-center">
+                                        <div class="h3 fw-bold text-primary mb-0">24</div>
+                                        <small class="text-muted text-uppercase"
+                                            style="font-size: 0.7rem;">Orders</small>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="h3 fw-bold text-success mb-0">₹15.4k</div>
+                                        <small class="text-muted text-uppercase"
+                                            style="font-size: 0.7rem;">Spent</small>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="h3 fw-bold text-warning mb-0">Active</div>
+                                        <small class="text-muted text-uppercase"
+                                            style="font-size: 0.7rem;">Status</small>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-9">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Email</label>
-                                            <input type="text" class="form-control" value="${user.email}" readonly>
+
+                            <!-- Tabs Navigation -->
+                            <div class="zenith-tabs">
+                                <button class="zenith-tab-btn active" data-tab="tab-profile">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </button>
+                                <button class="zenith-tab-btn" data-tab="tab-orders">
+                                    <i class="fas fa-shopping-bag me-2"></i>Orders
+                                </button>
+                                <button class="zenith-tab-btn" data-tab="tab-addresses">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Addresses
+                                </button>
+                                <button class="zenith-tab-btn" data-tab="tab-preferences">
+                                    <i class="fas fa-cog me-2"></i>Preferences & Settings
+                                </button>
+                                <button class="zenith-tab-btn" data-tab="tab-reviews">
+                                    <i class="fas fa-star me-2"></i>Reviews
+                                </button>
+                            </div>
+
+                            <!-- Tabs Content -->
+                            <div class="tab-content">
+
+                                <!-- 1. Profile Tab -->
+                                <div id="tab-profile" class="tab-content-pane active">
+                                    <div class="glass-panel p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="fw-bold m-0 text-dark"><i
+                                                    class="fas fa-id-card me-2 text-primary"></i>Personal Information
+                                            </h5>
+                                            <button class="btn btn-sm btn-zenith-primary"><i
+                                                    class="fas fa-save me-2"></i>Save Changes</button>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Phone</label>
-                                            <input type="text" class="form-control" value="${user.phone}" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Location</label>
-                                            <input type="text" class="form-control"
-                                                   value="${user.city}, ${user.country}" readonly>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Address</label>
-                                            <textarea class="form-control" rows="2" readonly>${user.address}</textarea>
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <label class="zenith-form-label">Full Name</label>
+                                                <input type="text" id="input-name" class="form-control zenith-input">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="zenith-form-label">Date of Birth</label>
+                                                <input type="date" id="input-dob" class="form-control zenith-input">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="zenith-form-label">Email Address</label>
+                                                <input type="email" id="input-email" class="form-control zenith-input">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="zenith-form-label">Phone Number</label>
+                                                <input type="tel" id="input-phone" class="form-control zenith-input">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <hr>
+
+                                <!-- 2. ADDRESSES TAB (Master-Detail) -->
+                                <div id="tab-addresses" class="tab-content-pane">
+                                    <div class="row g-4 h-100">
+                                        <!-- Left: Address List -->
+                                        <div class="col-lg-4 border-end">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="fw-bold m-0 text-muted text-uppercase small ls-1">Saved
+                                                    Locations</h6>
+                                                <button class="btn btn-sm btn-light text-primary rounded-circle"
+                                                    onclick="createNewAddress()">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <div class="address-list-scroll" id="address-list-container"
+                                                style="max-height: 600px; overflow-y: auto; padding-right: 5px;">
+                                                <!-- List populated by JS -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Right: Address Detail / Edit Form -->
+                                        <div class="col-lg-8">
+                                            <div class="glass-panel p-4 h-100 position-relative">
+                                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                                    <h5 class="fw-bold m-0 text-dark" id="addr-detail-title"><i
+                                                            class="fas fa-map-marker-alt me-2 text-primary"></i>Address
+                                                        Details</h5>
+                                                    <div>
+                                                        <button class="btn btn-sm btn-danger me-2 d-none"
+                                                            id="btn-delete-addr" onclick="deleteCurrentAddress()">
+                                                            <i class="fas fa-trash me-2"></i>Delete
+                                                        </button>
+                                                        <button class="btn btn-sm btn-zenith-primary"
+                                                            onclick="saveAddressMasterDetail()">
+                                                            <i class="fas fa-save me-2"></i>Save Address
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <form id="addressForm">
+                                                    <input type="hidden" id="addr-id">
+
+                                                    <div class="row g-3">
+                                                        <div class="col-12">
+                                                            <label class="zenith-form-label">Location Type</label>
+                                                            <div class="d-flex gap-2">
+                                                                <input type="radio" class="btn-check" name="addrType"
+                                                                    id="type-home" value="HOME" checked
+                                                                    onchange="toggleReceiverFields()">
+                                                                <label class="btn btn-outline-primary px-3 rounded-pill"
+                                                                    for="type-home">Home</label>
+
+                                                                <input type="radio" class="btn-check" name="addrType"
+                                                                    id="type-work" value="WORK"
+                                                                    onchange="toggleReceiverFields()">
+                                                                <label class="btn btn-outline-primary px-3 rounded-pill"
+                                                                    for="type-work">Work</label>
+
+                                                                <input type="radio" class="btn-check" name="addrType"
+                                                                    id="type-others" value="OTHERS"
+                                                                    onchange="toggleReceiverFields()">
+                                                                <label class="btn btn-outline-primary px-3 rounded-pill"
+                                                                    for="type-others">Others</label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" id="receiver-fields" style="display:none;">
+                                                            <div class="p-3 bg-light rounded border">
+                                                                <div class="row g-3">
+                                                                    <div class="col-md-6">
+                                                                        <label class="zenith-form-label">Receiver
+                                                                            Name</label>
+                                                                        <input type="text" id="addr-receiver-name"
+                                                                            class="form-control zenith-input">
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <label class="zenith-form-label">Receiver
+                                                                            Phone</label>
+                                                                        <input type="text" id="addr-receiver-phone"
+                                                                            class="form-control zenith-input">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label class="zenith-form-label">House / Flat No</label>
+                                                            <input type="text" id="addr-house-no"
+                                                                class="form-control zenith-input"
+                                                                placeholder="e.g. 104A">
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="zenith-form-label">Landmark</label>
+                                                            <input type="text" id="addr-landmark"
+                                                                class="form-control zenith-input"
+                                                                placeholder="e.g. Near Metro Station">
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <label class="zenith-form-label">Full Address</label>
+                                                            <textarea id="addr-text" class="form-control zenith-input"
+                                                                rows="3"
+                                                                placeholder="Click to edit address..."></textarea>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="zenith-form-label">Latitude</label>
+                                                            <input type="text" id="addr-lat"
+                                                                class="form-control zenith-input"
+                                                                placeholder="e.g. 12.9716">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="zenith-form-label">Longitude</label>
+                                                            <input type="text" id="addr-lng"
+                                                                class="form-control zenith-input"
+                                                                placeholder="e.g. 77.5946">
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                                <!-- Placeholder Map or Graphic -->
+                                                <div class="mt-4 border rounded overflow-hidden"
+                                                    style="height: 150px; background: #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                                                    <div class="text-center text-muted">
+                                                        <i class="fas fa-map-marked-alt fa-2x mb-2"></i>
+                                                        <p class="mb-0 small">Map Preview (Static)</p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Orders Tab -->
+                            <div id="tab-orders" class="tab-content-pane">
+                                <div class="glass-panel p-0 overflow-hidden">
+                                    <div
+                                        class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
+                                        <h5 class="fw-bold m-0"><i class="fas fa-history me-2 text-primary"></i>Order
+                                            History</h5>
+                                        <div class="d-flex gap-2">
+                                            <div class="input-group input-group-sm" style="width: 200px;">
+                                                <span class="input-group-text bg-white border-end-0"><i
+                                                        class="fas fa-search text-muted"></i></span>
+                                                <input type="text" id="order-search-input"
+                                                    class="form-control border-start-0"
+                                                    placeholder="Search Order ID...">
+                                            </div>
+                                            <select class="form-select form-select-sm" style="width: 150px;">
+                                                <option>All Status</option>
+                                                <option>Completed</option>
+                                                <option>Pending</option>
+                                                <option>Returned</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table zenith-table align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="ps-4">Order ID</th>
+                                                    <th>Date</th>
+                                                    <th>Items</th>
+                                                    <th>Total</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="orders-table-body">
+                                                <!-- Populated by JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Preferences Tab -->
+                            <div id="tab-preferences" class="tab-content-pane">
                                 <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="stat-card bg-light p-3 rounded text-center">
-                                            <h6 class="stat-title">Total Orders</h6>
-                                            <h3 class="stat-value">${user.totalOrders}</h3>
+                                    <div class="col-md-6">
+                                        <div class="glass-panel p-4 h-100">
+                                            <h5 class="fw-bold mb-4"><i
+                                                    class="fas fa-comment-dots me-2 text-primary"></i>Communication
+                                                Channels</h5>
+
+                                            <div class="toggle-switch">
+                                                <div>
+                                                    <h6 class="m-0 fw-bold">SMS Notifications</h6>
+                                                    <small class="text-muted">Receive updates via SMS</small>
+                                                </div>
+                                                <label class="switch">
+                                                    <input type="checkbox" id="sms-toggle">
+                                                    <span class="slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="toggle-switch">
+                                                <div>
+                                                    <h6 class="m-0 fw-bold">WhatsApp Updates</h6>
+                                                    <small class="text-muted">Order confirmation & tracking</small>
+                                                </div>
+                                                <label class="switch">
+                                                    <input type="checkbox" id="whatsapp-toggle">
+                                                    <span class="slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="toggle-switch">
+                                                <div>
+                                                    <h6 class="m-0 fw-bold">Email Newsletter</h6>
+                                                    <small class="text-muted">Weekly deals and offers</small>
+                                                </div>
+                                                <label class="switch">
+                                                    <input type="checkbox" id="email-toggle">
+                                                    <span class="slider"></span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="stat-card bg-light p-3 rounded text-center">
-                                            <h6 class="stat-title">Total Spent</h6>
-                                            <h3 class="stat-value"><fmt:formatNumber value="${user.totalSpent}" type="currency"/></h3>
+
+                                    <div class="col-md-6">
+                                        <div class="glass-panel p-4 h-100">
+                                            <h5 class="fw-bold mb-4"><i
+                                                    class="fas fa-bullhorn me-2 text-primary"></i>Marketing & Promo
+                                            </h5>
+
+                                            <div class="toggle-switch">
+                                                <div>
+                                                    <h6 class="m-0 fw-bold">Promotional Offers</h6>
+                                                    <small class="text-muted">Allow personalized promotions</small>
+                                                </div>
+                                                <label class="switch">
+                                                    <input type="checkbox" id="promo-toggle">
+                                                    <span class="slider"></span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="stat-card bg-light p-3 rounded text-center">
-                                            <h6 class="stat-title">Last Active</h6>
-                                            <h3 class="stat-value"><fmt:formatDate value="${user.lastActive}" pattern="dd MMM yyyy"/></h3>
+                                </div>
+                            </div>
+
+                            <!-- 4. Reviews Tab -->
+                            <div id="tab-reviews" class="tab-content-pane">
+                                <div class="glass-panel p-4 text-center py-5">
+                                    <img src="${pageContext.request.contextPath}/resources/images/star-rating.png"
+                                        width="80" class="mb-3 opacity-50" alt="Reviews">
+                                    <h5 class="text-muted">No reviews submitted by this user yet.</h5>
+                                </div>
+                            </div>
+
+                        </div>
+                        </div>
+                    </main>
+
+                    <!-- Order Details Modal -->
+                    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg">
+                                <div class="modal-header bg-zenith-primary border-0"
+                                    style="background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%); color:white;">
+                                    <h5 class="modal-title font-weight-bold">Order Details</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4" id="orderDetailsContent">
+                                    <!-- Content loaded dynamically via JS -->
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="stat-card bg-light p-3 rounded text-center">
-                                            <h6 class="stat-title">Active Days</h6>
-                                            <h3 class="stat-value">${user.lastActiveDays} days</h3>
-                                        </div>
-                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 bg-light">
+                                    <span class="text-muted small me-auto">Order ID: <span id="modalOrderId"
+                                            class="fw-bold">...</span></span>
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                                        <i class="fas fa-print me-2"></i>Print Invoice
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Order History Section -->
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Order History</h5>
-                    </div>
-                    <div class="card-body">
-                        <c:choose>
-                            <c:when test="${empty userOrders}">
-                                <div class="alert alert-info">
-                                    This user hasn't placed any orders yet.
+                    <!-- Address Modal -->
+                    <div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg">
+                                <div class="modal-header bg-white border-bottom-0 pb-0">
+                                    <h5 class="modal-title fw-bold" id="addressModalTitle">Add New Address</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Order ID</th>
-                                                <th>Date</th>
-                                                <th>Items</th>
-                                                <th>Total</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <c:forEach var="order" items="${userOrders}">
-                                            <tr>
-                                                <td>${order.orderId}</td>
-                                                <td>
-                                                    <fmt:formatDate value="${order.orderDate}" pattern="dd MMM yyyy"/>
-                                                    <small class="text-muted d-block">
-                                                        <fmt:formatDate value="${order.orderDate}" pattern="hh:mm a"/>
-                                                    </small>
-                                                </td>
-                                                <td>
-                                                    <c:forEach var="item" items="${order.items}" varStatus="loop">
-                                                        ${item.name} (${item.quantity})<c:if test="${!loop.last}">, </c:if>
-                                                    </c:forEach>
-                                                </td>
-                                                <td><fmt:formatNumber value="${order.totalAmount}" type="currency"/></td>
-                                                <td>
-                                                    <div class="badge-div bg-${order.status == 'Delivered' ? 'success' :
-                                                                          order.status == 'Shipped' ? 'info' :
-                                                                          order.status == 'Processing' ? 'warning' :
-                                                                          order.status == 'Cancelled' ? 'danger' : 'secondary'}">
-                                                        ${order.status}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                                            data-bs-target="#orderDetailsModal"
-                                                            onclick="showOrderDetails('${order.orderId}')">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            </c:forEach>
-                                        </tbody>
-                                    </table>
+                                <div class="modal-body p-4">
+                                    <form id="addressForm">
+                                        <input type="hidden" id="addr-id">
+
+                                        <div class="mb-3">
+                                            <label class="zenith-form-label">Address Type</label>
+                                            <div class="d-flex gap-2">
+                                                <input type="radio" class="btn-check" name="addrType" id="type-home"
+                                                    value="HOME" checked onchange="toggleReceiverFields()">
+                                                <label class="btn btn-outline-primary flex-fill"
+                                                    for="type-home">Home</label>
+
+                                                <input type="radio" class="btn-check" name="addrType" id="type-work"
+                                                    value="WORK" onchange="toggleReceiverFields()">
+                                                <label class="btn btn-outline-primary flex-fill"
+                                                    for="type-work">Work</label>
+
+                                                <input type="radio" class="btn-check" name="addrType" id="type-others"
+                                                    value="OTHERS" onchange="toggleReceiverFields()">
+                                                <label class="btn btn-outline-primary flex-fill"
+                                                    for="type-others">Others</label>
+                                            </div>
+                                        </div>
+
+                                        <div id="receiver-fields" class="mb-3" style="display:none;">
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <label class="zenith-form-label small">Receiver Name</label>
+                                                    <input type="text" id="addr-receiver-name"
+                                                        class="form-control zenith-input">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="zenith-form-label small">Receiver Phone</label>
+                                                    <input type="text" id="addr-receiver-phone"
+                                                        class="form-control zenith-input">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="zenith-form-label">House/Flat No</label>
+                                            <input type="text" id="addr-house-no" class="form-control zenith-input"
+                                                placeholder="e.g. Flat 101, Galaxy Apts">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="zenith-form-label">Full Address</label>
+                                            <textarea id="addr-text" class="form-control zenith-input" rows="3"
+                                                placeholder="Enter complete address area, street, etc."></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="zenith-form-label">Landmark</label>
+                                            <input type="text" id="addr-landmark" class="form-control zenith-input"
+                                                placeholder="Near City Mall">
+                                        </div>
+
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="zenith-form-label small">Latitude</label>
+                                                <input type="text" id="addr-lat" class="form-control zenith-input"
+                                                    placeholder="0.0000">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="zenith-form-label small">Longitude</label>
+                                                <input type="text" id="addr-lng" class="form-control zenith-input"
+                                                    placeholder="0.0000">
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
-                            </c:otherwise>
-                        </c:choose>
+                                <div class="modal-footer border-top-0 pt-0">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary px-4" onclick="saveAddress()">Save
+                                        Address</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
 
-<!-- Order Details Modal -->
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Order Details - <span id="modalOrderId"></span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="orderDetailsContent">
-                <!-- Content will be loaded dynamically -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="printOrder()">
-                    <i class="fas fa-print me-2"></i>Print
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function showOrderDetails(orderId) {
-    // In a real application, you would fetch this data from the server
-    // For demo purposes, we'll use the dummy data
-
-    // Find the order
-    let order = null;
-    <c:forEach var="o" items="${userOrders}">
-        if ('${o.orderId}' === orderId) {
-            order = {
-                orderId: '${o.orderId}',
-                orderDate: '<fmt:formatDate value="${o.orderDate}" pattern="dd MMM yyyy hh:mm a"/>',
-                status: '${o.status}',
-                paymentMethod: '${o.paymentMethod}',
-                shippingAddress: '${o.shippingAddress}',
-                items: [
-                    <c:forEach var="item" items="${o.items}">
-                    {
-                        name: '${item.name}',
-                        quantity: ${item.quantity},
-                        price: <fmt:formatNumber value="${item.price}" type="currency"/>,
-                        total: <fmt:formatNumber value="${item.price * item.quantity}" type="currency"/>
-                    },
-                    </c:forEach>
-                ],
-                subtotal: <fmt:formatNumber value="${o.subtotal}" type="currency"/>,
-                tax: <fmt:formatNumber value="${o.tax}" type="currency"/>,
-                shipping: <fmt:formatNumber value="${o.shipping}" type="currency"/>,
-                totalAmount: <fmt:formatNumber value="${o.totalAmount}" type="currency"/>
-            };
-        }
-    </c:forEach>
-
-    if (order) {
-        document.getElementById('modalOrderId').textContent = order.orderId;
-
-        let html = `
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Order Information</h6>
-                    <table class="table table-sm">
-                        <tr>
-                            <th>Order Date:</th>
-                            <td>${order.orderDate}</td>
-                        </tr>
-                        <tr>
-                            <th>Status:</th>
-                            <td><span class="badge bg-${order.status == 'Delivered' ? 'success' :
-                                                  order.status == 'Shipped' ? 'info' :
-                                                  order.status == 'Processing' ? 'warning' :
-                                                  order.status == 'Cancelled' ? 'danger' : 'secondary'}">
-                                ${order.status}</span></td>
-                        </tr>
-                        <tr>
-                            <th>Payment Method:</th>
-                            <td>${order.paymentMethod}</td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h6>Shipping Address</h6>
-                    <address>${order.shippingAddress}</address>
-                </div>
-            </div>
-
-            <h6 class="mt-4">Order Items</h6>
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-
-        order.items.forEach(item => {
-            html += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.price}</td>
-                    <td>${item.total}</td>
-                </tr>`;
-        });
-
-        html += `
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="3" class="text-end">Subtotal:</th>
-                        <td>${order.subtotal}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="3" class="text-end">Tax:</th>
-                        <td>${order.tax}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="3" class="text-end">Shipping:</th>
-                        <td>${order.shipping}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="3" class="text-end">Total:</th>
-                        <td><strong>${order.totalAmount}</strong></td>
-                    </tr>
-                </tfoot>
-            </table>`;
-
-        document.getElementById('orderDetailsContent').innerHTML = html;
-    }
-}
-
-function printOrder() {
-    // Implement print functionality
-    const printContent = document.getElementById('orderDetailsContent').innerHTML;
-    const originalContent = document.body.innerHTML;
-
-    document.body.innerHTML = `
-        <h2>Order #${document.getElementById('modalOrderId').textContent}</h2>
-        ${printContent}
-    `;
-
-    window.print();
-    document.body.innerHTML = originalContent;
-    // Re-show the modal
-    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
-    modal.show();
-}
-</script>
-</c:if>
-
-<%@ include file="/includes/footer.jsp" %>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/view-user.css">
+                    <script src="${pageContext.request.contextPath}/resources/js/user-view.js"></script>
+                    <%@ include file="/includes/footer.jsp" %>

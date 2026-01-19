@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countActiveUsersLast30Days(LocalDateTime fromDate);
 
     // Total revenue
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM User u JOIN Order o ON o.user.id = u.id")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o")
     Double getTotalRevenue();
 
     // Average order value

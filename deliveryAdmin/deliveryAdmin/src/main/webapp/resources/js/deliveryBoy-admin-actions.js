@@ -1,8 +1,8 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // ===================================================================
     // API ENDPOINTS & CONFIG
     // ===================================================================
-    const API_BASE = 'http://113.11.231.115:8080/api';
+    const API_BASE = 'http://meatsfresh.org.in:8080/api';
     const RIDER_API = `${API_BASE}/delivery`;
     const ADMIN_API = `${API_BASE}/delivery/admin`;
     const WALLET_API = `${API_BASE}/delivery/wallets`;
@@ -20,7 +20,7 @@ $(document).ready(function() {
 
     // This will apply to any AJAX call that DOES NOT have its own beforeSend function.
     $.ajaxSetup({
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
             xhr.setRequestHeader('Authorization', authHeader);
         }
     });
@@ -53,7 +53,7 @@ $(document).ready(function() {
     function loadRiderData() {
         // This request works fine because it uses the global ajaxSetup.
         $.get(`${RIDER_API}/${riderId}`)
-            .done(function(data) {
+            .done(function (data) {
                 $('#riderName').text(`${data.firstName} ${data.lastName}`);
                 $('#riderId').text(data.id);
                 updateStatusUI(data);
@@ -101,11 +101,11 @@ $(document).ready(function() {
     function handleReject() {
         const reason = prompt("Please enter the reason for rejection:");
         if (reason && reason.trim()) {
-             updateRiderStatus(
+            updateRiderStatus(
                 `${ADMIN_API}/${riderId}/reject-partner?rejectionReason=${encodeURIComponent(reason.trim())}`,
                 'PUT',
                 'Rider rejected successfully.'
-             );
+            );
         } else if (reason !== null) {
             showError('Rejection reason cannot be empty.');
         }
@@ -113,15 +113,15 @@ $(document).ready(function() {
 
     function updateRiderStatus(url, method, successMessage) {
         const btn = $('#approveBtn, #rejectBtn');
-         $.ajax({
+        $.ajax({
             url: url,
             method: method,
             // MODIFIED: This beforeSend function now also sets the auth header.
-            beforeSend: function(xhr) {
+            beforeSend: function (xhr) {
                 xhr.setRequestHeader('Authorization', authHeader);
                 btn.prop('disabled', true);
             },
-            success: function() {
+            success: function () {
                 showToast(successMessage);
                 loadRiderData(); // Reload data to reflect the new status
             },
@@ -158,11 +158,11 @@ $(document).ready(function() {
             url: url,
             method: method,
             // MODIFIED: This beforeSend function now also sets the auth header.
-            beforeSend: function(xhr) {
+            beforeSend: function (xhr) {
                 xhr.setRequestHeader('Authorization', authHeader);
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
             },
-            success: function() {
+            success: function () {
                 showToast(successMessage);
                 form[0].reset();
             },
@@ -189,11 +189,11 @@ $(document).ready(function() {
             contentType: 'application/json',
             data: JSON.stringify(payload),
             // MODIFIED: This beforeSend function now also sets the auth header.
-            beforeSend: function(xhr) {
+            beforeSend: function (xhr) {
                 xhr.setRequestHeader('Authorization', authHeader);
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
             },
-            success: function(response) {
+            success: function (response) {
                 showToast(response.message || 'Payout processed successfully!');
                 form[0].reset();
             },
@@ -228,7 +228,7 @@ $(document).ready(function() {
             try {
                 const response = JSON.parse(xhr.responseText);
                 if (response.message) return response.message;
-            } catch (e) {}
+            } catch (e) { }
         }
         return xhr.statusText || 'An unknown error occurred.';
     }
