@@ -1,0 +1,494 @@
+/* User View - Zenith Premium Styles */
+
+/* Profile Header - Glassmorphism Card */
+.profile-header-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.profile-avatar-lg {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-info h2 {
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.profile-meta i {
+    color: #0d6efd;
+    margin-right: 0.5rem;
+}
+
+/* Zenith Tabs */
+.zenith-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 1px;
+}
+
+.zenith-tab-btn {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: #6c757d;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 8px 8px 0 0;
+}
+
+.zenith-tab-btn:hover {
+    color: #0d6efd;
+    background: rgba(13, 110, 253, 0.05);
+}
+
+.zenith-tab-btn.active {
+    color: #0d6efd;
+}
+
+.zenith-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Tab Content Areas */
+.tab-content-pane {
+    display: none;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.tab-content-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Styles */
+.zenith-form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.zenith-input {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+    background: #f8f9fa;
+}
+
+.zenith-input:focus {
+    background: #fff;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.toggle-switch:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #dee2e6;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+}
+
+input:checked+.slider:before {
+    transform: translateX(24px);
+}
+
+/* Stats Row */
+.details-stat-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.details-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.details-stat-val {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0.5rem 0;
+}
+
+.details-stat-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* Zenith Table - Modern Floating Rows */
+.zenith-table {
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.zenith-table thead th {
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #8898aa;
+    padding: 1rem 1.5rem;
+    background: transparent;
+}
+
+.zenith-table tbody tr {
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+}
+
+.zenith-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.zenith-table td {
+    border: none;
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+}
+
+.zenith-table td:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.zenith-table td:last-child {
+    border-radius: 0 12px 12px 0;
+}
+
+/* Modal - Receipt Style & Modern Cards */
+.zenith-modal-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 16px 16px 0 0;
+}
+
+.zenith-info-card {
+    background: #f8f9fc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    height: 100%;
+    transition: all 0.2s;
+}
+
+.zenith-info-card:hover {
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+.zenith-info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.zenith-bg-blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.zenith-bg-purple {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+/* Item List in Modal */
+.zenith-item-list {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.zenith-item-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.zenith-item-row:last-child {
+    border-bottom: none;
+}
+
+.zenith-bill-summary {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.zenith-bill-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.zenith-bill-total {
+    border-top: 2px dashed #cbd5e1;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1e293b;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Zenith Badge - Modern Status Pill */
+.zenith-badge {
+    padding: 0.35em 0.8em;
+    border-radius: 50rem;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.zenith-badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.zenith-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.zenith-badge.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.zenith-badge.info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+/* Zenith Address Card */
+.zenith-address-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.zenith-address-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e1;
+}
+
+.zenith-addr-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.zenith-addr-type.HOME {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.zenith-addr-type.WORK {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.zenith-addr-type.OTHERS {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}
+
+.zenith-addr-actions {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.zenith-address-card:hover .zenith-addr-actions {
+    opacity: 1;
+}
+
+/* Address Master-Detail Styles */
+.address-item {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.75rem;
+    background: #fff;
+}
+
+.address-item:hover {
+    background: #f8f9fa;
+}
+
+.address-item.active {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.address-item h6 {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.address-item p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.address-list-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.address-list-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+}
+
+.zenith-badge.secondary {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}

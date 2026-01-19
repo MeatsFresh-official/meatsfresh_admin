@@ -1,0 +1,399 @@
+/* shop-view.css - Zenith Premium Design for Shops */
+
+/* Reusing Core Zenith Variables & Base Styles from user-view.css implicitly or explicitly */
+:root {
+    --zenith-primary: #1e293b;
+    --zenith-accent: #3b82f6;
+    --zenith-bg: #f8f9fc;
+    --zenith-glass: rgba(255, 255, 255, 0.95);
+    --zenith-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Shop Header Card */
+.shop-header-card {
+    background: var(--zenith-glass);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--zenith-shadow);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.shop-avatar-lg {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.shop-info h2 {
+    font-weight: 800;
+    color: var(--zenith-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.shop-meta {
+    color: #64748b;
+    font-size: 0.95rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Online/Offline Toggle */
+.shop-status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background 0.3s;
+}
+
+.status-text {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.shop-status-toggle.online .status-indicator {
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+.shop-status-toggle.online .status-text {
+    color: #10b981;
+}
+
+.shop-status-toggle.offline .status-indicator {
+    background: #ef4444;
+}
+
+.shop-status-toggle.offline .status-text {
+    color: #ef4444;
+}
+
+/* Switch Input */
+.zenith-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.zenith-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.zenith-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.zenith-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.zenith-slider {
+    background-color: #10b981;
+}
+
+input:checked+.zenith-slider:before {
+    transform: translateX(20px);
+}
+
+/* Tabs */
+.zenith-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 1px;
+}
+
+.zenith-tab-btn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    color: #64748b;
+    position: relative;
+    transition: all 0.3s;
+    border-radius: 8px 8px 0 0;
+}
+
+.zenith-tab-btn.active {
+    color: var(--zenith-accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.zenith-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--zenith-accent);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Glass Panel */
+.glass-panel {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+/* Forms */
+.zenith-form-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.zenith-input {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+
+.zenith-input:focus {
+    border-color: var(--zenith-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #fff;
+    outline: none;
+}
+
+/* Product Cards */
+.zenith-product-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.zenith-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.product-img-container {
+    height: 160px;
+    background: #f1f5f9;
+    position: relative;
+}
+
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.product-body {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #1e293b;
+}
+
+.product-cat {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.product-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 0.75rem;
+}
+
+.product-price {
+    font-weight: 700;
+    color: var(--zenith-accent);
+}
+
+/* Table Styles (Reused from user-view.css but ensuring presence) */
+.zenith-table {
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.zenith-table thead th {
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #8898aa;
+    padding: 1rem 1.5rem;
+    background: transparent;
+}
+
+.zenith-table tbody tr {
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+}
+
+.zenith-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.zenith-table td {
+    border: none;
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+}
+
+.zenith-table td:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.zenith-table td:last-child {
+    border-radius: 0 12px 12px 0;
+}
+
+.zenith-badge {
+    padding: 0.35em 0.8em;
+    border-radius: 50rem;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zenith-badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.zenith-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.zenith-badge.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.zenith-badge.info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+/* Buttons */
+.btn-zenith-primary {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(30, 41, 59, 0.2);
+}
+
+.btn-zenith-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(30, 41, 59, 0.3);
+    color: white;
+}
+
+.tab-content-pane {
+    display: none;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.tab-content-pane.active {
+    display: block;
+}
