@@ -161,6 +161,11 @@ public class PageController {
         return "deliveryBoy-earnings";
     }
 
+    @GetMapping("/delivery-incentives")
+    public String getDeliveryIncentives() {
+        return "deliveryBoy-incentives";
+    }
+
     @GetMapping("/payments")
     public String getPayments() {
         return "payments";

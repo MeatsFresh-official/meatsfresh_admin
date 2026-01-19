@@ -160,34 +160,80 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.show();
     }
 
+    // API Config
+    const API_ADD_CATEGORY = 'http://meatsfresh.org.in:8080/api/vendor/admin/categories';
+
     window.saveCategory = function () {
-        if (!catNameInput.value.trim()) {
+        const nameVal = catNameInput.value.trim();
+        const commVal = catCommInput.value;
+        const file = catFileInput.files[0];
+
+        if (!nameVal) {
             alert('Category Name is required');
             return;
         }
-        if (catCommInput.value === '') {
+        if (commVal === '') {
             alert('Commission is required');
             return;
         }
 
-        const id = catIdInput.value;
-        const newCat = {
-            id: id || 'c' + Date.now(),
-            name: catNameInput.value.trim(),
-            commission: parseFloat(catCommInput.value),
-            image: currentImage || ''
-        };
-
-        if (id) {
-            const idx = categories.findIndex(c => c.id === id);
-            if (idx !== -1) categories[idx] = newCat;
-        } else {
-            categories.unshift(newCat);
+        const form = new FormData();
+        form.append("name", nameVal);
+        form.append("commission", commVal);
+        if (file) {
+            // Using logic from user snippet, though filename UUID might be optional, we just pass the file
+            form.append("image", file);
         }
 
-        renderGrid(categories); // Re-render
-        updateStats(); // Refresh stats
-        modal.hide();
+        const submitBtn = document.querySelector('#categoryModal .btn-primary');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const settings = {
+            "url": "http://meatsfresh.org.in:8080/api/vendor/admin/categories",
+            "method": "POST",
+            "timeout": 0,
+            "processData": false,
+            "mimeType": "multipart/form-data",
+            "contentType": false,
+            "data": form,
+            "beforeSend": function (xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa("user:user"));
+            }
+        };
+        console.log("Sending request to 8080 with Auth header set via beforeSend");
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+            alert('Category saved successfully!');
+            modal.hide();
+
+            const newCat = {
+                id: 'new_' + Date.now(),
+                name: nameVal,
+                commission: parseFloat(commVal),
+                image: currentImage || ''
+            };
+            categories.unshift(newCat);
+            renderGrid(categories);
+            updateStats();
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            console.error('Error:', textStatus, errorThrown);
+            console.log('Response:', jqXHR.responseText);
+            let msg = `Error: ${textStatus} ${errorThrown}`;
+            try {
+                // Try parsing JSON error
+                const errJson = JSON.parse(jqXHR.responseText);
+                msg = `Error Detail: ${JSON.stringify(errJson, null, 2)}`;
+            } catch (e) {
+                msg = `Error Detail: ${jqXHR.responseText || errorThrown || "Unknown Error"}`;
+            }
+            alert(msg);
+        }).always(function () {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        });
     }
 
     window.deleteCategory = function (id) {

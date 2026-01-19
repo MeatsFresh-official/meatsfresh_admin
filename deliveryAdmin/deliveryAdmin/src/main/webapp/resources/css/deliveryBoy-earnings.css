@@ -1,87 +1,359 @@
-/* --- Skeleton Loader --- */
-.skeleton {
-    background: #e9ecef;
-    background: linear-gradient(110deg, #e9ecef 8%, #f8f9fa 18%, #e9ecef 33%);
-    background-size: 200% 100%;
-    animation: 1.5s shine linear infinite;
-    border-radius: .25rem;
+:root {
+    /* --- ZENITH PREMIUM PALETTE --- */
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --info-gradient: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-light: #9ca3af;
+
+    --bg-main: #f3f4f6;
+    --sidebar-width: 280px;
 }
 
-@keyframes shine {
+body {
+    background-color: var(--bg-main);
+    font-family: 'Inter', sans-serif;
+    /* Assuming Inter or system font */
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
     to {
-        background-position-x: -200%;
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-/* --- Table Specific Styles --- */
+.animate-on-load {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* --- GLASS PANELS --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- HERO STATISTICS CARDS --- */
+.hero-stat-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    padding: 1.5rem;
+    color: white;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.hero-stat-card .card-body {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    z-index: 1;
+}
+
+.hero-stat-card .stat-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    opacity: 0.2;
+}
+
+.hero-stat-card h3 {
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.02em;
+}
+
+.hero-stat-card h6 {
+    font-weight: 500;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+/* Gradient Variants */
+.bg-gradient-primary-zenith {
+    background: var(--primary-gradient);
+}
+
+.bg-gradient-success-zenith {
+    background: var(--success-gradient);
+}
+
+.bg-gradient-warning-zenith {
+    background: var(--warning-gradient);
+}
+
+.bg-gradient-info-zenith {
+    background: var(--info-gradient);
+}
+
+.bg-gradient-danger-zenith {
+    background: var(--danger-gradient);
+}
+
+
+/* --- TABLE STYLES --- */
+.zenith-table-container {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.zenith-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    /* Spacing between rows */
+}
+
+.zenith-table thead th {
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    border: none;
+}
+
+.zenith-table tbody tr {
+    background: white;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.zenith-table tbody tr:hover {
+    transform: scale(1.005);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+    position: relative;
+}
+
+.zenith-table td {
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.95rem;
+}
+
+.zenith-table td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.zenith-table td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+
+/* --- RIDER INFO & AVATAR --- */
 .rider-info {
     display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
 .rider-avatar {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    /* Prevent shrinking */
+}
+
+/* --- ICON CONTAINERS --- */
+.icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-circle {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    color: #fff;
-    margin-right: 12px;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
-.rider-name {
-    font-weight: 600;
-    margin: 0;
-    line-height: 1.2;
-}
-
-.rider-id {
-    font-size: 0.85rem;
-    color: #6c757d;
-}
-
-.earnings-amount {
-    font-weight: 600;
-}
-
-.pending-amount {
-    color: #dc3545; /* Bootstrap danger color for emphasis */
-}
-
-/* --- Payout Status Column & Badge Fix --- */
-
-/* 1. Define a consistent width for the column */
-.payout-status-column {
-    width: 130px;
-}
-
-/* 2. CRUCIAL FIX: Reset badge position to override conflicting global styles */
-.payout-status-column .badge {
-    position: static;
-}
-
-/* --- Status Badge Styling --- */
-.payout-status {
+/* --- BADGES --- */
+.zenith-badge {
+    padding: 0.35em 0.8em;
     font-size: 0.75rem;
     font-weight: 600;
-    padding: 0.4em 0.8em;
-    letter-spacing: 0.5px;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    white-space: nowrap;
 }
 
-.payout-status.status-paid {
-    background-color: rgba(25, 135, 84, 0.1);
-    color: #198754;
+.zenith-badge.pending {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
 }
 
-.payout-status.status-pending {
-    background-color: rgba(255, 193, 7, 0.15);
-    color: #b98700;
+.zenith-badge.paid {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #d1fae5;
 }
 
-.payout-status.status-failed {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
+.zenith-badge.failed {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fee2e2;
+}
+
+/* --- UTILITY CLASSES --- */
+.bg-gradient-soft-warning {
+    background: linear-gradient(to right, #fffbeb, #fff7ed);
+}
+
+.bg-soft-info {
+    background-color: #ecfeff;
+}
+
+.text-info {
+    color: #0891b2;
+}
+
+.bg-soft-success {
+    background-color: #ecfdf5;
+}
+
+.text-success {
+    color: #059669;
+}
+
+.bg-soft-danger {
+    background-color: #fef2f2;
+}
+
+.text-danger {
+    color: #dc2626;
+}
+
+.bg-soft-warning {
+    background-color: #fffbeb;
+}
+
+.text-warning {
+    color: #d97706;
+}
+
+.border {
+    border: 1px solid #e5e7eb !important;
+}
+
+.rounded-pill {
+    border-radius: 50rem !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- BUTTONS --- */
+.btn-zenith-primary {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+.btn-zenith-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+    color: white;
+}
+
+.btn-zenith-primary:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    transform: none;
+    box-shadow: none;
+}
+
+.page-header h1 {
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    background: linear-gradient(to right, #1f2937, #4b5563);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- FILTER PILLS --- */
+.filter-pill.active {
+    background-color: #f3f4f6;
+    color: #4f46e5 !important;
+    font-weight: 700 !important;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.filter-pill:hover {
+    background-color: #f9fafb;
+    color: #4f46e5 !important;
 }

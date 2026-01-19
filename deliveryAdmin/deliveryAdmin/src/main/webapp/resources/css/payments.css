@@ -1,49 +1,263 @@
-/* payments.css */
+:root {
+    /* --- ZENITH PREMIUM PALETTE --- */
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --info-gradient: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
 
-.card-icon {
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-light: #9ca3af;
+
+    --bg-main: #f3f4f6;
+    --sidebar-width: 280px;
+}
+
+body {
+    background-color: var(--bg-main);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* --- GLASS PANELS --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* --- HERO STATISTICS CARDS --- */
+.hero-stat-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    padding: 1.5rem;
+    color: white;
+    height: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.hero-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.hero-stat-card .card-body {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-stat-card::before {
+    content: '';
     position: absolute;
-    right: 20px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    z-index: 1;
+}
+
+.hero-stat-card .card-icon {
+    position: absolute;
+    right: 1.5rem;
     top: 50%;
     transform: translateY(-50%);
-    opacity: 0.3;
-    font-size: 2.5rem;
+    font-size: 3rem;
+    opacity: 0.15;
 }
 
+.hero-stat-card h3 {
+    font-weight: 800;
+    font-size: 2.2rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.02em;
+}
+
+.hero-stat-card h6 {
+    font-weight: 600;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+/* Gradient Variants */
+.bg-gradient-success-zenith {
+    background: var(--success-gradient);
+}
+
+.bg-gradient-primary-zenith {
+    background: var(--primary-gradient);
+}
+
+.bg-gradient-info-zenith {
+    background: var(--info-gradient);
+}
+
+/* --- TABLE STYLES --- */
+.zenith-table-container {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.zenith-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.zenith-table thead th {
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    border: none;
+}
+
+.zenith-table tbody tr {
+    background: white;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    /* Note: border-radius on tr sometimes tricky, usually handled by td first/last child */
+}
+
+.zenith-table tbody tr:hover {
+    transform: scale(1.002);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+    position: relative;
+}
+
+.zenith-table td {
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.zenith-table td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.zenith-table td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* --- BADGES --- */
 .badge-div {
+    padding: 0.4em 0.8em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     display: inline-block;
-    padding: 0.35em 0.65em;
-    font-size: .85em;
-    font-weight: 700;
-    line-height: 1;
-    color: #fff;
     text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.25rem;
-    text-transform: capitalize;
+    min-width: 80px;
 }
 
-/* Custom background colors for badges if not in bootstrap */
-.bg-purple {
-    background-color: #6f42c1;
-}
-.bg-razorpay { background-color: #02042b; }
-.bg-stripe { background-color: #635bff; }
-.bg-phonepe { background-color: #5f259f; }
-.bg-cash { background-color: #198754; }
-.bg-pending { background-color: #ffc107; color: #000 !important; }
-.bg-failed { background-color: #dc3545; }
-.bg-completed { background-color: #198754; }
-
-
-#timeFilterButtons .btn.active {
-    color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+.badge-div.bg-completed,
+.badge-div.bg-cash {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #d1fae5;
 }
 
-#timeFilterButtons #customDateBtn.active {
-     color: #fff;
-    background-color: #6c757d;
-    border-color: #6c757d;
+.badge-div.bg-pending {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
+}
+
+.badge-div.bg-failed {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fee2e2;
+}
+
+.badge-div.bg-online {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #dbeafe;
+}
+
+/* --- BUTTONS --- */
+.btn-zenith-primary {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+.btn-zenith-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+    color: white;
+}
+
+.btn-zenith-success {
+    background: var(--success-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+.btn-zenith-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    color: white;
+}
+
+.btn-outline-zenith {
+    background: white;
+    color: var(--text-secondary);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.btn-outline-zenith:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: var(--text-primary);
+}
+
+/* --- PAGE HEADER --- */
+.page-header h1 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #111827, #4b5563);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

@@ -353,16 +353,19 @@ input:checked+.slider:before {
 
 /* Zenith Badge - Modern Status Pill */
 .zenith-badge {
-    padding: 0.35em 0.8em;
+    padding: 0.2rem 0.6rem;
     border-radius: 50rem;
     font-weight: 700;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1;
+    min-width: 60px;
 }
 
 .zenith-badge.success {

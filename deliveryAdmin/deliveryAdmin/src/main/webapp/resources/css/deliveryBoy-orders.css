@@ -1,97 +1,216 @@
-/* deliveryBoy-orders.css */
-
-.main-content .page-header {
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
+:root {
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    --secondary-gradient: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --zenith-primary: #4f46e5;
 }
 
-.card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+body {
+    background-color: #f3f4f6;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
 }
 
-.card .card-header-tabs {
-    margin: -0.75rem -1.25rem;
+/* --- Utilities --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.address-truncate {
-    max-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.text-gradient-primary {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-gradient-primary-zenith {
+    background: var(--primary-gradient);
+}
+
+.bg-gradient-success-zenith {
+    background: var(--success-gradient);
+}
+
+.bg-gradient-warning-zenith {
+    background: var(--warning-gradient);
+}
+
+.bg-gradient-danger-zenith {
+    background: var(--danger-gradient);
+}
+
+.bg-soft-primary {
+    background-color: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
+
+.bg-soft-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.bg-soft-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.bg-soft-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+/* --- Table Styles --- */
+.zenith-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.zenith-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.zenith-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+}
+
+.zenith-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.zenith-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.clickable-row {
     cursor: pointer;
 }
 
-.status-indicator {
-    padding: 0.25em 0.6em;
-    font-size: 0.85em;
-    font-weight: 600;
-    border-radius: 50rem;
-    display: inline-block;
-    text-transform: uppercase;
-}
-
-.status-pending {
-    background-color: rgba(255, 193, 7, 0.2);
-    color: #b08500;
-}
-
-.status-active, .status-delivered {
-    background-color: rgba(25, 135, 84, 0.2);
-    color: #0c623b;
-}
-
-.status-info, .status-in_transit {
-    background-color: rgba(13, 202, 240, 0.2);
-    color: #0a8cb1;
-}
-
-.status-rejected, .status-cancelled {
-    background-color: rgba(220, 53, 69, 0.2);
-    color: #9d2633;
-}
-
-.rating-stars i {
-    color: #ffc107;
-}
-
-.timeline {
+/* --- Order Cards (Heart View) --- */
+.financial-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
     position: relative;
-    padding-left: 1.5rem;
-    border-left: 2px solid #e9ecef;
+    overflow: hidden;
 }
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
-
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
-
-.timeline-item::before {
+.financial-card::before {
     content: '';
     position: absolute;
-    left: -2.0rem;
-    top: 0.25rem;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 50%;
-    background-color: #0d6efd;
-    border: 3px solid #fff;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--primary-gradient);
 }
 
-.timeline-item-title {
-    font-weight: bold;
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed #e2e8f0;
 }
 
-.timeline-item-time {
-    font-size: 0.85rem;
-    color: #6c757d;
+.stat-row:last-child {
+    border-bottom: none;
 }
 
-.toast-container {
-    z-index: 1090;
+/* --- Map Placeholder --- */
+.map-placeholder {
+    width: 100%;
+    height: 180px;
+    background-color: #e2e8f0;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    background-image: url('https://img.freepik.com/free-vector/city-map-background-design_1017-13453.jpg');
+    /* Generic map bg */
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.map-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+}
+
+/* --- Offcanvas --- */
+.offcanvas {
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.offcanvas-header {
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* --- Badges & Icons --- */
+.zenith-badge {
+    padding: 0.35em 0.8em;
+    border-radius: 50rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.025em;
+}
+
+.icon-box {
+    transition: transform 0.2s;
+}
+
+.icon-box:hover {
+    transform: scale(1.05);
+}
+
+/* --- Animations --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-on-load {
+    animation: fadeInUp 0.4s ease-out forwards;
+    opacity: 0;
 }

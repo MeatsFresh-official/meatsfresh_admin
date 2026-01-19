@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // =================================================================
     // == CONFIGURE YOUR API BASE URL HERE ==
     // =================================================================
@@ -67,15 +67,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function postData(url, data) {
-         try {
+        try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             if (!response.ok) {
-                 const err = await response.json();
-                 throw new Error(err.message || `HTTP error! Status: ${response.status}`);
+                const err = await response.json();
+                throw new Error(err.message || `HTTP error! Status: ${response.status}`);
             }
             return await response.json();
         } catch (error) {
@@ -125,31 +125,34 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderPaymentsTable(payments) {
         paymentsTableBody.innerHTML = '';
         if (!payments || payments.length === 0) {
-            paymentsTableBody.innerHTML = `<tr><td colspan="7" class="text-center">No payment transactions found.</td></tr>`;
+            paymentsTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-5 text-muted">No payment transactions found.</td></tr>`;
             return;
         }
-        payments.forEach(payment => {
+        payments.forEach((payment, index) => {
             const row = `
-                <tr>
-                    <td>${payment.transactionId}</td>
-                    <td>${new Date(payment.date).toLocaleString('en-IN')}</td>
+                <tr style="animation: fadeInUp 0.3s ease forwards; animation-delay: ${index * 0.05}s; opacity: 0;">
+                    <td class="ps-4 fw-medium text-primary">${payment.transactionId}</td>
+                    <td class="text-secondary small">${new Date(payment.date).toLocaleString('en-IN')}</td>
                     <td>
                         <div class="d-flex align-items-center">
+                             <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px; font-weight: 700; font-size: 0.8rem;">
+                                ${payment.customerName.charAt(0).toUpperCase()}
+                            </div>
                             <div>
-                                <h6 class="mb-0">${payment.customerName}</h6>
-                                <small class="text-muted">Order #${payment.orderId}</small>
+                                <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">${payment.customerName}</h6>
+                                <small class="text-muted" style="font-size: 0.75rem;">Order #${payment.orderId}</small>
                             </div>
                         </div>
                     </td>
-                    <td>${formatCurrency(payment.amount)}</td>
-                    <td><div class="badge-div bg-${payment.method.toLowerCase()}">${payment.method}</div></td>
-                    <td><div class="badge-div bg-${payment.status.toLowerCase()}">${payment.status}</div></td>
-                    <td>
+                    <td class="fw-bold text-dark">${formatCurrency(payment.amount)}</td>
+                    <td><div class="badge-div bg-${payment.method.toLowerCase()} shadow-sm">${payment.method}</div></td>
+                    <td><div class="badge-div bg-${payment.status.toLowerCase()} shadow-sm">${payment.status}</div></td>
+                    <td class="text-center pe-4">
                         <div class="btn-group btn-group-sm" role="group">
-                            <button class="btn btn-outline-primary" onclick="viewPaymentDetails('${payment.id}')"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-white shadow-sm text-primary hover-scale rounded-start" onclick="viewPaymentDetails('${payment.id}')" title="View Details"><i class="fas fa-eye"></i></button>
                             ${payment.status === 'COMPLETED' && payment.method !== 'CASH' ?
-                                `<button class="btn btn-outline-danger" onclick="confirmRefund('${payment.id}', ${payment.amount})"><i class="fas fa-undo"></i></button>` : ''
-                            }
+                    `<button class="btn btn-white shadow-sm text-danger hover-scale rounded-end" onclick="confirmRefund('${payment.id}', ${payment.amount})" title="Refund"><i class="fas fa-undo"></i></button>` : ''
+                }
                         </div>
                     </td>
                 </tr>`;
@@ -165,9 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Event Handlers ---
     timeFilterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            timeFilterButtons.forEach(btn => btn.classList.remove('active'));
-            customDateBtn.classList.remove('active');
-            button.classList.add('active');
+            timeFilterButtons.forEach(btn => {
+                btn.classList.remove('active', 'text-white', 'btn-primary');
+                btn.classList.add('text-muted');
+            });
+            customDateBtn.classList.remove('text-primary');
+            customDateBtn.classList.add('text-muted');
+
+            button.classList.remove('text-muted');
+            button.classList.add('active'); // CSS handles active state styling
+
             currentFilters.time = button.dataset.filter;
             currentFilters.startDate = '';
             currentFilters.endDate = '';
@@ -200,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.key === 'Enter') searchBtn.click();
     });
 
-    document.getElementById('addCashPaymentForm').addEventListener('submit', function(event) {
+    document.getElementById('addCashPaymentForm').addEventListener('submit', function (event) {
         event.preventDefault();
         const data = Object.fromEntries(new FormData(this).entries());
         postData(API_ENDPOINTS.recordCashPayment, data).then(response => {
@@ -227,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Global Functions for Button Clicks ---
-    window.viewPaymentDetails = function(paymentId) {
+    window.viewPaymentDetails = function (paymentId) {
         paymentDetailsModal.show();
         const loader = document.getElementById('paymentDetailLoader');
         const content = document.getElementById('paymentDetailContent');
@@ -235,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
         content.classList.add('d-none');
 
         fetchData(`${API_ENDPOINTS.getPaymentDetails}?id=${paymentId}`).then(data => {
-            if(data) {
+            if (data) {
                 document.getElementById('detailTransactionId').textContent = data.transactionId;
                 document.getElementById('detailPaymentDate').textContent = new Date(data.date).toLocaleString('en-IN');
                 document.getElementById('detailAmount').textContent = formatCurrency(data.amount);
@@ -247,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const onlineDetails = document.getElementById('onlinePaymentDetails');
                 const cashDetails = document.getElementById('cashPaymentDetails');
 
-                if(data.method !== 'CASH') {
+                if (data.method !== 'CASH') {
                     onlineDetails.classList.remove('d-none');
                     cashDetails.classList.add('d-none');
                     document.getElementById('detailGatewayRef').textContent = data.gatewayReference || 'N/A';
@@ -261,13 +271,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 loader.classList.add('d-none');
                 content.classList.remove('d-none');
             } else {
-                 paymentDetailsModal.hide();
-                 showToast(false, "Could not fetch payment details.");
+                paymentDetailsModal.hide();
+                showToast(false, "Could not fetch payment details.");
             }
         });
     };
 
-    window.confirmRefund = function(paymentId, amount) {
+    window.confirmRefund = function (paymentId, amount) {
         document.getElementById('refundPaymentId').value = paymentId;
         document.getElementById('refundAmount').value = amount;
         document.getElementById('refundReason').value = '';

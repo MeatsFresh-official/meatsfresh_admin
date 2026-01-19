@@ -116,7 +116,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/login",
                                 "/logout",
-                                "/pages/**",
+                                "/WEB-INF/pages/**",
                                 "/resources/**",
                                 "/webjars/**",
                                 "/uploads/**"

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===================================================================
     // API ENDPOINTS
     // ===================================================================
-    const API_BASE = 'http://localhost:8080';
+    const API_BASE = 'http://meatsfresh.org.in:8080';
     const VENDORS_API = API_BASE + '/vendor';
     const VENDOR_REGISTER_API = VENDORS_API + '/register';
     const ADMIN_VENDORS_API = API_BASE + '/deliveryAdmin/api/dashboard/all-shops';
@@ -46,28 +46,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const getMockVendors = () => {
         return [
             {
-                vendorId: 'V9001', vendorName: 'Meats Fresh Premium', vendorInfo: 'Premium Quality Meat & Poultry',
-                city: 'Bangalore', shopPhoto: '', isApproved: true, isActive: 'Y',
+                vendorId: 1, vendorInfo: 'Meats Fresh Premium (VEN-F1EA0C01)', contactDetails: '9876543210 | support@meatsfresh.com',
+                city: 'Bangalore', shopPhoto: '', status: 'ONLINE', availability: 'OPEN',
                 stats: { orders: 1250, revenue: 540000 }
             },
             {
-                vendorId: 'V9002', vendorName: 'Ocean Catch Seafoods', vendorInfo: 'Fresh Marine & Freshwater Fish',
-                city: 'Mumbai', shopPhoto: '', isApproved: true, isActive: 'N',
+                vendorId: 2, vendorInfo: 'Ocean Catch Seafoods (VEN-F1EA0C02)', contactDetails: '9876543211 | ocean@catch.com',
+                city: 'Mumbai', shopPhoto: '', status: 'OFFLINE', availability: 'CLOSED',
                 stats: { orders: 850, revenue: 320000 }
             },
             {
-                vendorId: 'V9003', vendorName: 'Green Farm Organics', vendorInfo: 'Farm Fresh Organic Chicken',
-                city: 'Pune', shopPhoto: '', isApproved: false, isActive: 'N',
+                vendorId: 3, vendorInfo: 'Green Farm Organics (VEN-F1EA0C03)', contactDetails: '9876543212 | green@farm.com',
+                city: 'Pune', shopPhoto: '', status: 'ONLINE', availability: 'OPEN',
                 stats: { orders: 45, revenue: 15000 }
             },
             {
-                vendorId: 'V9004', vendorName: 'City Butchers', vendorInfo: 'Daily Fresh Mutton & Lamb',
-                city: 'Delhi', shopPhoto: '', isApproved: true, isActive: 'Y',
+                vendorId: 4, vendorInfo: 'City Butchers (VEN-F1EA0C04)', contactDetails: '9876543213 | city@butchers.com',
+                city: 'Delhi', shopPhoto: '', status: 'ONLINE', availability: 'OPEN',
                 stats: { orders: 2100, revenue: 890000 }
             },
             {
-                vendorId: 'V9005', vendorName: 'Spice & Meat Hub', vendorInfo: 'Marinated Meats & Spices',
-                city: 'Hyderabad', shopPhoto: '', isApproved: true, isActive: 'Y',
+                vendorId: 5, vendorInfo: 'Spice & Meat Hub (VEN-F1EA0C05)', contactDetails: '9876543214 | spice@hub.com',
+                city: 'Hyderabad', shopPhoto: '', status: 'MAINTENANCE', availability: 'CLOSED',
                 stats: { orders: 600, revenue: 250000 }
             }
         ];
@@ -255,9 +255,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const IMAGE_BASE_URL = 'http://meatsfresh.org.in:8080/';
 
         container.innerHTML = vendors.map(shop => {
-            const status = shop.isApproved === true ? 'Accepted' : 'Pending';
-            const statusClass = shop.isApproved === true ? 'success' : 'warning';
-            const isAvailable = shop.isActive === 'Y';
+            const status = shop.status || 'UNKNOWN';
+            const statusClass = status === 'ONLINE' ? 'success' : 'secondary';
+            const availability = shop.availability || 'CLOSED';
+            const isAvailable = availability === 'OPEN';
             const imageUrl = shop.shopPhoto ? `${IMAGE_BASE_URL}${shop.shopPhoto}` : 'resources/images/default-store.jpg';
 
             if (isGrid) {
@@ -266,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="col-md-6 col-lg-4 col-xl-3 animate-on-load">
                     <div class="card h-100 border-0 shadow-sm hover-shadow-lg transition-all" style="border-radius: 16px; overflow: hidden;">
                         <div class="position-relative" style="height: 140px;">
-                            <img src="${imageUrl}" class="w-100 h-100 object-fit-cover" alt="${shop.vendorName}" onerror="this.src='resources/images/default-store.jpg'">
+                            <img src="${imageUrl}" class="w-100 h-100 object-fit-cover" alt="${shop.vendorInfo}" onerror="this.src='resources/images/default-store.jpg'">
                             <span class="position-absolute top-0 end-0 m-2 badge bg-white text-dark shadow-sm rounded-pill px-3">
                                 <i class="fas fa-star text-warning me-1"></i> 4.5
                             </span>
@@ -274,14 +275,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="badge bg-${statusClass} bg-opacity-10 text-${statusClass} rounded-pill border border-${statusClass} px-2 py-1" style="font-size: 0.7rem;">${status}</span>
-                                <span class="badge bg-${isAvailable ? 'success' : 'danger'} bg-opacity-10 text-${isAvailable ? 'success' : 'danger'} rounded-pill px-2 py-1" style="font-size: 0.7rem;">${isAvailable ? 'Online' : 'Offline'}</span>
+                                <span class="badge bg-${isAvailable ? 'success' : 'danger'} bg-opacity-10 text-${isAvailable ? 'success' : 'danger'} rounded-pill px-2 py-1" style="font-size: 0.7rem;">${availability}</span>
                             </div>
                             <h6 class="fw-bold text-truncate mb-1" title="${shop.vendorInfo}">${shop.vendorInfo || 'Unnamed Shop'}</h6>
-                            <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1"></i> ${shop.city || 'Bangalore'}</p>
+                            <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1"></i> ${shop.contactDetails ? shop.contactDetails.split('|')[0] : 'N/A'}</p>
                             
                             <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top">
                                 <div class="small text-muted">
-                                    <i class="fas fa-box me-1"></i> 24 Prods
+                                    <i class="fas fa-box me-1"></i> ID: ${shop.vendorId}
                                 </div>
                                 <a href="viewshop?id=${shop.vendorId}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Details</a>
                             </div>
@@ -297,13 +298,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         
                         <div class="flex-grow-1" style="min-width: 200px;">
                             <h6 class="fw-bold mb-0">${shop.vendorInfo || 'Unnamed Shop'}</h6>
-                            <small class="text-muted"><i class="fas fa-id-badge me-1"></i> ID: ${shop.vendorId}</small>
+                            <small class="text-muted"><i class="fas fa-id-badge me-1"></i> ID: ${shop.vendorId} | ${shop.contactDetails || ''}</small>
                         </div>
 
                         <div style="min-width: 150px;">
                             <div class="d-flex gap-2">
                                 <span class="zenith-badge ${statusClass}">${status}</span>
-                                <span class="zenith-badge ${isAvailable ? 'success' : 'secondary'}">${isAvailable ? 'Online' : 'Offline'}</span>
+                                <span class="zenith-badge ${isAvailable ? 'success' : 'danger'}">${availability}</span>
                             </div>
                         </div>
 

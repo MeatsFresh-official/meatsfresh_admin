@@ -88,33 +88,35 @@ public class PageAccessFilter extends OncePerRequestFilter {
         Map<String, String> mappings = new HashMap<>();
 
         // Dashboard
-        mappings.put("/pages/dashboard.jsp", "DASHBOARD");
+        mappings.put("/WEB-INF/pages/dashboard.jsp", "DASHBOARD");
 
         // User Management
-        mappings.put("/pages/user.jsp", "USER_PAGE");
-        mappings.put("/pages/users-reviewAndratings.jsp", "USER_REVIEWS");
-        mappings.put("/pages/view-cartpage.jsp", "USER_CARTS");
+        mappings.put("/WEB-INF/pages/user.jsp", "USER_PAGE");
+        mappings.put("/WEB-INF/pages/users-reviewAndratings.jsp", "USER_REVIEWS");
+        mappings.put("/WEB-INF/pages/view-cartpage.jsp", "USER_CARTS");
 
         // Vendor Management
-        mappings.put("/pages/shopspage.jsp", "SHOPS_PAGE");
-        mappings.put("/pages/categories.jsp", "CATEGORIES_MANAGEMENT");
-        mappings.put("/pages/shops-adsAndpromotion.jsp", "SHOPS_ADS");
-        mappings.put("/pages/orders-billings.jsp", "ORDERS_BILLINGS");
-        mappings.put("/pages/commissions-report.jsp", "COMMISSIONS_REPORT");
+        mappings.put("/WEB-INF/pages/shopspage.jsp", "SHOPS_PAGE");
+        mappings.put("/WEB-INF/pages/categories.jsp", "CATEGORIES_MANAGEMENT");
+        mappings.put("/WEB-INF/pages/shops-adsAndpromotion.jsp", "SHOPS_ADS");
+        mappings.put("/WEB-INF/pages/orders-billings.jsp", "ORDERS_BILLINGS");
+        mappings.put("/WEB-INF/pages/commissions-report.jsp", "COMMISSIONS_REPORT");
 
         // Delivery System
-        mappings.put("/pages/deliveryBoy-orders.jsp", "DELIVERY_ORDERS");
-        mappings.put("/pages/deliveryBoy-manage.jsp", "DELIVERY_MANAGE");
-        mappings.put("/pages/payments.jsp", "DELIVERY_PAYMENTS");
+        mappings.put("/WEB-INF/pages/deliveryBoy-orders.jsp", "DELIVERY_ORDERS");
+        mappings.put("/WEB-INF/pages/deliveryBoy-manage.jsp", "DELIVERY_MANAGE");
+        mappings.put("/WEB-INF/pages/deliveryBoy-earnings.jsp", "DELIVERY_EARNINGS");
+        mappings.put("/WEB-INF/pages/deliveryBoy-incentives.jsp", "DELIVERY_INCENTIVES");
+        mappings.put("/WEB-INF/pages/payments.jsp", "DELIVERY_PAYMENTS");
 
         // System Settings
-        mappings.put("/pages/admin-staff.jsp", "ADMIN_STAFF");
-        mappings.put("/pages/website-analysis.jsp", "WEBSITE_ANALYTICS");
-        mappings.put("/pages/app-homepage.jsp", "APP_HOMEPAGE");
-        mappings.put("/pages/notifications.jsp", "NOTIFICATIONS");
-        mappings.put("/pages/sms-integration.jsp", "SMS_INTEGRATION");
-        mappings.put("/pages/coupon-code.jsp", "COUPON_CODE");
-        mappings.put("/pages/help-support.jsp", "HELP_SUPPORT");
+        mappings.put("/WEB-INF/pages/admin-staff.jsp", "ADMIN_STAFF");
+        mappings.put("/WEB-INF/pages/website-analysis.jsp", "WEBSITE_ANALYTICS");
+        mappings.put("/WEB-INF/pages/app-homepage.jsp", "APP_HOMEPAGE");
+        mappings.put("/WEB-INF/pages/notifications.jsp", "NOTIFICATIONS");
+        mappings.put("/WEB-INF/pages/sms-integration.jsp", "SMS_INTEGRATION");
+        mappings.put("/WEB-INF/pages/coupon-code.jsp", "COUPON_CODE");
+        mappings.put("/WEB-INF/pages/help-support.jsp", "HELP_SUPPORT");
 
         return mappings;
     }

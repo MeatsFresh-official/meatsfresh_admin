@@ -12,7 +12,7 @@
         <ul class="nav flex-column">
 
           <!-- Dashboard Section -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'DASHBOARD')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DASHBOARD')}">
             <li class="nav-item">
               <a class="nav-link ${pageContext.request.requestURI.endsWith('/dashboard') ? 'active' : ''}"
                 href="${pageContext.request.contextPath}/dashboard">
@@ -23,7 +23,7 @@
           </c:if>
 
           <!-- User Management -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'USER_MANAGEMENT')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'USER_MANAGEMENT')}">
             <li class="nav-item">
               <a class="nav-link collapsed ${pageContext.request.requestURI.contains('/user') ? 'active' : ''}"
                 data-bs-toggle="collapse" href="#userCollapse">
@@ -33,22 +33,23 @@
               </a>
               <div class="collapse ${pageContext.request.requestURI.contains('/user') ? 'show' : ''}" id="userCollapse">
                 <ul class="nav flex-column submenu">
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'USER_PAGE')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'USER_PAGE')}">
                     <li><a href="${pageContext.request.contextPath}/user"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/user') ? 'active' : ''}">
                         <i class="fas fa-user-edit"></i> User</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'USER_EARNINGS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'USER_EARNINGS')}">
                     <li><a href="${pageContext.request.contextPath}/user-earnings"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/user-earnings') ? 'active' : ''}">
                         <i class="fas fa-money-bill-wave"></i> User Revenue</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'USER_REVIEWS')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'USER_REVIEWS')}">
                     <li><a href="${pageContext.request.contextPath}/users-reviewAndratings"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/users-reviewAndratings') ? 'active' : ''}">
                         <i class="fas fa-star"></i> Ratings & Reviews</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'USER_CARTS')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'USER_CARTS')}">
                     <li><a href="${pageContext.request.contextPath}/view-cartpage"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/view-cartpage') ? 'active' : ''}">
                         <i class="fas fa-shopping-cart"></i> Carts</a></li>
@@ -65,7 +66,7 @@
           </c:if>
 
           <!-- Vendor Management -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'VENDOR_MANAGEMENT')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'VENDOR_MANAGEMENT')}">
             <li class="nav-item">
               <a class="nav-link collapsed ${pageContext.request.requestURI.contains('/shop') ? 'active' : ''}"
                 data-bs-toggle="collapse" href="#vendorCollapse">
@@ -76,32 +77,36 @@
               <div class="collapse ${pageContext.request.requestURI.contains('/shop') ? 'show' : ''}"
                 id="vendorCollapse">
                 <ul class="nav flex-column submenu">
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'SHOPS_PAGE')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'SHOPS_PAGE')}">
                     <li><a href="${pageContext.request.contextPath}/shopspage"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/shopspage') ? 'active' : ''}">
                         <i class="fas fa-store-alt"></i> Shops</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'CATEGORIES_MANAGEMENT')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'CATEGORIES_MANAGEMENT')}">
                     <li><a href="${pageContext.request.contextPath}/categories"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/categories') ? 'active' : ''}">
                         <i class="fas fa-utensils"></i> Categories</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'SHOPS_EARNINGS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'SHOPS_EARNINGS')}">
                     <li><a href="${pageContext.request.contextPath}/shop-earnings"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/shop-earnings') ? 'active' : ''}">
                         <i class="fas fa-money-bill-wave"></i> Shop Earnings</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'SHOPS_ADS')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'SHOPS_ADS')}">
                     <li><a href="${pageContext.request.contextPath}/shops-adsAndpromotion"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/shops-adsAndpromotion') ? 'active' : ''}">
                         <i class="fas fa-bullhorn"></i> Ads & Promotions</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'ORDERS_BILLINGS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'ORDERS_BILLINGS')}">
                     <li><a href="${pageContext.request.contextPath}/orders-billings"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/orders-billings') ? 'active' : ''}">
                         <i class="fas fa-receipt"></i> Orders & Billings</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'COMMISSIONS_REPORT')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'COMMISSIONS_REPORT')}">
                     <li><a href="${pageContext.request.contextPath}/commissions-report"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/commissions-report') ? 'active' : ''}">
                         <i class="fas fa-chart-pie"></i> Commissions Report</a></li>
@@ -113,7 +118,7 @@
           </c:if>
 
           <!-- Banner Management (Separate Page) -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'BANNERS')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'BANNERS')}">
             <li class="nav-item">
               <a href="${pageContext.request.contextPath}/banners"
                 class="nav-link ${pageContext.request.requestURI.endsWith('/banners') ? 'active' : ''}">
@@ -122,8 +127,16 @@
             </li>
           </c:if>
 
+          <!-- Coupon Management -->
+          <li class="nav-item">
+            <a href="${pageContext.request.contextPath}/coupons"
+              class="nav-link ${pageContext.request.requestURI.endsWith('/coupons') ? 'active' : ''}">
+              <i class="fas fa-ticket-alt"></i> <span>Coupons</span>
+            </a>
+          </li>
+
           <!-- Delivery System -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'DELIVERY_SYSTEM')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DELIVERY_SYSTEM')}">
             <li class="nav-item">
               <a class="nav-link collapsed ${pageContext.request.requestURI.contains('/deliveryBoy') ? 'active' : ''}"
                 data-bs-toggle="collapse" href="#deliveryCollapse">
@@ -134,22 +147,32 @@
               <div class="collapse ${pageContext.request.requestURI.contains('/deliveryBoy') ? 'show' : ''}"
                 id="deliveryCollapse">
                 <ul class="nav flex-column submenu">
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'DELIVERY_ORDERS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DELIVERY_ORDERS')}">
                     <li><a href="${pageContext.request.contextPath}/deliveryBoy-orders"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/deliveryBoy-orders') ? 'active' : ''}">
                         <i class="fas fa-box-open"></i> Orders</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'DELIVERY_MANAGE')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DELIVERY_MANAGE')}">
                     <li><a href="${pageContext.request.contextPath}/deliveryBoy-manage"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/deliveryBoy-manage') ? 'active' : ''}">
                         <i class="fas fa-motorcycle"></i> Delivery Boys</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'DELIVERY_EARNINGS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DELIVERY_EARNINGS')}">
                     <li><a href="${pageContext.request.contextPath}/deliveryBoy-earnings"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/deliveryBoy-earnings') ? 'active' : ''}">
-                        <i class="fas fa-money-bill-wave"></i> Delivery Earnings</a></li>
+                        <i class="fas fa-wallet"></i> Delivery Earnings</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'DELIVERY_PAYMENTS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DELIVERY_INCENTIVES')}">
+                    <li><a href="${pageContext.request.contextPath}/delivery-incentives"
+                        class="nav-link ${pageContext.request.requestURI.endsWith('/delivery-incentives') ? 'active' : ''}">
+                        <i class="fas fa-gift"></i> Incentives</a></li>
+                  </c:if>
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'DELIVERY_PAYMENTS')}">
                     <li><a href="${pageContext.request.contextPath}/payments"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/payments') ? 'active' : ''}">
                         <i class="fas fa-credit-card"></i> Payments</a></li>
@@ -160,7 +183,7 @@
           </c:if>
 
           <!-- System Settings -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'SYSTEM_SETTINGS')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'SYSTEM_SETTINGS')}">
             <li class="nav-item">
               <a class="nav-link collapsed ${pageContext.request.requestURI.contains('/admin-staff') ? 'active' : ''}"
                 data-bs-toggle="collapse" href="#systemCollapse">
@@ -171,33 +194,31 @@
               <div class="collapse ${pageContext.request.requestURI.contains('/admin-staff') ? 'show' : ''}"
                 id="systemCollapse">
                 <ul class="nav flex-column submenu">
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'ADMIN_STAFF')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'ADMIN_STAFF')}">
                     <li><a href="${pageContext.request.contextPath}/admin-staff"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/admin-staff') ? 'active' : ''}">
                         <i class="fas fa-user-shield"></i> Admin & Staff</a></li>
                   </c:if>
 
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'APP_HOMEPAGE')}">
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'APP_HOMEPAGE')}">
                     <li><a href="${pageContext.request.contextPath}/app-homepage"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/app-homepage') ? 'active' : ''}">
                         <i class="fas fa-mobile-alt"></i> App Homepage</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'NOTIFICATIONS')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'NOTIFICATIONS')}">
                     <li><a href="${pageContext.request.contextPath}/notifications"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/notifications') ? 'active' : ''}">
                         <i class="fas fa-bell"></i> Notifications</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'SMS_INTEGRATION')}">
+                  <c:if
+                    test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'SMS_INTEGRATION')}">
                     <li><a href="${pageContext.request.contextPath}/sms-integration"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/sms-integration') ? 'active' : ''}">
                         <i class="fas fa-sms"></i> SMS Integration</a></li>
                   </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'COUPON_CODE')}">
-                    <li><a href="${pageContext.request.contextPath}/coupon-code"
-                        class="nav-link ${pageContext.request.requestURI.endsWith('/coupon-code') ? 'active' : ''}">
-                        <i class="fas fa-tags"></i> Coupon Codes</a></li>
-                  </c:if>
-                  <c:if test="${fn:contains(currentStaff.accessPages, 'HELP_SUPPORT')}">
+
+                  <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'HELP_SUPPORT')}">
                     <li><a href="${pageContext.request.contextPath}/help-support"
                         class="nav-link ${pageContext.request.requestURI.endsWith('/help-support') ? 'active' : ''}">
                         <i class="fas fa-question-circle"></i> Help & Support</a></li>
@@ -208,7 +229,7 @@
           </c:if>
 
           <!-- Reports Section - Fixed -->
-          <c:if test="${fn:contains(currentStaff.accessPages, 'REPORTS')}">
+          <c:if test="${currentStaff.role == 'ADMIN' || fn:contains(currentStaff.accessPages, 'REPORTS')}">
             <li class="nav-item">
               <a class="nav-link ${pageContext.request.requestURI.contains('/reports') ? 'active' : ''}"
                 href="${pageContext.request.contextPath}/reports"

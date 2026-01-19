@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const API_URL = '/api/earnings'; // Replace with your actual API endpoint
+    const API_URL = '/api/earnings';
 
     // --- DOM ELEMENT REFERENCES ---
     const statsContainer = document.getElementById('earnings-stats-container');
@@ -8,9 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const paginationInfo = document.getElementById('pagination-info');
     const paginationControls = document.getElementById('pagination-controls');
-    const dropdownButton = document.getElementById('earningsDropdown').querySelector('span');
+    const dropdownButton = document.getElementById('earningsDropdownLabel');
     const dropdownItems = document.querySelectorAll('.earnings-range');
-    const dateRangeModal = new bootstrap.Modal(document.getElementById('dateRangeModal'));
+    const dateRangeModalElement = document.getElementById('dateRangeModal');
+    const dateRangeModal = dateRangeModalElement ? new bootstrap.Modal(dateRangeModalElement) : null;
     const applyDateRangeBtn = document.getElementById('applyDateRange');
 
     let earningsChart; // To hold the Chart.js instance
@@ -24,96 +25,107 @@ document.addEventListener('DOMContentLoaded', function () {
         searchQuery: '',
     };
 
-    // --- MOCK DATA (Replace with actual API calls) ---
+    // --- MOCK DATA ---
     const mockApi = {
-        getStats: async (range, start, end) => {
-            console.log(`Fetching stats for range: ${range}`, { start, end });
-            await new Promise(res => setTimeout(res, 500)); // Simulate network delay
+        getStats: async (range) => {
+            // No delay
+            const variance = Math.random() * 0.1 + 0.95;
             return {
-                totalEarnings: 125400.50,
-                thisMonthEarnings: 18340.75,
-                thisWeekEarnings: 4560.20,
-                todayEarnings: 780.00
+                totalEarnings: 1254320.50 * variance,
+                thisMonthEarnings: 148340.75 * variance,
+                thisWeekEarnings: 42560.20 * variance,
+                todayEarnings: 7890.00 * variance
             };
         },
-        getChartData: async (range, start, end) => {
-            console.log(`Fetching chart data for range: ${range}`, { start, end });
-            await new Promise(res => setTimeout(res, 500));
-            // Return different data based on the range for demonstration
+        getChartData: async (range) => {
+            // No delay
+            if (range === 'today') {
+                return {
+                    labels: ['12 AM', '4 AM', '8 AM', '12 PM', '4 PM', '8 PM'],
+                    data: [120, 80, 450, 1200, 1500, 1100]
+                };
+            }
             if (range === 'week') {
                 return {
                     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    data: [650, 590, 800, 810, 560, 550, 400]
+                    data: [12500, 15900, 18000, 18100, 25600, 29500, 24000]
                 };
             }
+            if (range === 'year') {
+                return {
+                    labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
+                    data: [120000, 128000, 155000, 158000, 185000, 210000]
+                };
+            }
+            // Month default
             return {
                 labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                data: [4215, 5312, 4890, 3923]
+                data: [42150, 53120, 48900, 69230]
             };
         },
-        getShopsData: async (page, search, range, start, end) => {
-            console.log(`Fetching shops for page: ${page}, search: '${search}', range: ${range}`);
-            await new Promise(res => setTimeout(res, 800));
+        getShopsData: async (page, search, range) => {
+            // No delay
             const allShops = [
-                { id: 'VID001', name: 'Green Grocers', contact: 'contact@greengrocers.com', phone: '123-456-7890', status: 'ACCEPTED', totalEarnings: 15200.50, periodEarnings: 2100.25, avatar: 'G' },
-                { id: 'VID002', name: 'Fresh Farms', contact: 'info@freshfarms.net', phone: '987-654-3210', status: 'ACCEPTED', totalEarnings: 28300.00, periodEarnings: 4500.50, avatar: 'F' },
-                { id: 'VID003', name: 'Daily Needs Store', contact: 'support@dailyneeds.com', phone: '555-123-4567', status: 'PENDING', totalEarnings: 5400.75, periodEarnings: 800.00, avatar: 'D' },
-                { id: 'VID004', name: 'Organic World', contact: 'hello@organicworld.dev', phone: '555-987-6543', status: 'REJECTED', totalEarnings: 45000.20, periodEarnings: 6850.75, avatar: 'O' }
+                { id: 'SHP-001', name: 'Fresh Choice Market', contact: 'john@freshchoice.com', phone: '+91 98765 43210', status: 'ACCEPTED', totalEarnings: 452000.50, periodEarnings: 45000.00 },
+                { id: 'SHP-002', name: 'Organic Greens', contact: 'sarah@organicgreens.com', phone: '+91 98765 12345', status: 'ACCEPTED', totalEarnings: 328000.00, periodEarnings: 32000.50 },
+                { id: 'SHP-003', name: 'Meats & More', contact: 'support@meatsmore.com', phone: '+91 99887 76655', status: 'PENDING', totalEarnings: 12500.75, periodEarnings: 1200.00 },
+                { id: 'SHP-004', name: 'Daily Essentials', contact: 'contact@dailyessentials.net', phone: '+91 88776 65544', status: 'REJECTED', totalEarnings: 0.00, periodEarnings: 0.00 },
+                { id: 'SHP-005', name: 'Gourmet Basket', contact: 'info@gourmetbasket.com', phone: '+91 77665 54433', status: 'ACCEPTED', totalEarnings: 156000.25, periodEarnings: 15600.00 },
+                { id: 'SHP-006', name: 'City Supermarket', contact: 'manager@citysuper.com', phone: '+91 66554 43322', status: 'ACCEPTED', totalEarnings: 895000.00, periodEarnings: 95000.00 },
+                { id: 'SHP-007', name: 'Corner Store', contact: 'hello@cornerstore.in', phone: '+91 55443 32211', status: 'ACCEPTED', totalEarnings: 56000.30, periodEarnings: 5600.00 },
+                { id: 'SHP-008', name: 'Vegan Delight', contact: 'vegan@delight.com', phone: '+91 44332 21100', status: 'PENDING', totalEarnings: 23000.90, periodEarnings: 2300.90 },
+                { id: 'SHP-009', name: 'Baker\'s Dozen', contact: 'orders@baker.com', phone: '+91 33221 10099', status: 'ACCEPTED', totalEarnings: 112000.50, periodEarnings: 11200.50 },
+                { id: 'SHP-010', name: 'Spice Route', contact: 'spices@route.com', phone: '+91 22110 09988', status: 'ACCEPTED', totalEarnings: 78000.00, periodEarnings: 7800.00 }
             ];
-             const filteredShops = allShops.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
+
+            const term = search ? search.toLowerCase() : '';
+            const filtered = allShops.filter(s =>
+                s.name.toLowerCase().includes(term) ||
+                s.contact.toLowerCase().includes(term)
+            );
+
             return {
-                shops: filteredShops,
-                totalPages: 1,
-                currentPage: 1,
-                totalItems: filteredShops.length
+                shops: filtered,
+                totalItems: filtered.length
             };
         }
     };
 
-    // --- DATA RENDERING FUNCTIONS ---
+    // --- RENDERING ---
     function renderStats(stats) {
-        statsContainer.innerHTML = `
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <h6 class="mb-0">Total Earnings</h6>
-                        <h3 class="mb-0">₹${stats.totalEarnings.toFixed(2)}</h3>
+        if (!statsContainer) return;
+        const items = [
+            { label: 'Total Earnings', val: stats.totalEarnings, color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'fa-rupee-sign' },
+            { label: 'This Month', val: stats.thisMonthEarnings, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'fa-calendar-alt' },
+            { label: 'This Week', val: stats.thisWeekEarnings, color: 'text-blue-600', bg: 'bg-blue-50', icon: 'fa-chart-line' },
+            { label: 'Today', val: stats.todayEarnings, color: 'text-amber-600', bg: 'bg-amber-50', icon: 'fa-clock' }
+        ];
+
+        statsContainer.innerHTML = items.map(i => `
+            <div class="card-base p-6 fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 mb-1">${i.label}</p>
+                        <h3 class="text-2xl font-bold text-slate-900 tracking-tight">₹${i.val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+                    </div>
+                    <div class="stat-icon-wrapper ${i.bg} ${i.color}">
+                        <i class="fas ${i.icon}"></i>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h6 class="mb-0">This Month</h6>
-                        <h3 class="mb-0">₹${stats.thisMonthEarnings.toFixed(2)}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <h6 class="mb-0">This Week</h6>
-                        <h3 class="mb-0">₹${stats.thisWeekEarnings.toFixed(2)}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <h6 class="mb-0">Today</h6>
-                        <h3 class="mb-0">₹${stats.todayEarnings.toFixed(2)}</h3>
-                    </div>
-                </div>
-            </div>
-        `;
+        `).join('');
     }
 
     function renderChart(chartData) {
-        chartContainer.innerHTML = '<canvas id="earningsChart"></canvas>'; // Clear skeleton and add canvas
+        if (!chartContainer) return;
+        chartContainer.innerHTML = '<canvas id="earningsChart"></canvas>';
         const ctx = document.getElementById('earningsChart').getContext('2d');
-        if (earningsChart) {
-            earningsChart.destroy();
-        }
+        if (earningsChart) earningsChart.destroy();
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
         earningsChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -121,37 +133,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Earnings',
                     data: chartData.data,
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    pointRadius: 3,
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: 'rgba(78, 115, 223, 1)',
-                    pointHoverRadius: 5,
-                    tension: 0.3,
+                    backgroundColor: gradient,
+                    borderColor: '#6366f1',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#6366f1',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.4,
                     fill: true
                 }]
             },
             options: {
                 maintainAspectRatio: false,
                 responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                             callback: function(value) {
-                                return '₹' + value;
-                            }
-                        }
-                    }
-                },
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        borderColor: '#334155',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
                         callbacks: {
-                            label: function(context) {
-                                return ` Earnings: ₹${context.raw.toFixed(2)}`;
-                            }
+                            label: (ctx) => ` Revenue: ₹${ctx.raw.toLocaleString('en-IN')}`
                         }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                        ticks: {
+                            font: { family: "'Inter', sans-serif", size: 11 },
+                            color: '#64748b',
+                            callback: (val) => '₹' + val.toLocaleString('en-IN', { notation: "compact" })
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#64748b' }
                     }
                 }
             }
@@ -159,117 +184,123 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderTable(data) {
+        if (!tableBody) return;
         if (!data.shops || data.shops.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-5">No shop earnings data found.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-500 italic">No shop earnings data found.</td></tr>`;
             return;
         }
 
-        const statusBadges = {
-            'ACCEPTED': 'bg-success-light',
-            'PENDING': 'bg-warning-light',
-            'REJECTED': 'bg-danger-light'
+        const statusConfig = {
+            'ACCEPTED': { class: 'bg-emerald-100 text-emerald-800', label: 'Active', icon: 'fa-check-circle' },
+            'PENDING': { class: 'bg-amber-100 text-amber-800', label: 'Pending', icon: 'fa-clock' },
+            'REJECTED': { class: 'bg-rose-100 text-rose-800', label: 'Inactive', icon: 'fa-times-circle' }
         };
 
-        tableBody.innerHTML = data.shops.map(shop => `
-            <tr>
-                <td class="ps-4">
-                    <div class="vendor-info">
-                        <div class="vendor-avatar" style="background-color: #4e73df;">${shop.avatar}</div>
-                        <div>
-                            <p class="vendor-name">${shop.name}</p>
-                            <span class="vendor-id">${shop.id}</span>
+        tableBody.innerHTML = data.shops.map(shop => {
+            const status = statusConfig[shop.status] || { class: 'bg-slate-100 text-slate-800', label: shop.status, icon: 'fa-info-circle' };
+            const initials = shop.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            return `
+            <tr class="hover:bg-slate-50 transition-colors duration-150">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                            <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">${initials}</div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-slate-900">${shop.name}</div>
+                            <div class="text-xs text-slate-500 font-mono">${shop.id}</div>
                         </div>
                     </div>
                 </td>
-                <td>
-                    <div>${shop.contact}</div>
-                    <small class="text-muted">${shop.phone}</small>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-slate-900">${shop.contact}</div>
+                    <div class="text-sm text-slate-500">${shop.phone}</div>
                 </td>
-                <td class="text-center status-column"><span class="badge ${statusBadges[shop.status] || 'bg-secondary-light'}">${shop.status}</span></td>
-                <td class="text-end earnings-amount">₹${shop.totalEarnings.toFixed(2)}</td>
-                <td class="text-end pe-4 earnings-amount text-primary">₹${shop.periodEarnings.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.class}">
+                        <i class="fas ${status.icon} mr-1.5"></i> ${status.label}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-900 font-semibold">
+                    ₹${shop.totalEarnings.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-indigo-600 font-medium">
+                    +₹${shop.periodEarnings.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function renderPagination(data) {
-        paginationInfo.textContent = `Showing ${data.shops.length} of ${data.totalItems} shops.`;
-        // Pagination logic would be implemented here if totalPages > 1
-        paginationControls.innerHTML = '';
-    }
-
-    // --- DATA FETCHING & UI UPDATE ---
-    async function updateDashboard() {
-        // Show skeletons while loading
-        showSkeletons();
-
-        // Fetch all data in parallel
-        const [stats, chartData, shopsData] = await Promise.all([
-            mockApi.getStats(state.timeRange, state.customStartDate, state.customEndDate),
-            mockApi.getChartData(state.timeRange, state.customStartDate, state.customEndDate),
-            mockApi.getShopsData(state.currentPage, state.searchQuery, state.timeRange, state.customStartDate, state.customEndDate)
-        ]);
-
-        // Render components with fetched data
-        renderStats(stats);
-        renderChart(chartData);
-        renderTable(shopsData);
-        renderPagination(shopsData);
+        if (!paginationInfo || !paginationControls) return;
+        paginationInfo.textContent = `Showing ${data.shops.length} entries`;
+        // Simplified
+        paginationControls.innerHTML = `
+            <span class="relative inline-flex items-center px-2 py-2 rounded-md border border-slate-300 bg-white text-sm font-medium text-slate-500">
+                1
+            </span>
+        `;
     }
 
     function showSkeletons() {
-        statsContainer.innerHTML = Array(4).fill('<div class="col-xl-3 col-md-6 mb-4"><div class="card skeleton" style="height: 120px;"></div></div>').join('');
-        chartContainer.innerHTML = '<div class="skeleton w-100" style="height: 300px;"></div>';
-        tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
+        if (statsContainer) statsContainer.innerHTML = Array(4).fill('<div class="card-base p-6"><div class="animate-pulse flex space-x-4"><div class="flex-1 space-y-4 py-1"><div class="h-4 bg-slate-200 rounded w-3/4"></div><div class="h-8 bg-slate-200 rounded"></div></div><div class="rounded-full bg-slate-200 h-12 w-12"></div></div></div>').join('');
+        if (chartContainer) chartContainer.innerHTML = '<div class="animate-pulse bg-slate-200 h-full w-full rounded-lg"></div>';
+        if (tableBody) tableBody.innerHTML = Array(5).fill('<tr><td colspan="5" class="px-6 py-4"><div class="animate-pulse h-4 bg-slate-200 rounded w-full"></div></td></tr>').join('');
     }
 
-    // --- EVENT LISTENERS ---
-    dropdownItems.forEach(item => {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const newRange = this.dataset.range;
+    async function updateDashboard() {
+        showSkeletons();
+        try {
+            const [stats, chartData, shopsData] = await Promise.all([
+                mockApi.getStats(state.timeRange),
+                mockApi.getChartData(state.timeRange),
+                mockApi.getShopsData(state.currentPage, state.searchQuery, state.timeRange)
+            ]);
+            renderStats(stats);
+            renderChart(chartData);
+            renderTable(shopsData);
+            renderPagination(shopsData);
+        } catch (error) {
+            console.error("Dashboard error:", error);
+            if (tableBody) tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 p-4">Error loading data. Check console.</td></tr>`;
+        }
+    }
 
-            if (state.timeRange !== newRange) {
-                state.timeRange = newRange;
-                state.customStartDate = null;
-                state.customEndDate = null;
-                state.currentPage = 1; // Reset to first page
-                dropdownButton.textContent = this.textContent;
-                dropdownItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
+    // --- LISTENERS ---
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const range = item.dataset.range;
+            if (state.timeRange !== range) {
+                state.timeRange = range;
+                if (dropdownButton) dropdownButton.textContent = item.textContent.trim();
                 updateDashboard();
             }
         });
     });
 
-    applyDateRangeBtn.addEventListener('click', () => {
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
+    if (searchInput) {
+        let timeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                state.searchQuery = searchInput.value;
+                updateDashboard();
+            }, 300);
+        });
+    }
 
-        if (startDate && endDate) {
+    if (applyDateRangeBtn && dateRangeModal) {
+        applyDateRangeBtn.addEventListener('click', () => {
+            // Placeholder logic for custom range
             state.timeRange = 'custom';
-            state.customStartDate = startDate;
-            state.customEndDate = endDate;
-            state.currentPage = 1;
-            dropdownButton.textContent = `Custom`;
-            dropdownItems.forEach(i => i.classList.remove('active'));
+            if (dropdownButton) dropdownButton.textContent = 'Custom';
             dateRangeModal.hide();
             updateDashboard();
-        } else {
-            alert('Please select both a start and end date.');
-        }
-    });
+        });
+    }
 
-    let searchTimeout;
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            state.searchQuery = searchInput.value;
-            state.currentPage = 1;
-            updateDashboard();
-        }, 300); // Debounce for 300ms
-    });
-
-    // --- INITIAL LOAD ---
+    // Init
     updateDashboard();
 });

@@ -10,7 +10,7 @@
 // ===================================================================================
 
 const API_CONFIG = {
-    baseUrl: 'http://localhost:8080',
+    baseUrl: 'http://meatsfresh.org.in:8080',
     baseUrl2: 'http://meatsfresh.org.in:8082',
     baseUrl3: 'http://meatsfresh.org.in:8083',
     endpoints: {
@@ -97,7 +97,8 @@ function updateStatsDisplay() {
     document.getElementById('totalUsers').textContent = userStats.totalUsers || 0;
     document.getElementById('activeUsers').textContent = userStats.activeUsersLast30Days || 0;
     document.getElementById('totalRevenue').textContent = formatCurrency(userStats.totalRevenue || 0);
-    document.getElementById('avgOrderValue').textContent = formatCurrency(userStats.avgOrderValue || 0);
+    const avgOrderValueEl = document.getElementById('avgOrderValue');
+    if (avgOrderValueEl) avgOrderValueEl.textContent = formatCurrency(userStats.avgOrderValue || 0);
 }
 
 function isUserActive(lastActiveDate) {
@@ -145,14 +146,20 @@ function renderPaginationControls() {
         return;
     }
 
-    // Adjust page index (0-based in backend, 1-based in UI)
     const uiPage = currentPage + 1;
+    const maxVisibleButtons = 5;
+    let startPage = Math.max(1, uiPage - Math.floor(maxVisibleButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+
+    if (endPage - startPage + 1 < maxVisibleButtons) {
+        startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+    }
 
     let html = `
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-2 bg-light rounded-3 shadow-sm border border-light">
         <div class="d-flex align-items-center">
             <span class="text-muted small me-2">Show</span>
-            <select class="form-select form-select-sm" style="width: 70px;" onchange="changePageSize(this.value)">
+            <select class="form-select form-select-sm" style="width: 70px;" onchange="window.changePageSize(this.value)">
                 <option value="5" ${itemsPerPage == 5 ? 'selected' : ''}>5</option>
                 <option value="10" ${itemsPerPage == 10 ? 'selected' : ''}>10</option>
                 <option value="25" ${itemsPerPage == 25 ? 'selected' : ''}>25</option>
@@ -170,62 +177,51 @@ function renderPaginationControls() {
             <nav aria-label="Page navigation">
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item ${uiPage === 1 ? 'disabled' : ''}">
-                        <button class="page-link border-0 rounded-start" onclick="changePage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>
-                    </li>
-    `;
-
-    const maxVisibleButtons = 5;
-    let startPage = Math.max(1, uiPage - Math.floor(maxVisibleButtons / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
-
-    if (endPage - startPage + 1 < maxVisibleButtons) {
-        startPage = Math.max(1, endPage - maxVisibleButtons + 1);
-    }
+                        <button class="page-link border-0 rounded-start" onclick="window.changePage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>
+                    </li>`;
 
     if (startPage > 1) {
-        html += `<li class="page-item"><button class="page-link border-0" onclick="changePage(0)">1</button></li>`;
+        html += `<li class="page-item"><button class="page-link border-0" onclick="window.changePage(0)">1</button></li>`;
         if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link border-0">...</span></li>`;
     }
 
     for (let i = startPage; i <= endPage; i++) {
         const isActive = i === uiPage;
-        // pass i - 1 because generic 'changePage' expects 0-based index
         html += `
             <li class="page-item ${isActive ? 'active' : ''}">
-                <button class="page-link border-0 ${isActive ? 'bg-primary text-white shadow-sm' : ''}" onclick="changePage(${i - 1})">${i}</button>
-            </li>
-        `;
+                <button class="page-link border-0 ${isActive ? 'bg-primary text-white shadow-sm' : ''}" onclick="window.changePage(${i - 1})">${i}</button>
+            </li>`;
     }
 
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) html += `<li class="page-item disabled"><span class="page-link border-0">...</span></li>`;
-        html += `<li class="page-item"><button class="page-link border-0" onclick="changePage(${totalPages - 1})">${totalPages}</button></li>`;
+        html += `<li class="page-item"><button class="page-link border-0" onclick="window.changePage(${totalPages - 1})">${totalPages}</button></li>`;
     }
 
     html += `
-                    <li class="page-item ${uiPage === totalPages ? 'disabled' : ''}">
-                        <button class="page-link border-0 rounded-end" onclick="changePage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>
+                    <li class="page-item ${uiPage >= totalPages ? 'disabled' : ''}">
+                        <button class="page-link border-0 rounded-end" onclick="window.changePage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>
                     </li>
                 </ul>
             </nav>
         </div>
-    </div>
-    `;
+    </div>`;
 
     container.innerHTML = html;
 }
 
-// Global functions for pagination onclick events
+// Global functions attached explicitly to window
 window.changePage = function (page) {
     if (page >= 0 && page < totalPages) {
-        console.log("Changing to page:", page); // Debug
         fetchUsers({ page: page });
     }
 };
 
 window.changePageSize = function (size) {
-    console.log("Changing page size to:", size); // Debug
-    fetchUsers({ page: 0, size: parseInt(size) });
+    const newSize = parseInt(size);
+    if (!isNaN(newSize)) {
+        fetchUsers({ page: 0, size: newSize });
+    }
 };
 
 
@@ -298,12 +294,20 @@ async function fetchUsers(filters = {}) {
         const basicAuth = btoa(`${username}:${password}`);
 
         // Construct payload combining persisted criteria + current pagination
+        // Helper to map UI values to API Enums
+        const getActivityEnum = (val) => {
+            val = val ? val.toLowerCase() : "all";
+            if (val === "active") return "ACTIVE_30";
+            if (val === "inactive") return "INACTIVE_30";
+            return "ALL";
+        };
+
         const requestBody = {
-            activityStatus: ((currentFilters.activity || document.getElementById('activityFilter')?.value || "ALL")).toUpperCase(),
+            activityStatus: getActivityEnum(currentFilters.activity || document.getElementById('activityFilter')?.value),
             spendingLevel: ((currentFilters.spending || document.getElementById('spendingFilter')?.value || "ALL")).toUpperCase(),
             startDate: currentFilters.startDate || null,
             endDate: currentFilters.endDate || null,
-            search: currentFilters.search || document.getElementById('userSearch')?.value || "", // Support search in main fetch
+            search: currentFilters.search || document.getElementById('userSearch')?.value || "",
             page: currentPage,
             size: itemsPerPage
         };
@@ -420,9 +424,9 @@ function renderUsers(users) {
                 <small class="text-muted" style="font-size: 0.75rem;">${formatTime(user.lastActive)}</small>
             </td>
             <td>
-                <span class="badge badge-zenith ${isUserActive(user.lastActive) ? 'badge-rider' : 'badge-inactive'}">
+                <span class="badge-zenith ${user.status === 'Y' ? 'badge-rider' : 'badge-inactive'}">
                     <i class="fas fa-circle me-1" style="font-size: 6px;"></i>
-                    ${isUserActive(user.lastActive) ? 'Active' : 'Inactive'}
+                    ${user.status === 'Y' ? 'Active' : 'Inactive'}
                 </span>
             </td>
             <td class="text-end">

@@ -175,13 +175,19 @@ body {
 
 /* Badges */
 .badge-zenith {
-    padding: 0.35rem 0.75rem;
-    border-radius: 2rem;
-    font-size: 0.75rem;
-    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 50rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    justify-content: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1;
+    min-width: 60px;
 }
 
 .badge-admin {
@@ -205,8 +211,8 @@ body {
 }
 
 .badge-inactive {
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
 }
 
 /* Buttons */

@@ -111,6 +111,16 @@ function loadMockData() {
     document.getElementById('header-phone').innerHTML = `<i class="fas fa-phone me-2"></i>${mockUser.phone}`;
     document.getElementById('header-img').src = mockUser.profileImage;
 
+    // Status Badge Logic
+    const statusVal = document.getElementById('header-status-val');
+    const isActive = mockUser.stats.activeDays <= 30; // Example logic
+
+    if (statusVal) {
+        statusVal.textContent = isActive ? 'Active' : 'Inactive';
+        statusVal.className = `h3 fw-bold ${isActive ? 'text-success' : 'text-danger'} mb-0`;
+    }
+
+
     // Populate Profile Inputs
     document.getElementById('input-name').value = mockUser.name;
     document.getElementById('input-email').value = mockUser.email;

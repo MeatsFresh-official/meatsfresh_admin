@@ -1,356 +1,335 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // =================================================================
-    // == CONFIGURE YOUR API BASE URL HERE ==
-    // =================================================================
-    const BASE_URL = 'http://localhost:8080';
-    // =================================================================
-
-    // API Endpoints
-    const API_ENDPOINTS = {
-        getDashboardStats: `${BASE_URL}/api/orders/stats`,
-        getAllOrders: `${BASE_URL}/api/orders/all`,
-        getPendingOrders: `${BASE_URL}/api/orders/pending`,
-        getCompletedOrders: `${BASE_URL}/api/orders/completed`,
-        getOrderDetails: `${BASE_URL}/api/orders/details`,
-        updateOrderStatus: `${BASE_URL}/api/orders/update-status`,
-        assignRider: `${BASE_URL}/api/orders/assign`
+document.addEventListener('DOMContentLoaded', () => {
+    // --- STATE MANAGEMENT ---
+    let state = {
+        allOrders: [],
+        pendingOrders: [],
+        completedOrders: [],
+        cancelledOrders: [],
+        currentPage: 1,
+        itemsPerPage: 10,
+        filters: {
+            dateRange: 'today',
+            search: ''
+        }
     };
 
-    // DOM Elements
-    const totalOrdersCount = document.getElementById('totalOrdersCount');
-    const pendingOrdersCount = document.getElementById('pendingOrdersCount');
-    const completedOrdersCount = document.getElementById('completedOrdersCount');
-    const cancelledOrdersCount = document.getElementById('cancelledOrdersCount');
-
-    const allOrdersTable = document.getElementById('ordersTable')?.querySelector('tbody');
-    const pendingOrdersTable = document.getElementById('pendingOrdersTable')?.querySelector('tbody');
-    const completedOrdersTable = document.getElementById('completedOrdersTable')?.querySelector('tbody');
-
-    const orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
-    const updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-
-    // Toast Notifications
-    const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-    const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
-
-    // Data Storage for Client-Side Operations (Search/Filter)
-    let masterAllOrders = [];
-    let masterPendingOrders = [];
-    let masterCompletedOrders = [];
-
-    // --- Pagination Initialization ---
-    // define render callbacks
-    const renderAllOrdersPage = (items) => renderOrders(allOrdersTable, items, 'all');
-    const renderPendingOrdersPage = (items) => renderOrders(pendingOrdersTable, items, 'pending');
-    const renderCompletedOrdersPage = (items) => renderOrders(completedOrdersTable, items, 'completed');
-
-    // Instantiate Paginators (10 items per page)
-    const allOrdersPaginator = new PaginationUtils('allOrdersPagination', 10, renderAllOrdersPage);
-    const pendingOrdersPaginator = new PaginationUtils('pendingOrdersPagination', 10, renderPendingOrdersPage);
-    const completedOrdersPaginator = new PaginationUtils('completedOrdersPagination', 10, renderCompletedOrdersPage);
-
-
-    function showToast(isSuccess, message) {
-        if (isSuccess) {
-            document.getElementById('toastMessage').innerText = message;
-            successToast.show();
-        } else {
-            document.getElementById('errorMessage').innerText = message;
-            errorToast.show();
+    // --- DOM ELEMENT REFERENCES ---
+    const elements = {
+        tabs: document.querySelectorAll('#orderTabs button'),
+        searchInput: document.getElementById('orderSearch'),
+        filterPills: document.querySelectorAll('.filter-pill'),
+        tableBodies: {
+            all: document.querySelector('#ordersTable tbody'),
+            pending: document.querySelector('#pendingOrdersTable tbody'),
+            completed: document.querySelector('#completedOrdersTable tbody')
+        },
+        paginations: {
+            all: document.getElementById('allOrdersPagination'),
+            pending: document.getElementById('pendingOrdersPagination'),
+            completed: document.getElementById('completedOrdersPagination')
+        },
+        stats: {
+            total: document.getElementById('totalOrdersCount'),
+            pending: document.getElementById('pendingOrdersCount'),
+            completed: document.getElementById('completedOrdersCount'),
+            cancelled: document.getElementById('cancelledOrdersCount')
+        },
+        offcanvas: {
+            element: document.getElementById('orderDetailsOffcanvas'),
+            instance: null,
+            fields: {
+                id: document.getElementById('offOrderId'),
+                status: document.getElementById('offStatus'),
+                time: document.getElementById('offTime'),
+                vendor: document.getElementById('offVendor'),
+                customer: document.getElementById('offCustomer'),
+                address: document.getElementById('offAddress'),
+                total: document.getElementById('offTotalAmount'),
+                baseFee: document.getElementById('offBaseFee'),
+                surgeFee: document.getElementById('offSurgeFee'),
+                riderEarnings: document.getElementById('offRiderEarnings'),
+                tip: document.getElementById('offTip'),
+                incentive: document.getElementById('offIncentive'),
+                itemsList: document.getElementById('offItemsList')
+            }
         }
+    };
+
+    // Initialize Bootstrap Offcanvas
+    if (elements.offcanvas.element) {
+        elements.offcanvas.instance = new bootstrap.Offcanvas(elements.offcanvas.element);
     }
 
-    // --- Data Fetching and Rendering ---
+    // --- UTILITIES ---
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 2
+        }).format(amount);
+    };
 
-    async function fetchData(url) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                // If 404/500, we might want to fail gracefully or return mock
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            showToast(false, 'Failed to fetch data from the server.');
-            return []; // Return empty array on error to safely handle map/filter
-        }
-    }
-
-    async function postData(url, data) {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Error posting data:', error);
-            showToast(false, 'An error occurred while sending data.');
-            return null;
-        }
-    }
-
-    function loadDashboardStats() {
-        fetchData(API_ENDPOINTS.getDashboardStats).then(data => {
-            if (data && !Array.isArray(data)) { // Check if object
-                totalOrdersCount.textContent = data.totalOrders || 0;
-                pendingOrdersCount.textContent = data.pendingOrders || 0;
-                completedOrdersCount.textContent = data.completedOrders || 0;
-                cancelledOrdersCount.textContent = data.cancelledOrders || 0;
-            }
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-IN', {
+            month: 'short', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', hour12: true
         });
-    }
+    };
 
-    // Generic Render Function used by Paginators
-    function renderOrders(tableBody, orders, type) {
-        tableBody.innerHTML = '';
-        if (!orders || orders.length === 0) {
-            const colspan = tableBody.parentElement.querySelector('thead tr').children.length;
-            tableBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-4 text-muted">No orders found.</td></tr>`;
+    const getStatusBadge = (status) => {
+        let badgeClass = 'bg-soft-secondary text-secondary';
+        let icon = '';
+
+        switch (status) {
+            case 'PENDING':
+                badgeClass = 'bg-soft-warning text-warning';
+                icon = '<i class="fas fa-clock me-1"></i>';
+                break;
+            case 'CONFIRMED':
+            case 'PREPARING':
+            case 'READY_FOR_PICKUP':
+                badgeClass = 'bg-soft-info text-info';
+                icon = '<i class="fas fa-spinner fa-spin me-1"></i>';
+                break;
+            case 'PICKED_UP':
+            case 'IN_TRANSIT':
+                badgeClass = 'bg-soft-primary text-primary';
+                icon = '<i class="fas fa-motorcycle me-1"></i>';
+                break;
+            case 'DELIVERED':
+                badgeClass = 'bg-soft-success text-success';
+                icon = '<i class="fas fa-check-circle me-1"></i>';
+                break;
+            case 'CANCELLED':
+                badgeClass = 'bg-soft-danger text-danger';
+                icon = '<i class="fas fa-times-circle me-1"></i>';
+                break;
+        }
+        return `<span class="zenith-badge ${badgeClass}">${icon}${status}</span>`;
+    };
+
+    // --- DATA FETCHING ---
+    const fetchOrders = async () => {
+        // Show Loading State
+        Object.values(elements.tableBodies).forEach(tbody => {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center p-5"><div class="spinner-border text-primary"></div></td></tr>`;
+        });
+
+        try {
+            // Simulate API call delay
+            // const response = await fetch('/api/vendor/orders'); 
+            // const data = await response.json();
+
+            // MOCK DATA for logic testing
+            const mockData = Array.from({ length: 15 }).map((_, i) => ({
+                orderId: `ORD-${1000 + i}`,
+                customerName: ['Alice Smith', 'Bob Jones', 'Charlie Brown'][i % 3],
+                totalAmount: (Math.random() * 2000 + 200).toFixed(2),
+                deliveryAddress: '123 Main St, Springfield',
+                status: ['PENDING', 'DELIVERED', 'CANCELLED', 'IN_TRANSIT'][i % 4],
+                riderName: i % 4 === 0 ? null : 'Raju Driver',
+                orderTime: new Date().toISOString(),
+                items: [
+                    { name: 'Chicken Curry', quantity: 1, price: 350 },
+                    { name: 'Naan', quantity: 2, price: 40 }
+                ],
+                // Mock Financials for redesign
+                baseFee: (Math.random() * 50 + 20).toFixed(2),
+                surgeFee: (Math.random() * 20).toFixed(2),
+                tip: (Math.random() * 50).toFixed(2),
+                incentive: (Math.random() > 0.7 ? 15.00 : 0.00).toFixed(2)
+            }));
+
+            state.allOrders = mockData;
+            state.pendingOrders = mockData.filter(o => ['PENDING', 'CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP', 'PICKED_UP', 'IN_TRANSIT'].includes(o.status));
+            state.completedOrders = mockData.filter(o => o.status === 'DELIVERED');
+            state.cancelledOrders = mockData.filter(o => o.status === 'CANCELLED');
+
+            updateStats();
+            renderTables();
+
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            showToast('Failed to load orders', 'error');
+        }
+    };
+
+    const updateStats = () => {
+        elements.stats.total.innerText = state.allOrders.length;
+        elements.stats.pending.innerText = state.pendingOrders.length;
+        elements.stats.completed.innerText = state.completedOrders.length;
+        elements.stats.cancelled.innerText = state.cancelledOrders.length;
+    };
+
+    // --- RENDERING ---
+    const renderTables = () => {
+        renderTable(elements.tableBodies.all, state.allOrders, 'all');
+        if (elements.tableBodies.pending) renderTable(elements.tableBodies.pending, state.pendingOrders, 'pending');
+        if (elements.tableBodies.completed) renderTable(elements.tableBodies.completed, state.completedOrders, 'completed');
+    };
+
+    const renderTable = (tbody, data, type) => {
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center p-5 text-muted">No orders found.</td></tr>`;
             return;
         }
 
-        orders.forEach(order => {
-            let rowHtml = '';
-            // Customize row based on order type (all, pending, completed)
-            switch (type) {
-                case 'pending':
-                    rowHtml = createPendingOrderRow(order);
-                    break;
-                case 'completed':
-                    rowHtml = createCompletedOrderRow(order);
-                    break;
-                default:
-                    rowHtml = createAllOrderRow(order);
+        data.forEach(order => {
+            const tr = document.createElement('tr');
+            tr.className = 'clickable-row animate-on-load';
+
+            // Different columns based on tab type if needed, but for now generic structure
+            let rowContent = '';
+
+            if (type === 'all') {
+                rowContent = `
+                    <td class="ps-4 fw-bold text-primary">${order.orderId}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle bg-soft-info text-info me-2 sm-avatar"><i class="fas fa-user"></i></div>
+                            <span class="fw-medium">${order.customerName}</span>
+                        </div>
+                    </td>
+                    <td class="fw-bold text-dark">${formatCurrency(order.totalAmount)}</td>
+                    <td><small class="text-muted text-truncate d-inline-block" style="max-width: 150px;">${order.deliveryAddress}</small></td>
+                    <td>${getStatusBadge(order.status)}</td>
+                     <td>${order.riderName ? `<span class="text-dark fw-medium"><i class="fas fa-motorcycle me-1 text-secondary"></i>${order.riderName}</span>` : '<span class="badge bg-light text-secondary">Unassigned</span>'}</td>
+                    <td class="text-center pe-4">
+                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle action-btn"><i class="fas fa-chevron-right text-secondary"></i></button>
+                    </td>
+                `;
+            } else if (type === 'pending') {
+                rowContent = `
+                    <td class="ps-4 fw-bold text-primary">${order.orderId}</td>
+                    <td>${order.customerName}</td>
+                    <td class="fw-bold">${formatCurrency(order.totalAmount)}</td>
+                    <td>
+                        <div class="d-flex flex-column">
+                             <small class="text-truncate" style="max-width: 150px;">${order.deliveryAddress}</small>
+                             <span class="badge bg-light text-secondary border mt-1" style="width: fit-content;"><i class="fas fa-location-arrow me-1"></i>2.5 km</span>
+                        </div>
+                    </td>
+                    <td><small class="text-muted fw-bold">${formatDate(order.orderTime)}</small></td>
+                    <td class="text-center pe-4">
+                        <button class="btn btn-sm btn-zenith-primary shadow-sm action-btn">Assign</button>
+                    </td>
+                `;
+            } else if (type === 'completed') {
+                rowContent = `
+                    <td class="ps-4 fw-bold text-primary">${order.orderId}</td>
+                    <td>${order.customerName}</td>
+                    <td class="fw-bold">${formatCurrency(order.totalAmount)}</td>
+                    <td><small class="text-muted">${formatDate(order.orderTime)}</small></td>
+                    <td>
+                        <div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                    </td>
+                    <td class="text-center pe-4">
+                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle action-btn"><i class="fas fa-eye text-primary"></i></button>
+                    </td>
+                `;
             }
-            tableBody.insertAdjacentHTML('beforeend', rowHtml);
+
+            tr.innerHTML = rowContent;
+
+            // Add click event for Offcanvas
+            tr.addEventListener('click', (e) => {
+                // Prevent trigger if clicking a button inside
+                /* if (e.target.closest('button')) return; */ // Actually, let's open details for all clicks for now, unless specific action
+                openOrderDetails(order);
+            });
+
+            tbody.appendChild(tr);
         });
-    }
+    };
 
-    // --- Row Creation Functions ---
+    // --- OFFCANVAS DETAILS LOGIC ---
+    const openOrderDetails = (order) => {
+        const f = elements.offcanvas.fields;
 
-    function createAllOrderRow(order) {
-        const statusClass = getStatusClass(order.status);
-        const riderName = order.rider ? order.rider.name : '<span class="text-muted">Not assigned</span>';
+        // Populate Logistics
+        f.id.innerText = order.orderId;
+        f.status.innerHTML = order.status; // Could use getStatusBadge but simple text is fine or use badge class update
+        f.status.className = `badge rounded-pill px-3 ${order.status === 'DELIVERED' ? 'bg-soft-success text-success' : 'bg-soft-primary text-primary'}`;
+        f.time.innerText = formatDate(order.orderTime);
+        f.vendor.innerText = "MeatsFresh Hub"; // Mock vendor
+        f.customer.innerText = order.customerName;
+        f.address.innerText = order.deliveryAddress;
 
-        return `
-            <tr>
-                <td>#${order.orderId}</td>
-                <td>${order.customer?.name || 'Guest'}</td>
-                <td>₹${(order.totalAmount || 0).toFixed(2)}</td>
-                <td class="address-truncate" title="${order.deliveryAddress}">${order.deliveryAddress}</td>
-                <td><span class="status-indicator ${statusClass}">${(order.status || '').replace('_', ' ')}</span></td>
-                <td>${riderName}</td>
-                <td>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary" onclick="viewOrderDetails('${order.orderId}')"><i class="fas fa-eye"></i></button>
-                        <button class="btn btn-outline-success" onclick="openUpdateStatusModal('${order.orderId}', '${order.status}')"><i class="fas fa-sync-alt"></i></button>
+        // Populate Financials (The Heart Card)
+        const total = parseFloat(order.totalAmount);
+        const base = parseFloat(order.baseFee);
+        const surge = parseFloat(order.surgeFee);
+        const tip = parseFloat(order.tip);
+        const incentive = parseFloat(order.incentive);
+        const riderTotal = base + surge + tip + incentive;
+
+        f.total.innerText = formatCurrency(total);
+        f.baseFee.innerText = formatCurrency(base);
+        f.surgeFee.innerText = formatCurrency(surge);
+        f.riderEarnings.innerText = formatCurrency(riderTotal);
+        f.tip.innerText = formatCurrency(tip);
+        f.incentive.innerText = formatCurrency(incentive);
+
+        // Populate Items
+        if (f.itemsList) {
+            f.itemsList.innerHTML = order.items.map(item => `
+                <li class="list-group-item d-flex justify-content-between align-items-center px-3 py-2 border-light">
+                    <div>
+                        <span class="badge bg-light text-dark border me-2">${item.quantity}x</span>
+                        <span class="fw-medium text-dark">${item.name}</span>
                     </div>
-                </td>
-            </tr>
-        `;
-    }
-
-    function createPendingOrderRow(order) {
-        const orderTime = new Date(order.orderTime).toLocaleString();
-        return `
-            <tr>
-                <td>#${order.orderId}</td>
-                <td>${order.customer?.name || 'Guest'}</td>
-                <td>₹${(order.totalAmount || 0).toFixed(2)}</td>
-                <td class="address-truncate" title="${order.deliveryAddress}">${order.deliveryAddress}</td>
-                <td>${order.distance || 0} km</td>
-                <td>${orderTime}</td>
-                <td>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary" onclick="viewOrderDetails('${order.orderId}')"><i class="fas fa-eye"></i></button>
-                        <button class="btn btn-outline-success" onclick="assignToMe('${order.orderId}')"><i class="fas fa-user-check me-1"></i>Accept</button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-
-    function createCompletedOrderRow(order) {
-        const completedTime = order.completedTime ? new Date(order.completedTime).toLocaleString() : 'N/A';
-        const ratingStars = getRatingStars(order.rating || 0);
-        return `
-             <tr>
-                <td>#${order.orderId}</td>
-                <td>${order.customer?.name || 'Guest'}</td>
-                <td>₹${(order.totalAmount || 0).toFixed(2)}</td>
-                <td>${completedTime}</td>
-                <td><div class="rating-stars">${ratingStars}</div></td>
-                <td>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary" onclick="viewOrderDetails('${order.orderId}')"><i class="fas fa-eye"></i></button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-
-    function getStatusClass(status) {
-        switch (status) {
-            case 'PENDING': return 'status-pending';
-            case 'DELIVERED': return 'status-delivered';
-            case 'CANCELLED': return 'status-cancelled';
-            case 'IN_TRANSIT': return 'status-in_transit';
-            default: return '';
+                    <span class="fw-bold text-secondary">${formatCurrency(item.price * item.quantity)}</span>
+                </li>
+            `).join('');
         }
-    }
 
-    function getRatingStars(rating) {
-        let stars = '';
-        for (let i = 1; i <= 5; i++) {
-            stars += `<i class="fas fa-star${i <= rating ? '' : '-empty'}"></i>`;
+        // Show Offcanvas
+        if (elements.offcanvas.instance) {
+            elements.offcanvas.instance.show();
         }
-        return stars;
-    }
+    };
 
+    // --- EVENT LISTENERS ---
 
-    // --- Modal Handling ---
-
-    window.viewOrderDetails = function (orderId) {
-        const modalBody = document.querySelector('#orderDetailsModal .modal-body');
-        modalBody.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-        orderDetailsModal.show();
-
-        fetchData(`${API_ENDPOINTS.getOrderDetails}?orderId=${orderId}`).then(data => {
-            if (data && data.orderId) {
-                document.getElementById('orderDetailId').textContent = data.orderId;
-                renderOrderDetails(modalBody, data);
-            } else {
-                modalBody.innerHTML = '<div class="alert alert-danger">Could not load order details.</div>';
-            }
-        });
-    }
-
-    function renderOrderDetails(container, order) {
-        container.innerHTML = `
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Customer Details</h5>
-                    <p><strong>Name:</strong> ${order.customer?.name || 'N/A'}</p>
-                    <p><strong>Address:</strong> ${order.deliveryAddress}</p>
-                    <p><strong>Phone:</strong> ${order.customer?.phone || 'N/A'}</p>
-                </div>
-                <div class="col-md-6">
-                     <h5>Order Summary</h5>
-                    <p><strong>Status:</strong> ${order.status}</p>
-                    <p><strong>Total Amount:</strong> ₹${(order.totalAmount || 0).toFixed(2)}</p>
-                    <p><strong>Payment Method:</strong> ${order.paymentMethod || 'COD'}</p>
-                </div>
-            </div>
-            <hr>
-            <h5>Order Items</h5>
-            <table class="table table-sm">
-                <thead><tr><th>Item</th><th>Qty</th><th>Price</th></tr></thead>
-                <tbody>
-                    ${(order.items || []).map(item => `<tr><td>${item.name}</td><td>${item.quantity}</td><td>₹${item.price.toFixed(2)}</td></tr>`).join('')}
-                </tbody>
-            </table>
-        `;
-    }
-
-    window.openUpdateStatusModal = function (orderId, currentStatus) {
-        document.getElementById('statusUpdateOrderId').value = orderId;
-        document.getElementById('currentStatusDisplay').textContent = (currentStatus || '').replace('_', ' ');
-        updateStatusModal.show();
-    }
-
-    document.getElementById('updateStatusBtn').addEventListener('click', function () {
-        const orderId = document.getElementById('statusUpdateOrderId').value;
-        const newStatus = document.getElementById('statusSelect').value;
-
-        const payload = { orderId, newStatus };
-
-        postData(API_ENDPOINTS.updateOrderStatus, payload).then(response => {
-            if (response && response.success) {
-                showToast(true, 'Order status updated successfully.');
-                updateStatusModal.hide();
-                loadAllOrders(); // Refresh to show new status
-            } else {
-                showToast(false, response ? response.message : 'Failed to update status.');
-            }
+    // Tab Switching
+    elements.tabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', (e) => {
+            // Can add logic to refresh specific data if needed
+            // console.log('Tab switched to', e.target.id);
         });
     });
 
-    window.assignToMe = function (orderId) {
-        if (confirm(`Are you sure you want to accept order #${orderId}?`)) {
-            postData(API_ENDPOINTS.assignRider, { orderId }).then(response => {
-                if (response && response.success) {
-                    showToast(true, 'Order assigned successfully.');
-                    loadPendingOrders(); // Refresh pending list
-                } else {
-                    showToast(false, response ? response.message : 'Failed to assign order.');
-                }
-            });
+    // Filtering
+    elements.filterPills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            e.preventDefault();
+            elements.filterPills.forEach(p => p.classList.remove('active', 'btn-zenith-primary'));
+            elements.filterPills.forEach(p => p.classList.add('text-secondary', 'hover-bg-light'));
+            e.target.classList.add('active', 'btn-zenith-primary');
+            e.target.classList.remove('text-secondary', 'hover-bg-light');
+
+            state.filters.dateRange = e.target.dataset.range;
+            // Re-fetch or filter existing data
+            fetchOrders();
+        });
+    });
+
+    // Toast Helper
+    const showToast = (message, type = 'success') => {
+        const toastEl = type === 'error' ? document.getElementById('errorToast') : document.getElementById('successToast');
+        if (toastEl) {
+            const toastBody = toastEl.querySelector('.toast-body');
+            if (toastBody) toastBody.innerText = message;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
         }
-    }
+    };
 
-
-    // --- Tab Switching and Initial Load ---
-
-    function loadAllOrders() {
-        // Show loading state implicitly handled by having empty table initially or logic in paginator
-        fetchData(API_ENDPOINTS.getAllOrders).then(data => {
-            masterAllOrders = Array.isArray(data) ? data : [];
-            // Apply current search if any exists
-            const searchValue = document.getElementById('orderSearch')?.value.trim().toLowerCase() || '';
-            const filtered = searchValue ? masterAllOrders.filter(o =>
-                o.orderId.toString().includes(searchValue) ||
-                (o.customer?.name || '').toLowerCase().includes(searchValue)
-            ) : masterAllOrders;
-
-            allOrdersPaginator.setData(filtered);
-        });
-    }
-
-    function loadPendingOrders() {
-        fetchData(API_ENDPOINTS.getPendingOrders).then(data => {
-            masterPendingOrders = Array.isArray(data) ? data : [];
-            pendingOrdersPaginator.setData(masterPendingOrders);
-        });
-    }
-
-    function loadCompletedOrders() {
-        fetchData(API_ENDPOINTS.getCompletedOrders).then(data => {
-            masterCompletedOrders = Array.isArray(data) ? data : [];
-            completedOrdersPaginator.setData(masterCompletedOrders);
-        });
-    }
-
-    // Search Functionality
-    const searchBtn = document.getElementById('searchOrderBtn');
-    const searchInput = document.getElementById('orderSearch');
-
-    if (searchBtn && searchInput) {
-        const handleSearch = () => {
-            const searchValue = searchInput.value.trim().toLowerCase();
-            const filtered = masterAllOrders.filter(o =>
-                o.orderId.toString().includes(searchValue) ||
-                (o.customer?.name || '').toLowerCase().includes(searchValue)
-            );
-            allOrdersPaginator.setData(filtered);
-        };
-        searchBtn.addEventListener('click', handleSearch);
-        searchInput.addEventListener('input', handleSearch); // Optional: Real-time search
-    }
-
-    // Add event listeners for tab clicks to reload data
-    document.getElementById('all-orders-tab').addEventListener('shown.bs.tab', loadAllOrders);
-    document.getElementById('pending-tab').addEventListener('shown.bs.tab', loadPendingOrders);
-    document.getElementById('completed-tab').addEventListener('shown.bs.tab', loadCompletedOrders);
-
-    // Initial Load
-    loadDashboardStats();
-    loadAllOrders(); // Load the default active tab's data
+    // --- INITIALIZATION ---
+    fetchOrders();
 });

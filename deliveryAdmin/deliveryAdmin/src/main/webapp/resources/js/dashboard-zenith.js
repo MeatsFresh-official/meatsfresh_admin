@@ -18,17 +18,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initOrdersChart() {
         const ctx = document.getElementById('ordersChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.2)');
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
+
         charts.orders = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 datasets: [{
                     label: 'Orders',
-                    data: [12, 19, 3, 5, 2, 3, 10],
+                    data: [45, 52, 38, 65, 48, 70, 85],
                     borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 3,
+                    backgroundColor: gradient,
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#4f46e5',
+                    pointHoverBorderWidth: 2
                 }]
             },
             options: {
@@ -36,8 +46,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            borderDash: [5, 5],
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#64748b' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b' }
+                    }
                 }
             }
         });
@@ -50,16 +70,26 @@ document.addEventListener('DOMContentLoaded', function () {
             data: {
                 labels: ['Delivered', 'Pending', 'Cancelled'],
                 datasets: [{
-                    data: [300, 50, 100],
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                    borderWidth: 0,
+                    data: [75, 15, 10],
+                    backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                    hoverOffset: 4,
+                    borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: { legend: { position: 'bottom' } }
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: { size: 12, weight: '600' }
+                        }
+                    }
+                }
             }
         });
     }
@@ -71,10 +101,12 @@ document.addEventListener('DOMContentLoaded', function () {
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 datasets: [{
-                    label: 'Earnings (₹)',
-                    data: [12000, 19000, 3000, 5000, 2000, 3000],
+                    label: 'Earnings',
+                    data: [42000, 56000, 31000, 78000, 52000, 95000],
                     backgroundColor: '#10b981',
-                    borderRadius: 4
+                    hoverBackgroundColor: '#059669',
+                    borderRadius: 8,
+                    barThickness: 20
                 }]
             },
             options: {
@@ -82,8 +114,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5], color: '#e2e8f0' },
+                        ticks: {
+                            color: '#64748b',
+                            callback: function (value) { return '₹' + value / 1000 + 'k'; }
+                        }
+                    },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
                 }
             }
         });
@@ -97,11 +136,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
                 datasets: [{
                     label: 'New Users',
-                    data: [50, 60, 70, 80],
+                    data: [120, 180, 150, 240],
                     borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 2,
+                    backgroundColor: 'transparent',
                     tension: 0.4,
-                    fill: true
+                    pointBackgroundColor: '#8b5cf6'
                 }]
             },
             options: {
@@ -109,8 +149,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
-                    x: { grid: { display: false } }
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#e2e8f0' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
                 }
             }
         });
@@ -124,6 +164,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Simulate data refresh
         refreshDashboard();
+    };
+
+    window.openCustomDatepicker = function () {
+        const picker = document.getElementById('customDateInput');
+        // Close dropdown
+        document.getElementById('timeRangeDropdown').classList.add('hidden');
+
+        // Trigger native picker
+        try {
+            picker.showPicker();
+        } catch (e) {
+            picker.focus();
+            picker.click();
+        }
+    };
+
+    window.handleCustomDateChange = function (input) {
+        if (input.value) {
+            // Format date for display
+            const date = new Date(input.value);
+            const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            setTimeRange(0, formatted); // 0 or specific code for custom
+        }
     };
 
     window.refreshDashboard = function () {

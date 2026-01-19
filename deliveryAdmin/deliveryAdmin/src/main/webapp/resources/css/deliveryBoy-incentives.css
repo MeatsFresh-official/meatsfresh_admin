@@ -1,0 +1,124 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    --secondary-gradient: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --zenith-primary: #4f46e5;
+}
+
+body {
+    background-color: #f3f4f6;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+}
+
+/* --- Utilities --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.text-gradient-primary {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-soft-primary {
+    background-color: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
+
+.bg-soft-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.bg-soft-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.btn-zenith-primary {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-zenith-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    color: white;
+}
+
+/* --- Table Styles --- */
+.zenith-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.zenith-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.zenith-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+}
+
+.zenith-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.zenith-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* --- Animations --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-on-load {
+    animation: fadeInUp 0.4s ease-out forwards;
+    opacity: 0;
+}
+
+/* --- Cards --- */
+.incentive-card {
+    transition: transform 0.2s;
+}
+
+.incentive-card:hover {
+    transform: translateY(-5px);
+}

@@ -79,10 +79,10 @@ function updateAccessOptions() {
 
     switch (role) {
         case 'ADMIN':
-            idsToSelect = ['userManagementAccess', 'vendorManagementAccess', 'deliverySystemAccess', 'systemSettingsAccess', 'reportsAccess'];
+            idsToSelect = ['userManagementAccess', 'vendorManagementAccess', 'deliverySystemAccess', 'systemSettingsAccess', 'reportsAccess', 'perm_DELIVERY_INCENTIVES'];
             break;
         case 'SUB_ADMIN':
-            idsToSelect = ['userManagementAccess', 'vendorManagementAccess', 'deliverySystemAccess', 'reportsAccess'];
+            idsToSelect = ['userManagementAccess', 'vendorManagementAccess', 'deliverySystemAccess', 'reportsAccess', 'perm_DELIVERY_INCENTIVES'];
             break;
         case 'MANAGER':
             idsToSelect = ['userManagementAccess', 'vendorManagementAccess', 'reportsAccess'];

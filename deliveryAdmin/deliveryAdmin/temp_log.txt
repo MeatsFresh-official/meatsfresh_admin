@@ -1,0 +1,500 @@
+2026-01-20T20:41:16.335+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/dashboard.css
+2026-01-20T20:41:16.335+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/default-avatar.jpg
+2026-01-20T20:41:16.335+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/default-avatar.jpg
+2026-01-20T20:41:16.336+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/admin-staff.css
+2026-01-20T20:41:16.336+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/admin-staff.css
+2026-01-20T20:41:16.336+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.337+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.337+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.337+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:41:16.337+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.337+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:41:16.337+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.338+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-9] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:41:16.340+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-9] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:41:16.343+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /resources/js/admin-staff.js
+2026-01-20T20:41:16.343+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /resources/js/admin-staff.js
+2026-01-20T20:41:16.344+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.347+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/user-setting.png
+2026-01-20T20:41:16.347+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/user-setting.png
+2026-01-20T20:41:16.348+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:41:16.582+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/url-image-logo.png
+2026-01-20T20:41:16.583+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/url-image-logo.png
+2026-01-20T20:41:16.589+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.777+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /admin-staff
+2026-01-20T20:42:30.778+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.778+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /admin-staff
+2026-01-20T20:42:30.778+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-3] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:30.779+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-3] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    order by
+        s1_0.name
+Hibernate: 
+    select
+        count(*) 
+    from
+        staff s1_0
+Hibernate: 
+    select
+        count(s1_0.id) 
+    from
+        staff s1_0 
+    where
+        s1_0.active=?
+Hibernate: 
+    select
+        count(s1_0.id) 
+    from
+        staff s1_0 
+    where
+        s1_0.active=?
+2026-01-20T20:42:30.787+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /WEB-INF/pages/admin-staff.jsp
+2026-01-20T20:42:30.787+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /WEB-INF/pages/admin-staff.jsp
+2026-01-20T20:42:30.921+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/dashboard.css
+2026-01-20T20:42:30.921+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/common/header-menu.css
+2026-01-20T20:42:30.921+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/dashboard.css
+2026-01-20T20:42:30.921+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/common/header-menu.css
+2026-01-20T20:42:30.922+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/default-avatar.jpg
+2026-01-20T20:42:30.922+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/default-avatar.jpg
+2026-01-20T20:42:30.922+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/admin-staff.css
+2026-01-20T20:42:30.922+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/admin-staff.css
+2026-01-20T20:42:30.922+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.922+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.923+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.923+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.924+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:42:30.924+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.924+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:42:30.925+05:30  INFO 7785 --- [deliveryAdmin] [io-8086-exec-10] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:30.926+05:30  INFO 7785 --- [deliveryAdmin] [io-8086-exec-10] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:42:30.928+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /resources/js/admin-staff.js
+2026-01-20T20:42:30.928+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /resources/js/admin-staff.js
+2026-01-20T20:42:30.939+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/user-setting.png
+2026-01-20T20:42:30.939+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/user-setting.png
+2026-01-20T20:42:30.939+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:30.941+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:31.152+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/url-image-logo.png
+2026-01-20T20:42:31.152+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/url-image-logo.png
+2026-01-20T20:42:31.157+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-7] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:36.327+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /delivery-incentives
+2026-01-20T20:42:36.328+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:36.328+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /delivery-incentives
+2026-01-20T20:42:36.329+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:42:36.329+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:36.329+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:42:36.329+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-2] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:36.330+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-2] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:42:38.652+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /delivery-incentives
+2026-01-20T20:42:38.653+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:38.653+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /delivery-incentives
+2026-01-20T20:42:38.653+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:42:38.654+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:38.654+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:42:38.654+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-1] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:38.655+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-1] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:42:38.907+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /delivery-incentives
+2026-01-20T20:42:38.907+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:38.908+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /delivery-incentives
+2026-01-20T20:42:38.908+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:42:38.908+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:38.909+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:42:38.909+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-3] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:38.910+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-3] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:42:39.087+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /delivery-incentives
+2026-01-20T20:42:39.087+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:39.088+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /delivery-incentives
+2026-01-20T20:42:39.088+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:42:39.089+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:39.089+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:42:39.089+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-9] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:39.090+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-9] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:42:39.237+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /delivery-incentives
+2026-01-20T20:42:39.237+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:39.237+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /delivery-incentives
+2026-01-20T20:42:39.238+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:42:39.238+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:42:39.238+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:42:39.238+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-6] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:42:39.239+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-6] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:43:16.454+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /admin-staff
+2026-01-20T20:43:16.454+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.454+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /admin-staff
+2026-01-20T20:43:16.455+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-4] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:43:16.456+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-4] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    order by
+        s1_0.name
+Hibernate: 
+    select
+        count(*) 
+    from
+        staff s1_0
+Hibernate: 
+    select
+        count(s1_0.id) 
+    from
+        staff s1_0 
+    where
+        s1_0.active=?
+Hibernate: 
+    select
+        count(s1_0.id) 
+    from
+        staff s1_0 
+    where
+        s1_0.active=?
+2026-01-20T20:43:16.461+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /WEB-INF/pages/admin-staff.jsp
+2026-01-20T20:43:16.461+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /WEB-INF/pages/admin-staff.jsp
+2026-01-20T20:43:16.473+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/dashboard.css
+2026-01-20T20:43:16.474+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/dashboard.css
+2026-01-20T20:43:16.475+05:30 DEBUG 7785 --- [deliveryAdmin] [io-8086-exec-10] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.477+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/common/header-menu.css
+2026-01-20T20:43:16.477+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/common/header-menu.css
+2026-01-20T20:43:16.477+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/default-avatar.jpg
+2026-01-20T20:43:16.477+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/default-avatar.jpg
+2026-01-20T20:43:16.477+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /resources/css/admin-staff.css
+2026-01-20T20:43:16.477+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /resources/css/admin-staff.css
+2026-01-20T20:43:16.478+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-7] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.478+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-5] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.478+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.479+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-01-20T20:43:16.479+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.479+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /error
+2026-01-20T20:43:16.480+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-8] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Found authenticated user 'admin@gmail.com'. Fetching details.
+Hibernate: 
+    select
+        s1_0.id,
+        ap1_0.staff_id,
+        ap1_0.page,
+        s1_0.active,
+        s1_0.email,
+        s1_0.name,
+        s1_0.password,
+        s1_0.phone,
+        s1_0.profile_image,
+        s1_0.role 
+    from
+        staff s1_0 
+    left join
+        staff_access_pages ap1_0 
+            on s1_0.id=ap1_0.staff_id 
+    where
+        s1_0.email=?
+Hibernate: 
+    select
+        p1_0.staff_id,
+        p1_0.permission 
+    from
+        staff_permissions p1_0 
+    where
+        p1_0.staff_id=?
+2026-01-20T20:43:16.481+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /resources/js/admin-staff.js
+2026-01-20T20:43:16.481+05:30  INFO 7785 --- [deliveryAdmin] [nio-8086-exec-8] c.m.config.GlobalControllerAdvice        : GlobalControllerAdvice: Successfully fetched Staff ID '1' for user 'admin@gmail.com'.
+2026-01-20T20:43:16.481+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /resources/js/admin-staff.js
+2026-01-20T20:43:16.482+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-2] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
+2026-01-20T20:43:16.487+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /resources/images/user-setting.png
+2026-01-20T20:43:16.487+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /resources/images/user-setting.png
+2026-01-20T20:43:16.489+05:30 DEBUG 7785 --- [deliveryAdmin] [nio-8086-exec-1] w.c.HttpSessionSecurityContextRepository : Retrieved SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=com.meatsfresh.StaffUserDetails@69fd8732, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=F0C61C06212F9C5CAFBE779AFB043891], Granted Authorities=[ROLE_ADMIN]]]
