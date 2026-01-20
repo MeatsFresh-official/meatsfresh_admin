@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================================
     // API ENDPOINTS
     // ===================================================================
-    const API_BASE = 'http://meatsfresh.org.in:8080/api/vendor';
+    const API_BASE = window.location.origin + '/api/vendor';
     const ADMIN_API = `${API_BASE}/admin`;
     const VENDOR_ID = new URLSearchParams(window.location.search).get('id');
 
