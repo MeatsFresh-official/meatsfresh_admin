@@ -2,7 +2,7 @@
  * @file This script manages the "Reviews and Ratings" page in the admin panel.
  * @description It handles fetching, displaying, filtering, sorting, and managing reviews,
  *              as well as displaying performance reports for vendors and delivery personnel.
- * @author Your Sai Manikanta/MeatsFresh
+ * @author leela krishna/MeatsFresh
  * @version 1.0
  */
 
@@ -327,26 +327,26 @@ async function loadReviews() {
 }
 async function loadGlobalSearch() {
     try {
-            const response = await fetch(`${API_BASE_URL2}${API_ENDPOINTS.GLOBAL_SEARCH}`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            search: document.getElementById('reviewSearch').value
-                        })
-            });
-            const data = await response.json();
-            appState.reviews = data.customerReviews; // Handle different API response structures
-            renderReviewsTable(); // Re-render the table with new data
-            appState.vendorPerformance = data.vendorPerformance;
-            renderVendorPerformance();
-            appState.deliveryPerformance = data.deliveryPerformance;
-            renderDeliveryPerformance();
-        } catch (error) {
-            // The error is logged by the apiService, so we just show a user-facing message here.
-            showAlert('Failed to load reviews. Please try again.', 'error');
-        }
+        const response = await fetch(`${API_BASE_URL2}${API_ENDPOINTS.GLOBAL_SEARCH}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                search: document.getElementById('reviewSearch').value
+            })
+        });
+        const data = await response.json();
+        appState.reviews = data.customerReviews; // Handle different API response structures
+        renderReviewsTable(); // Re-render the table with new data
+        appState.vendorPerformance = data.vendorPerformance;
+        renderVendorPerformance();
+        appState.deliveryPerformance = data.deliveryPerformance;
+        renderDeliveryPerformance();
+    } catch (error) {
+        // The error is logged by the apiService, so we just show a user-facing message here.
+        showAlert('Failed to load reviews. Please try again.', 'error');
+    }
 }
 
 /**
@@ -419,7 +419,7 @@ function initializeModals() {
     const replyModal = document.getElementById('replyModal');
     if (replyModal) {
         // This event fires just before the modal is shown.
-        replyModal.addEventListener('show.bs.modal', function(event) {
+        replyModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget; // The button that triggered the modal
             const reviewId = button.getAttribute('data-review-id');
             document.getElementById('replyReviewId').value = reviewId;
@@ -428,7 +428,7 @@ function initializeModals() {
 
     const detailModal = document.getElementById('detailModal');
     if (detailModal) {
-        detailModal.addEventListener('show.bs.modal', function(event) {
+        detailModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const reviewId = button.getAttribute('data-review-id');
             loadReviewDetails(reviewId); // Fetch and display details when modal opens.
@@ -437,7 +437,7 @@ function initializeModals() {
 
     const imageModal = document.getElementById('imageModal');
     if (imageModal) {
-        imageModal.addEventListener('show.bs.modal', function(event) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const imageSrc = button.getAttribute('data-image-src');
             document.getElementById('modalImage').src = imageSrc;
@@ -451,7 +451,7 @@ function initializeModals() {
 function initializeSorting() {
     const sortOptions = document.querySelectorAll('.sort-option');
     sortOptions.forEach(option => {
-        option.addEventListener('click', function(e) {
+        option.addEventListener('click', function (e) {
             e.preventDefault();
             const sortBy = this.getAttribute('data-sort');
             sortReviews(sortBy);

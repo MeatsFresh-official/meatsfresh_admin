@@ -1,7 +1,7 @@
 /**
  * @file This script manages the user list page for the admin panel.
  * @description It handles fetching, displaying, filtering, deleting, and exporting user data.
- * @author Your Sai Manikanta/MeatsFresh
+ * @autho leela krishna/MeatsFresh
  * @version 1.1 - Added Server-Side Pagination
  */
 
@@ -10,12 +10,12 @@
 // ===================================================================================
 
 const API_CONFIG = {
-    baseUrl: 'http://meatsfresh.org.in:8080',
-    baseUrl2: 'http://meatsfresh.org.in:8082',
-    baseUrl3: 'http://meatsfresh.org.in:8083',
+
+    baseUrl2: 'https://meatsfresh.org.in:8082',
+
     endpoints: {
         users: '/api/dashboard/table',
-        stats: '/deliveryAdmin/api/dashboard/users-card',
+        stats: '/api/deliveryAdmin/dashboard/users-card',
         globalSearch: '/api/dashboard/users/search',
         deleteUser: '/api/users/',
         exportBasic: '/api/export/basic',
@@ -26,6 +26,13 @@ const API_CONFIG = {
 
 let currentFilters = {};
 let userStats = {};
+
+// Helper for Basic Auth
+function getAuthHeaders(xhr) {
+    xhr.setRequestHeader("Authorization", "Basic " + btoa("user:user"));
+}
+
+const AUTH_HEADER_VAL = "Basic " + btoa("user:user");
 
 // Pagination State
 let currentPage = 0;
@@ -243,7 +250,9 @@ function buildQueryString(filters) {
 async function fetchStats(filters = {}) {
     try {
         const queryParams = buildQueryString(filters);
-        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.stats}?${queryParams}`);
+        const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.stats}?${queryParams}`, {
+            headers: { 'Authorization': AUTH_HEADER_VAL }
+        });
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -289,9 +298,7 @@ async function fetchUsers(filters = {}) {
         }
 
         // Prepare Request
-        const username = "user";
-        const password = "user";
-        const basicAuth = btoa(`${username}:${password}`);
+        // Auth handled via headers object below
 
         // Construct payload combining persisted criteria + current pagination
         // Helper to map UI values to API Enums
@@ -337,7 +344,7 @@ async function fetchUsers(filters = {}) {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Basic ${basicAuth}`
+                            'Authorization': AUTH_HEADER_VAL
                         },
                         body: JSON.stringify(requestBody)
                     }
@@ -472,9 +479,11 @@ async function downloadData(type) {
 
         const queryParams = buildQueryString(params);
         const endpoint = API_CONFIG.endpoints[`export${type.charAt(0).toUpperCase() + type.slice(1)}`];
-        const url = `${API_CONFIG.baseUrl}${endpoint}?${queryParams}`;
+        const url = `${API_CONFIG.baseUrl2}${endpoint}?${queryParams}`;
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: { 'Authorization': AUTH_HEADER_VAL }
+        });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const contentDisposition = response.headers.get('Content-Disposition');
@@ -513,8 +522,9 @@ async function deleteUser() {
     const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
 
     try {
-        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.deleteUser}${userId}`, {
-            method: 'DELETE'
+        const response = await fetch(`${API_CONFIG.baseUrl2}${API_CONFIG.endpoints.deleteUser}${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': AUTH_HEADER_VAL }
         });
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);

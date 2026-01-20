@@ -2,6 +2,19 @@
     <%@ include file="/includes/header.jsp" %>
 
         <main class="main-content">
+            <!-- Toast Notification Container -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+                <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-success text-white">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong class="me-auto">Success</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body" id="toastMessage"></div>
+                </div>
+            </div>
+
             <div class="container-fluid px-4 py-4">
 
                 <!-- Header -->

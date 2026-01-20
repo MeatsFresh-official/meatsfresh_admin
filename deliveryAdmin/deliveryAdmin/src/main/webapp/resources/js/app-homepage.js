@@ -1,23 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Mock Data ---
-    let normalBanners = [
-        { id: 'nb1', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80' },
-        { id: 'nb2', image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=800&q=80' }
-    ];
+    // --- Config ---
+    const USER_API_URL = 'https://meatsfresh.org.in:8082/api/home-banners/all';
+    const USER_UPLOAD_API_URL = 'https://meatsfresh.org.in:8082/api/home-banners/upload';
 
+    // --- State ---
+    let normalBanners = [];
     let specialBanners = [
         { id: 'sb1', type: 'image', url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80', active: true },
         { id: 'sb2', type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-slicing-a-juicy-lime-1563-large.mp4', active: false }
     ];
 
     let currentUploadType = 'image'; // 'image' or 'video' for special section
+    let updateState = { id: null, type: 'normal' };
 
     // --- DOM ---
     const normalGrid = document.getElementById('normalBannersGrid');
     const specialGrid = document.getElementById('specialBannersGrid');
 
     const normalInput = document.getElementById('normalFileInput');
+    const updateInput = document.getElementById('updateFileInput');
     const specialInput = document.getElementById('specialFileInput');
 
     const typeImageBtn = document.getElementById('typeImageBtn');
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (videoModalEl) videoModal = new bootstrap.Modal(videoModalEl);
 
     // --- Init ---
-    renderNormal();
+    fetchNormalBanners();
     renderSpecial();
 
     // Cleaning up video when modal hides
@@ -41,12 +43,65 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Auth & Generic ---
+    function getAuthHeaders(xhr) {
+        xhr.setRequestHeader("Authorization", "Basic " + btoa("user:user"));
+    }
+
+    function showToast(message) {
+        $('#toastMessage').text(message);
+        const toastEl = document.getElementById('successToast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    }
+
+    function showErrorToast(message) {
+        $('#errorMessage').text(message);
+        const toastEl = document.getElementById('errorToast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    }
+
+    // --- API Fetching ---
+
+    function fetchNormalBanners() {
+        console.log("App Home: Fetching normal banners...");
+        $.ajax({
+            url: USER_API_URL,
+            method: 'GET',
+            beforeSend: getAuthHeaders,
+            success: function (response) {
+                console.log("App Home: Success fetching banners:", response);
+                let bannerList = [];
+                if (response && response.data && Array.isArray(response.data)) {
+                    bannerList = response.data;
+                } else if (Array.isArray(response)) {
+                    bannerList = response;
+                }
+
+                normalBanners = bannerList.map(b => ({
+                    id: b.id !== undefined ? b.id.toString() : Math.random().toString(36).substr(2, 9),
+                    image: b.url || b.imageUrl || b.image,
+                    active: b.active !== undefined ? b.active : true
+                }));
+
+                renderNormal();
+            },
+            error: function (xhr, status, error) {
+                console.error("App Home: Error fetching banners:", error);
+                showErrorToast("Failed to load banners from server.");
+            }
+        });
+    }
+
     // --- Handlers ---
 
     window.setUploadType = function (type) {
         currentUploadType = type;
-
-        // Update Buttons
         if (type === 'image') {
             typeImageBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-100 text-gray-900 shadow-sm";
             typeVideoBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 transition-all";
@@ -64,15 +119,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // Upload Handlers
     normalInput.addEventListener('change', function () {
         if (this.files && this.files[0]) {
-            const url = URL.createObjectURL(this.files[0]);
-            normalBanners.push({ id: 'nb' + Date.now(), image: url });
-            renderNormal();
+            handleUpload(this.files[0], 'create');
             this.value = ''; // reset
         }
     });
 
+    updateInput.addEventListener('change', function () {
+        if (this.files && this.files[0] && updateState.id) {
+            handleUpload(this.files[0], 'update');
+            this.value = ''; // reset
+        }
+    });
+
+    function handleUpload(file, mode) {
+        if (!file.type.startsWith('image/')) {
+            showErrorToast('Please select an image file');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const url = (mode === 'update')
+            ? `https://meatsfresh.org.in:8082/api/home-banners/update/${updateState.id}`
+            : USER_UPLOAD_API_URL;
+
+        const method = (mode === 'update') ? 'PUT' : 'POST';
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: getAuthHeaders,
+            success: function (response) {
+                showToast(`Banner ${mode === 'update' ? 'updated' : 'uploaded'} successfully!`);
+                fetchNormalBanners();
+            },
+            error: function (xhr, status, error) {
+                console.error("Upload error:", error);
+                showErrorToast(`Failed to ${mode} banner: ` + (xhr.responseText || error));
+            }
+        });
+    }
+
     specialInput.addEventListener('change', function () {
         if (this.files && this.files[0]) {
+            // Mock behavior for special banners as they don't have an API yet
             const url = URL.createObjectURL(this.files[0]);
             specialBanners.push({
                 id: 'sb' + Date.now(),
@@ -89,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Render Logic ---
 
     function renderNormal() {
-        // Keep the first child (the upload card)
         const uploadCard = normalGrid.firstElementChild;
         normalGrid.innerHTML = '';
         normalGrid.appendChild(uploadCard);
@@ -100,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             div.innerHTML = `
                 <img src="${b.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                 
-                <!-- Action Pill -->
                 <div class="absolute bottom-3 right-3 z-30">
                     <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-white/50">
                         <button onclick="updateNormal('${b.id}')" class="w-8 h-8 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-colors" title="Edit">
@@ -141,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaContent = `<img src="${b.url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">`;
             }
 
-            // Toggle Switch HTML
             const toggleHtml = `
                 <label class="relative inline-flex items-center cursor-pointer pointer-events-auto" onclick="event.stopPropagation()">
                     <input type="checkbox" class="sr-only peer" ${b.active ? 'checked' : ''} onchange="toggleSpecial('${b.id}')">
@@ -151,13 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             div.innerHTML = `
                 ${mediaContent}
-                
-                <!-- Top Actions -->
                 <div class="absolute top-3 right-3 z-20">
                      ${toggleHtml}
                 </div>
-                
-                <!-- Action Pill -->
                 <div class="absolute bottom-3 right-3 z-30">
                     <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-white/50">
                         <button onclick="updateSpecial('${b.id}')" class="w-8 h-8 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-600 flex items-center justify-center transition-colors" title="Edit">
@@ -176,24 +263,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Actions ---
 
-    // Normal
     window.deleteNormal = function (id) {
-        if (confirm('Delete this banner?')) {
-            normalBanners = normalBanners.filter(b => b.id !== id);
-            renderNormal();
-        }
+        if (!confirm('Delete this banner?')) return;
+
+        $.ajax({
+            url: `https://meatsfresh.org.in:8082/api/home-banners/delete/${id}`,
+            method: 'DELETE',
+            beforeSend: getAuthHeaders,
+            success: function () {
+                showToast('Banner deleted successfully');
+                fetchNormalBanners();
+            },
+            error: function (xhr, status, error) {
+                showErrorToast('Failed to delete banner');
+            }
+        });
     }
 
-    // For update, we use a hidden input trick (globally or creating one)
-    // For simplicity in this demo, we'll just simulate a click on the main input
-    // In a real app, you'd track WHICH ID is being updated.
     window.updateNormal = function (id) {
-        normalInput.click();
-        // NOTE: In a real app we would need to know we are in "update mode" for this ID
-        // But for this mock, we just add a new one which is fine for visual demo
+        updateState = { id: id, type: 'normal' };
+        updateInput.click();
     }
 
-    // Special
+    // Special (Still Mock)
     window.deleteSpecial = function (id) {
         if (confirm('Remove this special banner?')) {
             specialBanners = specialBanners.filter(b => b.id !== id);
@@ -204,8 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleSpecial = function (id) {
         const b = specialBanners.find(x => x.id === id);
         if (b) b.active = !b.active;
-        // No re-render needed for checkbox as visual state updates automatically
-        // But in real app, we'd send API call here
     }
 
     window.updateSpecial = function (id) {

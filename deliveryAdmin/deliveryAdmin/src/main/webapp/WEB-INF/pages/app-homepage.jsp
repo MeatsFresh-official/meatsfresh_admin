@@ -1,6 +1,27 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ include file="/includes/header.jsp" %>
 
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+            <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-success text-white">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong class="me-auto">Success</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastMessage"></div>
+            </div>
+            <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="errorMessage"></div>
+            </div>
+        </div>
+
         <main class="main-content bg-gray-50/50 min-h-screen">
             <div class="container-fluid px-6 py-8">
 
@@ -43,6 +64,8 @@
                             </div>
                         </div>
                         <input type="file" id="normalFileInput" hidden accept="image/*">
+                        <!-- Hidden Input for Updating Banners -->
+                        <input type="file" id="updateFileInput" hidden accept="image/*">
                     </div>
                 </section>
 

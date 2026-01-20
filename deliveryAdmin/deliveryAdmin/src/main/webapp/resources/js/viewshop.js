@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const API_BASE = 'http://meatsfresh.org.in:8080/api/vendor';
+    const API_BASE = 'http://meatsfresh.org.in:8080';
     const IMAGE_BASE_URL = 'http://meatsfresh.org.in:8080';
 
-    const ADMIN_VENDORS_API = `${API_BASE}/allVendors`;
+    const ADMIN_VENDORS_API = `${API_BASE}/api/vendor/status`;
     const VENDOR_STATUS_API = (id) => `${API_BASE}/admin/${id}/status`;
     const ALL_PRODUCTS_API = `${API_BASE}/products`; // API to get all products
 

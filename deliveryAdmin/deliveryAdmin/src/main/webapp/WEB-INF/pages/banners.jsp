@@ -42,6 +42,27 @@
 
             <body class="bg-gray-50 text-gray-800">
 
+                <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+                    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-success text-white">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong class="me-auto">Success</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body" id="toastMessage"></div>
+                    </div>
+                    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-danger text-white">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong class="me-auto">Error</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body" id="errorMessage"></div>
+                    </div>
+                </div>
+
                 <div class="d-flex">
                     <!-- Sidebar -->
                     <%@ include file="/includes/sidebar.jsp" %>
@@ -58,7 +79,8 @@
                                         <h1 class="page-title">Banner Management</h1>
                                         <p class="page-subtitle">Manage promotional visuals for Vendors and Delivery
                                             Partners.</p>
-                                        <p class="text-xs text-secondary mt-1"><i class="fas fa-info-circle me-1"></i>
+                                        <p class="text-xs text-secondary mt-1" id="demo-mode-badge"><i
+                                                class="fas fa-info-circle me-1"></i>
                                             Demo Mode Active</p>
                                     </div>
                                 </div>
@@ -141,9 +163,6 @@
                                                 <!-- JS Injected -->
                                             </div>
                                         </div>
-                                        <!-- Hidden Input for Updating Banners -->
-                                        <input type="file" id="updateFileInput" hidden accept="image/*">
-
                                     </section>
 
                                 </div>

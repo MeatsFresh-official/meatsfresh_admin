@@ -2,15 +2,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===================================================================
     // API ENDPOINTS
     // ===================================================================
-    const API_BASE = 'http://meatsfresh.org.in:8080';
-    const VENDORS_API = API_BASE + '/vendor';
+    // ===================================================================
+    // API ENDPOINTS
+    // ===================================================================
+    // Dynamically determine base URL (e.g. http://localhost:8080)
+    const API_BASE = window.location.origin;
+
+    // Assuming context path is /deliveryAdmin, but if deployed as ROOT, adjust accordingly.
+    // Based on original code: API_BASE + '/deliveryAdmin/api/...'
+    // We will keep the path structure relative to origin.
+    const CONTEXT_PATH = '/deliveryAdmin';
+
+    const VENDORS_API = API_BASE + '/vendor'; // This defines /vendor at root
     const VENDOR_REGISTER_API = VENDORS_API + '/register';
-    const ADMIN_VENDORS_API = API_BASE + '/deliveryAdmin/api/dashboard/all-shops';
-    const ADMIN_VENDORS_GLOBAL_SEARCH = API_BASE + '/deliveryAdmin/api/dashboard/search';
+    const ADMIN_VENDORS_API = API_BASE + CONTEXT_PATH + '/api/dashboard/all-shops';
+    const ADMIN_VENDORS_GLOBAL_SEARCH = API_BASE + CONTEXT_PATH + '/api/dashboard/search';
+
     const DELETE_VENDOR_API = (id) => `${VENDORS_API}/${id}`;
     const VENDOR_STATUS_API = (id) => `${VENDORS_API}/admin/${id}/status`;
     const VENDOR_DASHBOARD_API = (id) => `${VENDORS_API}/dashboard?vendor_id=${id}`;
-    const API_BASE_LOC = 'http://meatsfresh.org.in:8080/api';
+
+    const API_BASE_LOC = API_BASE + '/api';
     const LOCATION_API = {
         countries: `${API_BASE_LOC}/address/countries`,
         states: `${API_BASE_LOC}/address/states`,

@@ -1,14 +1,21 @@
-document.addEventListener('DOMContentLoaded', function () {
+$(document).ready(function () {
+    console.log("Banners JS: Ready function fired");
 
-    // --- State ---
+    // --- Config & State ---
+    const BASE_URL_8080 = 'http://meatsfresh.org.in:8080';
+    const BASE_URL_8083 = 'http://meatsfresh.org.in:8083';
+
+    // Endpoints
+    const VENDOR_API_URL = `${BASE_URL_8080}/api/vendor/banners`;
+    const VENDOR_UPLOAD_URL = `${BASE_URL_8080}/api/vendor/banners/upload`;
+
+    const PARTNER_API_URL = `${BASE_URL_8083}/api/delivery-partner/banners`;
+    const PARTNER_LIST_URL = `${PARTNER_API_URL}/all`;
+    const PARTNER_UPLOAD_URL = `${PARTNER_API_URL}/upload`;
+
     let banners = {
-        vendor: [
-            { id: 'v1', imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', active: true },
-            { id: 'v2', imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80', active: true }
-        ],
-        partner: [
-            { id: 'p1', imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80', active: true }
-        ]
+        vendor: [],
+        partner: []
     };
 
     // --- DOM Elements ---
@@ -28,73 +35,165 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // --- Init ---
-    renderAll();
+    console.log("Banners JS: Initializing fetch...");
+    fetchBanners();
 
-    // --- Event Setup Helper ---
-    function setupUpload(type) {
-        const z = zones[type];
-        if (!z.upload || !z.input) return;
+    // --- Core Functions ---
 
-        // Click handled by inline onclick in JSP or we can add it here if preferred. 
-        // JSP has onclick="document.getElementById('...').click()" so we just need change event.
+    function getAuthHeaders(xhr) {
+        const auth = btoa("user:user");
+        xhr.setRequestHeader("Authorization", "Basic " + auth);
+        console.log("Banners JS: Auth header set");
+    }
 
-        z.input.addEventListener('change', function (e) {
-            if (this.files && this.files[0]) handleUpload(this.files[0], type);
-        });
+    function fetchBanners() {
+        console.log("Banners JS: fetchBanners() logic started");
+        fetchVendorBanners();
+        fetchPartnerBanners();
+    }
 
-        // Drag & Drop
-        const prevent = (e) => { e.preventDefault(); e.stopPropagation(); };
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => z.upload.addEventListener(evt, prevent));
+    function fetchVendorBanners() {
+        console.log("Banners JS: fetchVendorBanners() called. URL:", VENDOR_API_URL);
+        $.ajax({
+            url: VENDOR_API_URL,
+            method: 'GET',
+            beforeSend: getAuthHeaders,
+            success: function (response) {
+                console.log("Banners JS: Vendor API Success. Response:", response);
+                let bannerList = [];
+                if (response.data && Array.isArray(response.data)) {
+                    bannerList = response.data;
+                } else if (Array.isArray(response)) {
+                    bannerList = response;
+                }
 
-        ['dragenter', 'dragover'].forEach(evt => z.upload.addEventListener(evt, () => z.upload.classList.add('dragover')));
-        ['dragleave', 'drop'].forEach(evt => z.upload.addEventListener(evt, () => z.upload.classList.remove('dragover')));
+                banners.vendor = bannerList.map(b => ({
+                    id: b.id?.toString() || Math.random().toString(36).substr(2, 9),
+                    imageUrl: b.imageUrl || b.url || b.image,
+                    active: b.active !== undefined ? b.active : true
+                }));
 
-        z.upload.addEventListener('drop', (e) => {
-            const files = e.dataTransfer.files;
-            if (files && files[0]) handleUpload(files[0], type);
+                hideDemoMode();
+                renderSection('vendor');
+            },
+            error: function (xhr, status, error) {
+                console.error("Banners JS: Vendor API Error:", error);
+                renderError('vendor', error);
+            }
         });
     }
 
-    // Setup both
-    setupUpload('vendor');
-    setupUpload('partner');
+    function fetchPartnerBanners() {
+        console.log("Banners JS: [Partner] Initiating fetch from:", PARTNER_LIST_URL);
+        $.ajax({
+            url: PARTNER_LIST_URL,
+            method: 'GET',
+            dataType: 'json',
+            beforeSend: getAuthHeaders,
+            success: function (response) {
+                console.log("Banners JS: [Partner] Success via Port 8083. Response:", response);
+                let bannerList = [];
 
+                if (response) {
+                    if (response.data && Array.isArray(response.data)) {
+                        bannerList = response.data;
+                    } else if (response.banners && Array.isArray(response.banners)) {
+                        bannerList = response.banners;
+                    } else if (Array.isArray(response)) {
+                        bannerList = response;
+                    }
+                }
 
-    // --- Core Logic ---
+                banners.partner = bannerList.map(b => {
+                    // Normalize ID to string
+                    const id = (b.id !== undefined && b.id !== null) ? String(b.id) : Math.random().toString(36).substr(2, 9);
+                    // Use imageName as priority for partner banners
+                    const imageUrl = b.imageName || b.imageUrl || b.url || b.image;
+                    return {
+                        id: id,
+                        imageUrl: imageUrl,
+                        active: (b.active !== undefined && b.active !== null) ? b.active : true
+                    };
+                });
+
+                console.log("Banners JS: [Partner] State updated. Count:", banners.partner.length);
+                renderSection('partner');
+                hideDemoMode();
+            },
+            error: function (xhr, status, error) {
+                console.error("Banners JS: [Partner] API Error:", status, error);
+                const errorMsg = (xhr.status === 0)
+                    ? "Connection refused. Ensure the backend on port 8083 is running."
+                    : (error || "Failed to load data");
+                renderError('partner', errorMsg);
+            }
+        });
+    }
+
+    function renderError(type, error) {
+        const grid = zones[type]?.grid;
+        if (grid) {
+            grid.innerHTML = `
+                <div class="col-12 py-5 text-center text-red-500 bg-red-50 rounded-lg border-2 border-dashed border-red-200">
+                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                    <p class="text-sm font-semibold">Failed to load ${type} banners</p>
+                    <p class="text-xs opacity-75">${error || 'Connection error'}</p>
+                </div>
+            `;
+        }
+    }
 
     function handleUpload(file, type) {
         if (!file.type.startsWith('image/')) {
-            alert('Please select an image file');
+            showErrorToast('Please select an image file');
             return;
         }
 
         const z = zones[type];
+        const uploadUrl = type === 'partner' ? PARTNER_UPLOAD_URL : VENDOR_UPLOAD_URL;
 
         // Loading State
         z.upload.classList.add('uploading');
         const originalHtml = z.upload.innerHTML;
+
+        let targetName = type === 'partner' ? 'Partner' : 'Vendor';
+
         z.upload.innerHTML = `
             <div class="d-flex flex-column align-items-center">
                 <div class="loading-spinner mb-3"></div>
-                <h5>Uploading to ${type === 'vendor' ? 'Vendor' : 'Partner'}...</h5>
+                <h5>Uploading to ${targetName}...</h5>
             </div>
         `;
 
-        setTimeout(() => {
-            const newBanner = {
-                id: Date.now().toString(),
-                imageUrl: URL.createObjectURL(file),
-                active: true
-            };
+        const formData = new FormData();
+        formData.append("file", file);
 
-            banners[type].unshift(newBanner);
+        $.ajax({
+            url: uploadUrl,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: getAuthHeaders,
+            success: function (response) {
+                console.log("Upload success:", response);
+                showToast('Banner uploaded successfully!');
 
-            // Reset UI
-            z.upload.classList.remove('uploading');
-            z.upload.innerHTML = originalHtml;
+                fetchBanners(); // Refresh from server
 
-            renderAll();
-        }, 1200);
+                // Reset UI
+                z.upload.classList.remove('uploading');
+                z.upload.innerHTML = originalHtml;
+            },
+            error: function (xhr, status, error) {
+                console.error("Upload error:", error);
+                showErrorToast('Failed to upload banner: ' + (xhr.responseText || error));
+
+                // Reset UI
+                z.upload.classList.remove('uploading');
+                z.upload.innerHTML = originalHtml;
+            }
+        });
     }
 
     // --- Update Logic (Image Replacement) ---
@@ -112,18 +211,36 @@ document.addEventListener('DOMContentLoaded', function () {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 if (!file.type.startsWith('image/')) {
-                    alert('Please select an image file');
+                    showErrorToast('Please select an image file');
                     return;
                 }
 
                 // Process Update
-                if (updateState.id && updateState.type) {
-                    const list = banners[updateState.type];
-                    const banner = list.find(b => b.id === updateState.id);
-                    if (banner) {
-                        banner.imageUrl = URL.createObjectURL(file); // Update Image
-                        renderAll();
-                    }
+                if (updateState.id) {
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    const updateUrl = updateState.type === 'partner'
+                        ? `${PARTNER_API_URL}/update/${updateState.id}`
+                        : `${BASE_URL_8080}/api/vendor/banners/update/${updateState.id}`;
+
+                    $.ajax({
+                        url: updateUrl,
+                        method: 'PUT',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: getAuthHeaders,
+                        success: function (response) {
+                            console.log("Update success:", response);
+                            showToast('Banner updated successfully!');
+                            fetchBanners(); // Refresh from server
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Update error:", error);
+                            showErrorToast('Failed to update banner: ' + (xhr.responseText || error));
+                        }
+                    });
                 }
 
                 // Reset State
@@ -142,8 +259,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.deleteBanner = function (id, type) {
         if (!confirm('Delete this banner?')) return;
-        banners[type] = banners[type].filter(b => b.id !== id);
-        renderAll();
+
+        const deleteUrl = type === 'partner'
+            ? `${PARTNER_API_URL}/delete/${id}`
+            : `${BASE_URL_8080}/api/vendor/banners/delete/${id}`;
+
+        $.ajax({
+            url: deleteUrl,
+            method: 'DELETE',
+            beforeSend: getAuthHeaders,
+            success: function () {
+                showToast('Banner deleted successfully');
+                fetchBanners(); // Refresh logic
+            },
+            error: function (xhr, status, error) {
+                console.error('Delete error:', error);
+                showErrorToast('Failed to delete banner: ' + (xhr.responseText || error));
+            }
+        });
     }
 
     // --- Rendering ---
@@ -189,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <!-- Action Footer -->
                 <div class="p-3 flex justify-between items-center bg-white">
                      <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">ID: ${b.id.substring(0, 6)}</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">ID: ${String(b.id).substring(0, 8)}</span>
                     </div>
                     
                     <div class="flex items-center gap-2">
@@ -210,6 +343,58 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </div>
         `).join('');
+    }
+
+    // --- Event Setup Helper ---
+    function setupUpload(type) {
+        const z = zones[type];
+        if (!z.upload || !z.input) return;
+
+        z.input.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) handleUpload(this.files[0], type);
+        });
+
+        // Drag & Drop
+        const prevent = (e) => { e.preventDefault(); e.stopPropagation(); };
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => z.upload.addEventListener(evt, prevent));
+
+        ['dragenter', 'dragover'].forEach(evt => z.upload.addEventListener(evt, () => z.upload.classList.add('dragover')));
+        ['dragleave', 'drop'].forEach(evt => z.upload.addEventListener(evt, () => z.upload.classList.remove('dragover')));
+
+        z.upload.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files && files[0]) handleUpload(files[0], type);
+        });
+    }
+
+    // Setup all sections
+    setupUpload('vendor');
+    setupUpload('partner');
+
+    function hideDemoMode() {
+        const demoBadge = document.getElementById('demo-mode-badge');
+        if (demoBadge) {
+            demoBadge.innerHTML = '<i class="fas fa-check-circle me-1"></i> Live Data Connected';
+            demoBadge.classList.replace('text-secondary', 'text-green-500');
+        }
+    }
+
+    function showToast(message) {
+        $('#toastMessage').text(message);
+        const toastEl = document.getElementById('successToast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    }
+
+    function showErrorToast(message) {
+        $('#errorMessage').text(message);
+        const toastEl = document.getElementById('errorToast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
     }
 
 });

@@ -1,14 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Mock Data ---
-    let categories = [
-        { id: '1', name: 'Premium Cuts', commission: 15, image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=150&q=80' },
-        { id: '2', name: 'Organic Chicken', commission: 12, image: 'https://images.unsplash.com/photo-1587593810167-a6492031e5fd?auto=format&fit=crop&w=150&q=80' },
-        { id: '3', name: 'Marinated Specials', commission: 18, image: '' }, // Test no image
-        { id: '4', name: 'Deli & Cold Cuts', commission: 10, image: 'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=150&q=80' },
-        { id: '5', name: 'Ready to Cook', commission: 25, image: 'https://images.unsplash.com/photo-1544377892-74cc2188fa6c?auto=format&fit=crop&w=150&q=80' },
-        { id: '6', name: 'Seafood', commission: 14, image: 'https://images.unsplash.com/photo-1615141982880-13f572a73081?auto=format&fit=crop&w=150&q=80' },
-    ];
+    const API_URL = 'http://meatsfresh.org.in:8080/api/vendor/admin/categories';
+    let categories = [];
 
     // --- DOM Elements ---
     const loadingSpinner = document.getElementById('loading-spinner');
@@ -39,14 +32,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentImage = null;
 
-    // --- Simulation Init ---
-    setTimeout(() => {
-        loadingSpinner.classList.add('d-none');
-        pageContent.classList.remove('d-none');
-        updateStats();
-        renderGrid(categories); // Renamed to renderGrid
-    }, 800);
+    // --- Init ---
+    fetchCategories();
 
+    // --- API Functions ---
+
+    function getAuthHeaders(xhr) {
+        xhr.setRequestHeader("Authorization", "Basic " + btoa("user:user"));
+    }
+
+    function fetchCategories() {
+        loadingSpinner.classList.remove('d-none');
+        pageContent.classList.add('d-none');
+
+        $.ajax({
+            url: API_URL,
+            method: 'GET',
+            beforeSend: getAuthHeaders,
+            success: function (response) {
+                // Map response to handle "commision" typo from API if present
+                categories = response.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    // Handle both spellings just in case
+                    commission: item.commision !== undefined ? item.commision : item.commission,
+                    image: item.image
+                }));
+
+                loadingSpinner.classList.add('d-none');
+                pageContent.classList.remove('d-none');
+                updateStats();
+                renderGrid(categories);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching categories:", error);
+                loadingSpinner.classList.add('d-none');
+                // show error state or empty
+                pageContent.classList.remove('d-none');
+                alert("Failed to load categories");
+            }
+        });
+    }
 
     // --- Event Listeners ---
     searchInput.addEventListener('input', handleSearchSort);
@@ -83,14 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateStats() {
         statTotal.textContent = categories.length;
 
-        const totalComm = categories.reduce((sum, c) => sum + Number(c.commission), 0);
+        const totalComm = categories.reduce((sum, c) => sum + Number(c.commission || 0), 0);
         const avg = categories.length ? (totalComm / categories.length).toFixed(1) : 0;
         statAvg.textContent = avg + '%';
 
         const noImgCount = categories.filter(c => !c.image).length;
         statNoImage.textContent = noImgCount;
 
-        const maxComm = Math.max(...categories.map(c => Number(c.commission)), 0);
+        const maxComm = categories.length > 0 ? Math.max(...categories.map(c => Number(c.commission || 0))) : 0;
         statTop.textContent = maxComm + '%';
     }
 
@@ -147,7 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.editCategory = function (id) {
-        const cat = categories.find(c => c.id === id);
+        // Need to find by ID, which might be number or string depending on API
+        const cat = categories.find(c => c.id == id);
         if (!cat) return;
 
         modalTitle.textContent = 'Edit Category';
@@ -160,13 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.show();
     }
 
-    // API Config
-    const API_ADD_CATEGORY = 'http://meatsfresh.org.in:8080/api/vendor/admin/categories';
-
     window.saveCategory = function () {
         const nameVal = catNameInput.value.trim();
         const commVal = catCommInput.value;
         const file = catFileInput.files[0];
+        const id = catIdInput.value;
 
         if (!nameVal) {
             alert('Category Name is required');
@@ -177,11 +202,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Determine Add or Update
+        const isUpdate = !!id;
+        const url = isUpdate ? `${API_URL}/${id}` : API_URL;
+        const method = isUpdate ? 'PUT' : 'POST';
+
         const form = new FormData();
         form.append("name", nameVal);
-        form.append("commission", commVal);
+        form.append("commission", commVal); // Sending "commission" (correct spelling)
         if (file) {
-            // Using logic from user snippet, though filename UUID might be optional, we just pass the file
             form.append("image", file);
         }
 
@@ -191,45 +220,25 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Saving...';
 
         const settings = {
-            "url": "http://meatsfresh.org.in:8080/api/vendor/admin/categories",
-            "method": "POST",
+            "url": url,
+            "method": method,
             "timeout": 0,
             "processData": false,
             "mimeType": "multipart/form-data",
             "contentType": false,
             "data": form,
-            "beforeSend": function (xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + btoa("user:user"));
-            }
+            "beforeSend": getAuthHeaders
         };
-        console.log("Sending request to 8080 with Auth header set via beforeSend");
+        console.log(`Sending ${method} request to ${url}`);
 
         $.ajax(settings).done(function (response) {
             console.log(response);
-            alert('Category saved successfully!');
+            showToast(`Category ${isUpdate ? 'updated' : 'saved'} successfully!`);
             modal.hide();
-
-            const newCat = {
-                id: 'new_' + Date.now(),
-                name: nameVal,
-                commission: parseFloat(commVal),
-                image: currentImage || ''
-            };
-            categories.unshift(newCat);
-            renderGrid(categories);
-            updateStats();
+            fetchCategories(); // Reload to get fresh data
         }).fail(function (jqXHR, textStatus, errorThrown) {
             console.error('Error:', textStatus, errorThrown);
-            console.log('Response:', jqXHR.responseText);
-            let msg = `Error: ${textStatus} ${errorThrown}`;
-            try {
-                // Try parsing JSON error
-                const errJson = JSON.parse(jqXHR.responseText);
-                msg = `Error Detail: ${JSON.stringify(errJson, null, 2)}`;
-            } catch (e) {
-                msg = `Error Detail: ${jqXHR.responseText || errorThrown || "Unknown Error"}`;
-            }
-            alert(msg);
+            showToast('Error: ' + (jqXHR.responseText || errorThrown), true);
         }).always(function () {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -238,9 +247,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.deleteCategory = function (id) {
         if (confirm('Are you sure you want to delete this category?')) {
-            categories = categories.filter(c => c.id !== id);
-            renderGrid(categories);
-            updateStats();
+            $.ajax({
+                url: `${API_URL}/${id}`,
+                method: 'DELETE',
+                beforeSend: getAuthHeaders,
+                success: function () {
+                    showToast('Category deleted successfully');
+                    fetchCategories();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Delete error:', error);
+                    showToast('Failed to delete category', true);
+                }
+            });
+        }
+    }
+
+    function showToast(message, isError = false) {
+        const toastId = isError ? 'errorToast' : 'successToast';
+        const msgId = isError ? 'errorMessage' : 'toastMessage';
+
+        // If error toast doesn't exist in categories.jsp yet, fallback to success with style
+        // but for now I'll just use the one I added.
+
+        $(`#${msgId}`).text(message);
+        const toastEl = document.getElementById(toastId) || document.getElementById('successToast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        } else {
+            alert(message); // Fallback
         }
     }
 

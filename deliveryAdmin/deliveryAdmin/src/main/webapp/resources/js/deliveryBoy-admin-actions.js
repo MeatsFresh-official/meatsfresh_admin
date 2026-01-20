@@ -2,7 +2,7 @@ $(document).ready(function () {
     // ===================================================================
     // API ENDPOINTS & CONFIG
     // ===================================================================
-    const API_BASE = 'http://meatsfresh.org.in:8080/api';
+    const API_BASE = 'http://meatsfresh.org.in:8083/api';
     const RIDER_API = `${API_BASE}/delivery`;
     const ADMIN_API = `${API_BASE}/delivery/admin`;
     const WALLET_API = `${API_BASE}/delivery/wallets`;

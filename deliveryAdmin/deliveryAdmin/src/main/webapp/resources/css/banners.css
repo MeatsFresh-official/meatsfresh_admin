@@ -210,3 +210,54 @@ body {
 .animate-enter {
     animation: fadeIn 0.5s ease-out forwards;
 }
+
+/* Toast Styling */
+.toast-container {
+    z-index: 10000;
+}
+
+.toast {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: none !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden;
+}
+
+.toast-header {
+    background: transparent !important;
+    border-bottom: none !important;
+    padding: 1rem 1rem 0.5rem !important;
+}
+
+.toast-body {
+    padding: 0.5rem 1rem 1rem !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+.bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.showing {
+    animation: slideInRight 0.3s ease-out;
+}
