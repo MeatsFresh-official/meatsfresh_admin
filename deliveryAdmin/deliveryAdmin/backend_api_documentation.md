@@ -1,5 +1,3 @@
-<!-- # Backend API Specification for Zenith Admin Panel
-
 **Target Audience:** Backend Developers
 **Purpose:** This document defines the required API Endpoints, Request Parameters, and JSON Response structures needed to power the Zenith Admin Panel UI. The UI expects these exact field names and structures.
 
@@ -343,4 +341,3 @@ Approve or Reject a review.
 
 ### 6.2 Get Active Incentives
 *   **Endpoint:** `GET /api/incentives/active`
-*   **Expected Response:** List of active incentive objects. -->
