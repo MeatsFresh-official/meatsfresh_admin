@@ -16,6 +16,10 @@
                                     aria-label="Close"></button>
                             </div>
                         </c:if>
+                        <script>
+                            var contextPath = '${pageContext.request.contextPath}';
+                            console.log("Staff Management Page: contextPath is " + contextPath);
+                        </script>
                         <c:if test="${not empty error}">
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 ${error}
@@ -26,12 +30,15 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-5 animate-enter">
                             <div>
-                                <h1 class="page-title">Admin & Staff Management</h1>
-                                <p class="page-subtitle">Manage roles, permissions, and team performance</p>
+                                <h1 class="page-title text-3xl font-bold text-gray-800">Admin & Staff Management</h1>
+                                <p class="page-subtitle text-gray-500 mt-1">Manage roles, permissions, and team
+                                    performance</p>
                             </div>
-                            <button class="btn-zenith-primary d-flex align-items-center" data-bs-toggle="modal"
-                                data-bs-target="#addStaffModal">
-                                <i class="fas fa-plus me-2"></i> Add New Staff
+                            <button
+                                class="btn btn-zenith-primary d-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm hover:shadow-md transition-all"
+                                data-bs-toggle="modal" data-bs-target="#addStaffModal">
+                                <i class="fas fa-plus"></i>
+                                <span class="fw-medium">Add New Staff</span>
                             </button>
                         </div>
 
@@ -115,7 +122,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <c:forEach var="staff" items="${staffList}">
+                                        <c:forEach var="staff" items="${staffList}" varStatus="loop">
                                             <c:set var="accessStr">
                                                 <c:forEach items="${staff.accessPages}" var="p" varStatus="s">${p}${not
                                                     s.last ? ',' : ''}</c:forEach>
@@ -123,8 +130,14 @@
                                             <tr data-staff-id="${staff.id}" data-access-pages="${accessStr}">
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <img src="${not empty staff.profileImage ? staff.profileImage : pageContext.request.contextPath.concat('/resources/images/default-avatar.jpg')}"
-                                                            class="avatar-group-item me-3" alt="${staff.name}">
+                                                        <c:set var="profileImg"
+                                                            value="https://ui-avatars.com/api/?name=${staff.name}&background=6366f1&color=fff" />
+                                                        <c:if test="${not empty staff.profileImage}">
+                                                            <c:set var="profileImg"
+                                                                value="${pageContext.request.contextPath}${staff.profileImage}" />
+                                                        </c:if>
+                                                        <img src="${profileImg}" class="avatar-group-item me-3"
+                                                            alt="${staff.name}">
                                                         <div>
                                                             <h6 class="mb-0 fw-bold">${staff.name}</h6>
                                                             <small class="text-secondary">${staff.email}</small>
@@ -132,7 +145,7 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div class="d-flex flex-column gap-2">
+                                                    <div class="d-flex flex-column gap-2 align-items-center">
                                                         <span class="badge-zenith ${staff.role == 'ADMIN' ? 'badge-admin' :
                                                            staff.role == 'SUB_ADMIN' ? 'badge-subadmin' :
                                                            staff.role == 'MANAGER' ? 'badge-manager' :
@@ -161,11 +174,25 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex">
+                                                        <button class="btn-icon" onclick="handleEditClick(this)"
+                                                            data-id="${staff.id}" data-name="${staff.name}"
+                                                            data-email="${staff.email}" data-phone="${staff.phone}"
+                                                            data-role="${staff.role}" data-active="${staff.active}"
+                                                            data-bs-toggle="tooltip" title="Edit Staff">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
                                                         <button class="btn-icon"
                                                             onclick="openPermissionsModal('${staff.id}')"
                                                             data-bs-toggle="tooltip" title="Manage Access">
                                                             <i class="fas fa-key"></i>
                                                         </button>
+                                                        <c:if test="${not loop.first}">
+                                                            <button class="btn-icon btn-icon-danger"
+                                                                onclick="confirmDelete('${staff.id}')"
+                                                                data-bs-toggle="tooltip" title="Delete Staff">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </c:if>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -188,6 +215,7 @@
                                         <p class="text-muted mb-4">Select the pages this staff member is allowed to
                                             access.
                                             Unchecked pages will be hidden from their sidebar.</p>
+                                        <div id="permStatusMessage" class="mb-3" style="display: none;"></div>
                                         <form id="permissionsForm">
                                             <input type="hidden" id="permStaffId" name="staffId">
 
@@ -456,24 +484,122 @@
                                     </div>
                                     </form>
                                 </div>
-                                <div class="modal-footer">
+                                <div class="modal-footer" style="z-index: 1055; position: relative;">
                                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn btn-zenith-primary"
-                                        onclick="savePermissions()">Save Changes</button>
+                                    <button type="button" class="btn btn-zenith-primary" id="savePermissionsBtn"
+                                        style="z-index: 9999; position: relative; pointer-events: auto; cursor: pointer;"
+                                        onclick="window.savePermissions()">Save Changes</button>
                                 </div>
                             </div>
                         </div>
                         </div>
 
 
+                        <!-- Edit Staff Modal -->
+                        <div class="modal fade" id="editStaffModal" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <form class="modal-content glass-modal" id="editStaffForm" method="post"
+                                    action="${pageContext.request.contextPath}/admin-staff/edit"
+                                    enctype="multipart/form-data">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                    <input type="hidden" name="id" id="editStaffId">
+
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Edit Staff Member</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-body p-4">
+                                        <div id="editStaffStatusMessage" class="mb-3" style="display: none;"></div>
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <div class="form-floating-zenith mb-3">
+                                                    <label class="form-label ms-1 small fw-bold text-secondary">Full
+                                                        Name</label>
+                                                    <input type="text" name="name" id="editStaffName"
+                                                        class="form-control" required placeholder="John Doe">
+                                                </div>
+                                                <div class="form-floating-zenith mb-3">
+                                                    <label class="form-label ms-1 small fw-bold text-secondary">Email
+                                                        Address</label>
+                                                    <input type="email" name="email" id="editStaffEmail"
+                                                        class="form-control" required placeholder="john@example.com">
+                                                </div>
+                                                <div class="form-floating-zenith mb-3">
+                                                    <label class="form-label ms-1 small fw-bold text-secondary">Phone
+                                                        Number</label>
+                                                    <input type="tel" name="phone" id="editStaffPhone"
+                                                        class="form-control" placeholder="+91 98765 43210">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="form-floating-zenith mb-3">
+                                                    <label
+                                                        class="form-label ms-1 small fw-bold text-secondary">Role</label>
+                                                    <select name="role" id="editStaffRole" class="form-select" required>
+                                                        <option value="ADMIN">Admin</option>
+                                                        <option value="SUB_ADMIN">Sub Admin</option>
+                                                        <option value="MANAGER">Manager</option>
+                                                        <option value="RIDER">Delivery Rider</option>
+                                                        <option value="SUPPORT">Customer Support</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-floating-zenith mb-3">
+                                                    <label class="form-label ms-1 small fw-bold text-secondary">New
+                                                        Password (leave blank to keep current)</label>
+                                                    <div class="input-group">
+                                                        <input type="password" name="password" id="editPasswordField" class="form-control"
+                                                            placeholder="••••••••" autocomplete="new-password">
+                                                        <button class="btn btn-outline-secondary bg-white border-start-0 toggle-password" type="button" aria-pressed="false" aria-label="Show password" data-target="#editPasswordField" style="border-color: #e5e7eb; position: relative; z-index: 1055;" onclick="(function(btn){console.debug('inline toggle (edit)', btn); try{var target=btn.getAttribute('data-target')||'#editPasswordField'; var sel = target.indexOf('#')===0?target:'#'+target.replace(/^\s+|\s+$/g,''); var inp=document.querySelector(sel); if(!inp) inp=document.querySelector('input[name=\'password\']'); if(inp){ inp.type = inp.type==='password' ? 'text' : 'password'; var icon = btn.querySelector('i'); if(icon){ icon.classList.toggle('fa-eye'); icon.classList.toggle('fa-eye-slash'); } } }catch(e){console && console.error && console.error(e);} })(this); return false;">
+                                                            <i class="fas fa-eye text-secondary" aria-hidden="true"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="form-floating-zenith mb-3">
+                                                    <label class="form-label ms-1 small fw-bold text-secondary">Profile
+                                                        Photo</label>
+                                                    <input type="file" name="profileImage" class="form-control"
+                                                        accept="image/*">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-check form-switch p-3 bg-light rounded border">
+                                                    <input class="form-check-input" type="checkbox" name="active"
+                                                        id="editStaffActive" value="true">
+                                                    <label class="form-check-label fw-bold ms-2"
+                                                        for="editStaffActive">Staff Account Active</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-zenith-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                         <!-- Add Staff Modal -->
-                        <div class="modal fade" id="addStaffModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal fade" id="addStaffModal" tabindex="-1">
                             <div class="modal-dialog modal-lg">
                                 <form class="modal-content glass-modal" id="addStaffForm" method="post"
                                     action="${pageContext.request.contextPath}/admin-staff/add"
-                                    enctype="multipart/form-data">
+                                    enctype="multipart/form-data" autocomplete="off">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"
                                         id="csrfToken" />
+
+                                    <!-- Hidden dummy inputs to prevent browser autofill from filling visible fields -->
+                                    <!-- Off-screen dummy fields that soak up browser autofill (username / current-password) -->
+                                    <input type="text" name="username" autocomplete="username" tabindex="-1" readonly
+                                        style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">
+                                    <input type="password" name="current-password" autocomplete="current-password" tabindex="-1" readonly
+                                        style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">
 
                                     <div class="modal-header">
                                         <h5 class="modal-title fw-bold">Add New Staff Member</h5>
@@ -482,25 +608,26 @@
                                     </div>
 
                                     <div class="modal-body p-4">
+                                        <div id="addStaffStatusMessage" class="mb-3" style="display: none;"></div>
                                         <div class="row g-4">
                                             <div class="col-md-6">
                                                 <div class="form-floating-zenith mb-3">
                                                     <label class="form-label ms-1 small fw-bold text-secondary">Full
                                                         Name</label>
                                                     <input type="text" name="name" class="form-control" required
-                                                        placeholder="John Doe">
+                                                        autocomplete="name">
                                                 </div>
                                                 <div class="form-floating-zenith mb-3">
                                                     <label class="form-label ms-1 small fw-bold text-secondary">Email
                                                         Address</label>
                                                     <input type="email" name="email" class="form-control" required
-                                                        placeholder="john@example.com">
+                                                    autocomplete="off">
                                                 </div>
                                                 <div class="form-floating-zenith mb-3">
                                                     <label class="form-label ms-1 small fw-bold text-secondary">Phone
                                                         Number</label>
                                                     <input type="tel" name="phone" class="form-control"
-                                                        placeholder="+91 98765 43210">
+                                                        placeholder="+91" autocomplete="tel">
                                                 </div>
                                             </div>
 
@@ -523,12 +650,12 @@
                                                         class="form-label ms-1 small fw-bold text-secondary">Password</label>
                                                     <div class="input-group">
                                                         <input type="password" name="password" class="form-control"
-                                                            required id="passwordField" style="border-right: none;">
+                                                            required id="passwordField" style="border-right: none;" autocomplete="new-password">
                                                         <button
-                                                            class="btn btn-outline-secondary bg-white border-start-0"
-                                                            type="button" id="togglePassword"
-                                                            style="border-color: #e5e7eb;">
-                                                            <i class="fas fa-eye text-secondary"></i>
+                                                            class="btn btn-outline-secondary bg-white border-start-0 toggle-password"
+                                                            type="button" aria-pressed="false" aria-label="Show password"
+                                                            data-target="#passwordField" style="border-color: #e5e7eb; position: relative; z-index: 1055;" onclick="(function(btn){console.debug('inline toggle (add)', btn); try{var target=btn.getAttribute('data-target')||'#passwordField'; var sel = target.indexOf('#')===0?target:'#'+target.replace(/^\s+|\s+$/g,''); var inp=document.querySelector(sel); if(!inp) inp=document.querySelector('input[name=\'password\']'); if(inp){ inp.type = inp.type==='password' ? 'text' : 'password'; var icon = btn.querySelector('i'); if(icon){ icon.classList.toggle('fa-eye'); icon.classList.toggle('fa-eye-slash'); } } }catch(e){console && console.error && console.error(e);} })(this); return false;">
+                                                            <i class="fas fa-eye text-secondary" aria-hidden="true"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -643,13 +770,225 @@
                         <script src="https://cdn.tailwindcss.com"></script>
                         <%@ include file="/includes/footer.jsp" %>
                             <link rel="stylesheet"
-                                href="${pageContext.request.contextPath}/resources/css/admin-staff.css">
-                            <script src="${pageContext.request.contextPath}/resources/js/admin-staff.js"></script>
-
+                                href="${pageContext.request.contextPath}/resources/css/admin-staff.css?v=2.2">
+                            <script
+                                src="${pageContext.request.contextPath}/resources/js/permissions-fix.js?v=1.1"></script>
+                            <script src="${pageContext.request.contextPath}/resources/js/admin-staff.js?v=3.1"></script>
                             <script>
-                                const pageContext = {
-                                    request: {
-                                        contextPath: '${pageContext.request.contextPath}'
+                            (function() {
+                                // Clear any autofilled values when the Add Staff modal opens
+                                function clearAddStaffForm() {
+                                    try {
+                                        var addModal = document.getElementById('addStaffModal');
+                                        if (!addModal) return;
+
+                                        addModal.addEventListener('show.bs.modal', function () {
+                                            var form = document.getElementById('addStaffForm');
+                                            if (!form) return;
+
+                                            // Reset form fields and explicitly clear sensitive inputs
+                                            form.reset();
+
+                                            var email = form.querySelector('input[name="email"]');
+                                            var password = form.querySelector('input[name="password"]');
+                                            if (email) {
+                                                email.value = '';
+                                                // try to discourage autofill
+                                                email.setAttribute('autocomplete', 'off');
+                                                email.blur();
+                                            }
+                                            if (password) {
+                                                password.value = '';
+                                                password.setAttribute('autocomplete', 'new-password');
+                                                password.blur();
+                                            }
+
+                                            // Small timeout reflow to override browser autofill styling
+                                            setTimeout(function() {
+                                                if (email) email.classList.remove('autofill');
+                                                if (password) password.classList.remove('autofill');
+                                            }, 100);
+                                        });
+
+                                        // Also clear when the modal is triggered via button click (fallback)
+                                        var triggerBtn = document.querySelector('[data-bs-target="#addStaffModal"]');
+                                        if (triggerBtn) {
+                                            triggerBtn.addEventListener('click', function () {
+                                                var form = document.getElementById('addStaffForm');
+                                                if (!form) return;
+                                                form.reset();
+                                                var email = form.querySelector('input[name="email"]');
+                                                var password = form.querySelector('input[name="password"]');
+                                                if (email) email.value = '';
+                                                if (password) password.value = '';
+                                            });
+                                        }
+                                    } catch (e) {
+                                        console && console.warn && console.warn('clearAddStaffForm:', e);
                                     }
-                                };
-                            </script>
+                                }
+
+                                if (document.readyState === 'loading') {
+                                    document.addEventListener('DOMContentLoaded', clearAddStaffForm);
+                                } else {
+                                    clearAddStaffForm();
+                                }
+                            })();
+                        </script>
+
+                        <script>
+                            // Small, robust handler that toggles visibility for any button with .toggle-password
+                                                            (function () {
+                                                                function findAssociatedPasswordInput(btn) {
+                                                                    if (!btn) return null;
+                                                                    // If button explicitly names a target, use it first
+                                                                    var targetSel = btn.getAttribute && (btn.getAttribute('data-target') || btn.getAttribute('data-for'));
+                                                                    if (targetSel) {
+                                                                        try {
+                                                                            // allow both '#id' and plain id
+                                                                            var sel = targetSel.indexOf('#') === 0 ? targetSel : ('#' + targetSel.replace(/^\s+/, '').replace(/\s+$/, ''));
+                                                                            var el = document.querySelector(sel);
+                                                                            if (el) return el;
+                                                                        } catch (e) {
+                                                                            // ignore and continue
+                                                                        }
+                                                                    }
+                                                                    // Prefer input inside same input-group or form
+                                                                    var group = btn.closest('.input-group');
+                                                                    if (group) {
+                                                                        var inp = group.querySelector('input[type="password"], input[name="password"]');
+                                                                        if (inp) return inp;
+                                                                    }
+                                                                    var form = btn.closest('form');
+                                                                    if (form) {
+                                                                        var inp = form.querySelector('input[type="password"], input[name="password"]');
+                                                                        if (inp) return inp;
+                                                                    }
+                                                                    // Fallback to global password field(s)
+                                                                    return document.querySelector('input[type="password"], input[name="password"]');
+                                                                }
+
+                                                                function isVisible(el) {
+                                                                    if (!el) return false;
+                                                                    // offsetParent may be null for elements with display:none
+                                                                    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+                                                                }
+
+                                                                function pickVisibleInput(candidates) {
+                                                                    for (var i = 0; i < candidates.length; i++) {
+                                                                        if (isVisible(candidates[i])) return candidates[i];
+                                                                    }
+                                                                    return candidates[0] || null;
+                                                                }
+
+                                                                function toggle(btn) {
+                                                                    try {
+                                                                        var inp = findAssociatedPasswordInput(btn);
+                                                                        // If found input is hidden (our off-screen dummy), try to pick a visible one in the same scope
+                                                                        if (inp && !isVisible(inp)) {
+                                                                            var group = btn.closest('.input-group');
+                                                                            if (group) {
+                                                                                var cands = group.querySelectorAll('input[type="password"], input[name="password"]');
+                                                                                inp = pickVisibleInput(Array.prototype.slice.call(cands));
+                                                                            }
+                                                                            if ((!inp || !isVisible(inp)) && btn.closest('form')) {
+                                                                                var form = btn.closest('form');
+                                                                                var cands = form.querySelectorAll('input[type="password"], input[name="password"]');
+                                                                                inp = pickVisibleInput(Array.prototype.slice.call(cands));
+                                                                            }
+                                                                        }
+
+                                                                        if (!inp) return;
+                                                                        console && console.debug && console.debug('toggle: button=', btn, 'target input=', inp, 'beforeType=', inp.type);
+                                                                        var icon = btn.querySelector('i');
+                                                                        if (inp.type === 'password') {
+                                                                            inp.type = 'text';
+                                                                            if (icon) {
+                                                                                icon.classList.remove('fa-eye');
+                                                                                icon.classList.add('fa-eye-slash');
+                                                                            }
+                                                                            btn.setAttribute('aria-pressed', 'true');
+                                                                            btn.setAttribute('aria-label', 'Hide password');
+                                                                        } else {
+                                                                            inp.type = 'password';
+                                                                            if (icon) {
+                                                                                icon.classList.remove('fa-eye-slash');
+                                                                                icon.classList.add('fa-eye');
+                                                                            }
+                                                                            btn.setAttribute('aria-pressed', 'false');
+                                                                            btn.setAttribute('aria-label', 'Show password');
+                                                                        }
+                                                                        console && console.debug && console.debug('toggle: afterType=', inp.type);
+                                                                    } catch (e) {
+                                                                        console && console.error && console.error('toggle password error', e);
+                                                                    }
+                                                                }
+
+                                                                // Delegated click handler
+                                                                document.addEventListener('click', function (e) {
+                                                                    var btn = e.target && e.target.closest && e.target.closest('.toggle-password');
+                                                                    if (btn) {
+                                                                        e.preventDefault();
+                                                                        toggle(btn);
+                                                                    }
+                                                                }, false);
+
+                                                                // Also listen for pointerdown and touchstart on capture phase to handle cases
+                                                                // where click events are swallowed by overlays (autofill UI) or frameworks.
+                                                                document.addEventListener('pointerdown', function (e) {
+                                                                    var btn = e.target && e.target.closest && e.target.closest('.toggle-password');
+                                                                    if (btn) {
+                                                                        // debug early in capture
+                                                                        console && console.debug && console.debug('pointerdown on toggle', btn);
+                                                                        e.preventDefault();
+                                                                        toggle(btn);
+                                                                    }
+                                                                }, true);
+
+                                                                document.addEventListener('touchstart', function (e) {
+                                                                    var btn = e.target && e.target.closest && e.target.closest('.toggle-password');
+                                                                    if (btn) {
+                                                                        console && console.debug && console.debug('touchstart on toggle', btn);
+                                                                        e.preventDefault();
+                                                                        toggle(btn);
+                                                                    }
+                                                                }, {passive: false, capture: true});
+
+                                                                // Direct binding for robustness (some UI frameworks stop propagation)
+                                                                function bindDirectToggle() {
+                                                                    var buttons = document.querySelectorAll('.toggle-password');
+                                                                    buttons.forEach(function (b) {
+                                                                        if (b._bound) return;
+                                                                        b.addEventListener('click', function (ev) {
+                                                                            ev.preventDefault();
+                                                                            toggle(b);
+                                                                        });
+                                                                       // Also bind pointerdown as a fallback on the element itself
+                                                                       b.addEventListener('pointerdown', function (ev) {
+                                                                           ev.preventDefault();
+                                                                           toggle(b);
+                                                                       });
+                                                                        b._bound = true;
+                                                                    });
+                                                                }
+
+                                                                if (document.readyState === 'loading') {
+                                                                    document.addEventListener('DOMContentLoaded', bindDirectToggle);
+                                                                } else {
+                                                                    bindDirectToggle();
+                                                                }
+
+                                                                // keyboard accessibility
+                                                                document.addEventListener('keydown', function (e) {
+                                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                                        var active = document.activeElement;
+                                                                        if (active && active.classList && active.classList.contains('toggle-password')) {
+                                                                            e.preventDefault();
+                                                                            toggle(active);
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                                // ensure buttons added dynamically inside modals are bound (no-op because delegation used)
+                                                            })();
+                                                        </script>

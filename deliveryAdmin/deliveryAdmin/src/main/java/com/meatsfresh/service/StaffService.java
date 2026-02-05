@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +26,10 @@ public class StaffService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private static final String UPLOAD_DIR = "uploads/staff/";
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    private static final String UPLOAD_SUBDIR = "staff/";
 
     public List<Staff> getAllStaff() {
         return staffRepository.findAllByOrderByNameAsc();
@@ -51,7 +55,7 @@ public class StaffService {
 
         if (profileImage != null && !profileImage.isEmpty()) {
             String fileName = saveProfileImage(profileImage);
-            staff.setProfileImage("/" + UPLOAD_DIR + fileName);
+            staff.setProfileImage("/uploads/staff/" + fileName);
         }
 
         return staffRepository.save(staff);
@@ -59,7 +63,7 @@ public class StaffService {
 
     private String saveProfileImage(MultipartFile profileImage) throws IOException {
         String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
-        Path uploadPath = Paths.get(UPLOAD_DIR);
+        Path uploadPath = Paths.get(uploadDir, UPLOAD_SUBDIR);
 
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
@@ -134,5 +138,28 @@ public class StaffService {
 
     public Staff saveStaff(Staff staff) {
         return staffRepository.save(staff);
+    }
+
+    public Staff updateStaff(Long id, Staff updatedStaff, MultipartFile profileImage) throws IOException {
+        Staff existingStaff = getStaffById(id);
+
+        existingStaff.setName(updatedStaff.getName());
+        existingStaff.setEmail(updatedStaff.getEmail());
+        existingStaff.setPhone(updatedStaff.getPhone());
+        existingStaff.setRole(updatedStaff.getRole());
+        existingStaff.setActive(updatedStaff.isActive());
+
+        // Update password only if provided
+        if (updatedStaff.getPassword() != null && !updatedStaff.getPassword().isEmpty()) {
+            existingStaff.setPassword(passwordEncoder.encode(updatedStaff.getPassword()));
+        }
+
+        // Update profile image if provided
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String fileName = saveProfileImage(profileImage);
+            existingStaff.setProfileImage("/uploads/staff/" + fileName);
+        }
+
+        return staffRepository.save(existingStaff);
     }
 }

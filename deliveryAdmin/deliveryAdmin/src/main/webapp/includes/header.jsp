@@ -10,6 +10,9 @@
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <script>
+                        var contextPath = '${pageContext.request.contextPath}';
+                    </script>
                     <!-- Add this to your HTML head or form -->
                     <meta name="_csrf" content="${_csrf.token}" />
                     <meta name="_csrf_header" content="${_csrf.headerName}" />
@@ -80,7 +83,7 @@
 
                     <!-- Change Password Modal -->
                     <div class="modal fade" id="changePasswordModal" tabindex="-1"
-                        aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+                        aria-labelledby="changePasswordModalLabel">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">

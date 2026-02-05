@@ -104,6 +104,37 @@ public class AdminStaffController {
         }
     }
 
+    @PostMapping("/edit")
+    public String editStaff(
+            @RequestParam Long id,
+            @RequestParam String name,
+            @RequestParam String email,
+            @RequestParam String phone,
+            @RequestParam(required = false) String password,
+            @RequestParam String role,
+            @RequestParam(defaultValue = "false") boolean active,
+            @RequestParam(required = false) MultipartFile profileImage,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Staff existingStaff = new Staff();
+            existingStaff.setName(name);
+            existingStaff.setEmail(email);
+            existingStaff.setPhone(phone);
+            existingStaff.setPassword(password);
+            existingStaff.setRole(StaffRole.valueOf(role));
+            existingStaff.setActive(active);
+
+            staffService.updateStaff(id, existingStaff, profileImage);
+
+            redirectAttributes.addFlashAttribute("success", "Staff updated successfully");
+            return "redirect:/admin-staff";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error updating staff: " + e.getMessage());
+            return "redirect:/admin-staff";
+        }
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteStaff(@PathVariable Long id) {
         try {
@@ -120,24 +151,34 @@ public class AdminStaffController {
     @PostMapping("/update-access-pages")
     @ResponseBody
     public ResponseEntity<?> updateAccessPages(
-            @RequestParam Long staffId,
-            @RequestParam(required = false) List<String> accessPages) {
+            @RequestParam("staffId") Long staffId,
+            @RequestParam(value = "accessPages", required = false) List<String> accessPages) {
+        System.out.println("DEBUG: updateAccessPages called for staffId=" + staffId + ", accessPages=" + accessPages);
         try {
-            if (accessPages == null) {
-                accessPages = new ArrayList<>();
-            }
-            // Ensure dashboard access is preserved if it's mandatory, or let logic decide
-            if (!accessPages.contains("DASHBOARD")) {
-                accessPages.add("DASHBOARD");
-            }
-
             Staff staff = staffService.getStaffById(staffId);
-            staff.setAccessPages(accessPages);
-            staffService.saveStaff(staff); // Assuming saveStaff updates existing
 
-            return ResponseEntity.ok().body("{\"success\": true, \"message\": \"Permissions updated successfully\"}");
+            // Make mutable copy because Spring might return unmodifiable list
+            List<String> pages = accessPages != null ? new ArrayList<>(accessPages) : new ArrayList<>();
+
+            // Ensure dashboard access is preserved
+            if (!pages.contains("DASHBOARD")) {
+                pages.add("DASHBOARD");
+            }
+
+            // Important: Clear and addAll is safer for Hibernate collections than replacing
+            // the list
+            staff.getAccessPages().clear();
+            staff.getAccessPages().addAll(pages);
+
+            staffService.saveStaff(staff);
+            System.out.println("DEBUG: Permissions updated successfully for staffId=" + staffId);
+
+            return ResponseEntity.ok()
+                    .body(java.util.Map.of("success", true, "message", "Permissions updated successfully"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+            System.err.println("DEBUG ERROR: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(java.util.Map.of("success", false, "message", e.getMessage()));
         }
     }
 
