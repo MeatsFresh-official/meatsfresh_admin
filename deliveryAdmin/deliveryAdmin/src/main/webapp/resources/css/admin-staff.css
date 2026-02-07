@@ -48,6 +48,7 @@ body {
     font-weight: 700;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
 }
@@ -181,7 +182,9 @@ body {
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 105px;
 }
 
 .badge-admin {
